@@ -11,6 +11,15 @@ venv/
 .vscode/
 .DS_Store
 
+# Credentials — never commit these
+.env
+.env.*
+*.token
+*.pem
+.git-credentials
+secrets.*
+credentials.*
+
 # Model weights and large artifacts
 # Checkpoints are expensive to produce but too large for git.
 # checkpoints/MANIFEST.md IS tracked — it records what exists and where.
