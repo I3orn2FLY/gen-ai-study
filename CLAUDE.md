@@ -49,18 +49,33 @@ Initiate these — don't wait to be asked.
 - **Structural feedback means rewriting the document whole**, not patching wording.
 - **Being straight about what the field doesn't know is part of the job**, not a hedge.
 
-## Hardware
+## Hardware — the machine can change
 
-4 × TITAN RTX 24GB, **shared** — assume 1–2 free. **Turing, SM 7.5.**
+**Design against the floor: 1 × 8 GB GPU, 200 GB storage.** Every recipe must run there.
+Anything that only works on the current box is a design flaw. `ROADMAP.md` §4 has the
+per-phase requirements and the storage rules.
 
-Never suggest bf16, FlashAttention-2, or fp8 — none exist on this architecture. It's
-fp16 + GradScaler, and loss-scale collapse is an expected failure mode worth teaching rather
-than working around. Verify which SDPA backend actually runs. Triton does work on Turing.
+**Detect before recommending a precision or kernel — never assume:**
 
-Default every recipe to single-GPU with gradient accumulation; multi-GPU is Phase 11's
-subject. Checkpoint/resume is mandatory for long runs — jobs get preempted.
+```python
+import torch
+print(torch.cuda.get_device_name(0), torch.cuda.get_device_capability(0))
+print("bf16:", torch.cuda.is_bf16_supported(), "| GPUs:", torch.cuda.device_count())
+```
 
-~1.5 TB free on `/data`. Raw PyTorch; `webdataset` for data plumbing.
+- **bf16 supported (Ampere+):** use it. Simpler and more stable — no GradScaler.
+- **bf16 unsupported (Turing, SM 7.5):** fp16 + GradScaler. No FlashAttention-2, no fp8.
+  Loss-scale collapse is an expected failure mode worth teaching rather than working around.
+
+*Current box:* 4 × TITAN RTX 24GB, shared (assume 1–2 free), ~1.5 TB on `/data`, Turing
+SM 7.5, torch 2.10 / CUDA 12.8. Treat the extra capacity as a bonus, not a baseline.
+
+**Two phases are hardware-gated** and get postponed rather than faked at the floor: **11**
+(multi-GPU parallelism needs multiple GPUs) and **15** (native video). Both are Tier 3.
+
+Constant everywhere: single-GPU-first with gradient accumulation; multi-GPU is Phase 11's
+*subject*, not an ambient assumption. Checkpoint/resume mandatory for long runs. Raw PyTorch;
+`webdataset` for data plumbing. Record the machine in `PROGRESS.md` when it changes.
 
 ## Layout
 

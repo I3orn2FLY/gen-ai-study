@@ -6,6 +6,21 @@ Current state of the curriculum. Updated at the end of every section (`TEACHING.
 
 ---
 
+## Machine
+
+The curriculum is designed against a floor of **1 × 8 GB GPU, 200 GB storage** — every config
+must run there. Log the machine whenever it changes, so results stay comparable and so
+hardware-gated phases (11, 15) can be scheduled when capacity allows.
+
+| From | Machine | GPUs | Storage | Precision | Notes |
+|---|---|---|---|---|---|
+| 2026-07-29 | Linux, torch 2.10 / CUDA 12.8 | 4 × TITAN RTX 24 GB, Turing SM 7.5, **shared** | ~1.5 TB `/data` | fp16 + GradScaler (no bf16) | No FlashAttention-2, no fp8. Triton works. |
+
+**Gated phases:** 11 (needs multiple GPUs) and 15 (native video) — both Tier 3. Postpone
+rather than fake if the machine drops to the floor.
+
+---
+
 ## Build track
 
 Tiers are stopping points, not skip lists — work in dependency order. See `ROADMAP.md` §6.

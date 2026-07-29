@@ -54,6 +54,12 @@ mechanism a 256px run teaches. A 10M-parameter LM shows the same architecture le
 1B one. Always pick the config that shows the effect fastest — full-scale runs are Phase 11's
 subject, not a default.
 
+**Every config must run on the floor: 1 × 8 GB GPU, 200 GB storage.** The machine can change
+mid-curriculum, so a recipe that only works on the current box is broken. Check what the
+hardware actually is before recommending a precision or kernel (`ROADMAP.md` §4) — bf16 on
+Ampere+, fp16 + GradScaler on Turing. Extra GPUs and disk are a bonus to exploit, never a
+baseline to assume.
+
 **The 30-minute rule.** If a part's training run exceeds ~30 minutes on one GPU, shrink it:
 fewer steps, smaller model, smaller images, a subset. Exceptions are the handful of places
 where the long run *is* the lesson (Phase 2's scaling study, Phase 11's throughput work,
