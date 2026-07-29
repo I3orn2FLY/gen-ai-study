@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Editors
+.idea/
+.vscode/
+.DS_Store
+
+# Model weights and large artifacts
+# Checkpoints are expensive to produce but too large for git.
+# checkpoints/MANIFEST.md IS tracked — it records what exists and where.
+checkpoints/**
+!checkpoints/MANIFEST.md
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+
+# Datasets and caches
+data/
+datasets/
+*.tar
+*.tfrecord
+*.npy
+*.npz
+*.lmdb
+
+# Experiment outputs
+# Configs, results, and notes in experiments/ ARE tracked — see TEACHING.md.
+# Only bulk artifacts are ignored.
+wandb/
+runs/
+outputs/
+lightning_logs/
+**/samples/
+**/*.log
+
+# Large media generated during training
+*.mp4
+*.gif
+*.webm
