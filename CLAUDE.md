@@ -49,33 +49,37 @@ Initiate these — don't wait to be asked.
 - **Structural feedback means rewriting the document whole**, not patching wording.
 - **Being straight about what the field doesn't know is part of the job**, not a hedge.
 
-## Hardware — the machine can change
+## Hardware
 
-**Design against the floor: 1 × 8 GB GPU, 200 GB storage.** Every recipe must run there.
-Anything that only works on the current box is a design flaw. `ROADMAP.md` §4 has the
-per-phase requirements and the storage rules.
+**Design for the machine in front of you. Don't pre-shrink for a hypothetical weaker one.**
+
+*Current box:* 4 × TITAN RTX 24 GB, **shared** (GPU 0 often busy, 1–3 usually free), ~1.5 TB
+on `/data`, **Turing SM 7.5**, torch 2.13 / CUDA 13.0. The heavy phases (11, 14, 15, 16) are
+planned for this box and should use it.
 
 **Detect before recommending a precision or kernel — never assume:**
 
 ```python
 import torch
-print(torch.cuda.get_device_name(0), torch.cuda.get_device_capability(0))
-print("bf16:", torch.cuda.is_bf16_supported(), "| GPUs:", torch.cuda.device_count())
+print(torch.cuda.get_device_name(0), torch.cuda.get_device_capability(0),
+      "| GPUs:", torch.cuda.device_count())
+# The flag matters: torch >= 2.9 reports True on Turing via *emulation*, which is not usable.
+print("bf16 native:", torch.cuda.is_bf16_supported(including_emulation=False))
 ```
 
-- **bf16 supported (Ampere+):** use it. Simpler and more stable — no GradScaler.
-- **bf16 unsupported (Turing, SM 7.5):** fp16 + GradScaler. No FlashAttention-2, no fp8.
-  Loss-scale collapse is an expected failure mode worth teaching rather than working around.
+- **Native bf16 (Ampere+):** use it. Simpler and more stable — no GradScaler.
+- **No native bf16 (Turing, SM 7.5 — this box):** fp16 + GradScaler. No FlashAttention-2, no
+  fp8. Loss-scale collapse is an expected failure mode worth teaching, not working around.
 
-*Current box:* 4 × TITAN RTX 24GB, shared (assume 1–2 free), ~1.5 TB on `/data`, Turing
-SM 7.5, torch 2.10 / CUDA 12.8. Treat the extra capacity as a bonus, not a baseline.
+**The machine can change.** If it does, adjust affected phases *then* — `ROADMAP.md` §4 lists
+which ones and how. **11** (multi-GPU parallelism) and **15** (native video) are the two that
+genuinely gate on a weaker box; both are Tier 3, so postpone rather than fake. Record the new
+machine in `PROGRESS.md`.
 
-**Two phases are hardware-gated** and get postponed rather than faked at the floor: **11**
-(multi-GPU parallelism needs multiple GPUs) and **15** (native video). Both are Tier 3.
-
-Constant everywhere: single-GPU-first with gradient accumulation; multi-GPU is Phase 11's
-*subject*, not an ambient assumption. Checkpoint/resume mandatory for long runs. Raw PyTorch;
-`webdataset` for data plumbing. Record the machine in `PROGRESS.md` when it changes.
+Constant everywhere: single-GPU-first by default, with gradient accumulation; multi-GPU is
+Phase 11's *subject*, reached for there and where a heavy phase benefits — not assumed in
+every part. Checkpoint/resume mandatory for long runs. Raw PyTorch; `webdataset` for data
+plumbing.
 
 ## Layout
 

@@ -99,104 +99,97 @@ knowledgeable interviewer will correct.
 
 ## 4. Hardware
 
-**The machine can change.** This curriculum is designed against a guaranteed floor, not
-against whatever box is in front of it. Anything that only works on the current hardware is a
-design flaw.
+**Design for the machine in front of you. Note where a weaker one would need adjusting.**
 
-### The floor — design against this
+The heavy phases — 11, 14, 15, 16 — are planned for *this* box and should use it fully.
+Pre-shrinking every phase to fit a hypothetical laptop would cost real learning: multi-GPU
+parallelism, video memory arithmetic, and 24 GB-class fine-tuning are the subject in those
+phases, not incidental to it.
 
-| | Guaranteed minimum |
+### Current machine — the design target
+
+| | |
 |---|---|
-| GPU | **1 × 8 GB VRAM** |
-| Storage | **200 GB** |
+| GPU | 4 × NVIDIA TITAN RTX, 24 GB each, **Turing SM 7.5** |
+| Availability | **Shared.** GPU 0 is often busy; 1–3 usually free. Check before a long run. |
+| Storage | ~1.5 TB on `/data` |
+| Software | torch 2.13.0 + CUDA 13.0 |
 
-Every phase must have a configuration that runs here. Where a phase genuinely cannot, it is
-marked **gated** below and gets postponed rather than faked.
+Turing specifics that are **true here and false on newer cards**:
 
-The floor is a feature, not just a constraint: it enforces `TEACHING.md`'s "smallest thing
-that demonstrates the phenomenon" rule, which is what keeps parts to a few hours. A DDPM on
-32×32 CIFAR teaches every mechanism a 256px run does, and it fits in 8 GB.
-
-### Current machine — a bonus, never an assumption
-
-4 × NVIDIA TITAN RTX 24 GB (**shared** — assume 1–2 free), ~1.5 TB on `/data`,
-**Turing SM 7.5**, torch 2.10 + CUDA 12.8.
-
-Turing specifics that are **true here and may be false elsewhere**:
-
-- No bf16, no FlashAttention-2, no fp8 → fp16 + GradScaler, with loss-scale collapse and
-  attention overflow as expected failure modes. Taught in Phase 2, not worked around.
+- **No native bf16, no FlashAttention-2, no fp8** → fp16 + GradScaler, with loss-scale
+  collapse and attention overflow as expected failure modes. Taught in Phase 2, not worked
+  around.
 - `F.scaled_dot_product_attention` has a memory-efficient backend on SM 7.5, but not the
   flash backend.
 - Triton works, so Phase 11's kernel work is viable.
 
 ### Detect, don't assume
 
-**At the start of any session that will train something, check what the machine actually is**
-before recommending a precision or a kernel:
+Check what the machine actually is before recommending a precision or a kernel:
 
 ```python
 import torch
-p = torch.cuda.get_device_properties(0)
-cap = torch.cuda.get_device_capability(0)          # (7,5) Turing · (8,x) Ampere · (9,0) Hopper
-print(p.name, f"{p.total_memory/1e9:.1f} GB", cap)
-print("bf16:", torch.cuda.is_bf16_supported())     # False on Turing, True on Ampere+
-print("GPUs:", torch.cuda.device_count())
+p   = torch.cuda.get_device_properties(0)
+cap = torch.cuda.get_device_capability(0)     # (7,5) Turing · (8,x) Ampere · (9,0) Hopper
+print(p.name, f"{p.total_memory/1e9:.1f} GB", cap, "| GPUs:", torch.cuda.device_count())
+
+# NOTE the flag. torch >= 2.9 reports bf16 as supported on Turing because it can *emulate*
+# it — emulated bf16 has no tensor-core path and is not what you want.
+print("bf16 native:", torch.cuda.is_bf16_supported(including_emulation=False))   # False here
+print("bf16 default flag:", torch.cuda.is_bf16_supported())                      # True here
 ```
 
-Then adapt: **bf16 where supported** (simpler and more stable — no GradScaler, no loss-scale
-collapse), fp16 + GradScaler where not. On Ampere+, the fp16 pathologies in Phase 2.10 and
-Phase 11.5 become *historical* material rather than lived — still worth understanding, since
-plenty of production systems run fp16, but read rather than debugged.
+Then adapt: **native bf16 where it exists** (simpler and more stable — no GradScaler, no
+loss-scale collapse), fp16 + GradScaler where it doesn't. On Ampere+, the fp16 pathologies in
+Phase 2.10 and Phase 11.5 become *historical* material rather than lived — still worth
+understanding, since plenty of production systems run fp16, but read rather than debugged.
 
 Record the machine in `PROGRESS.md` when it changes, so results stay comparable across boxes.
 
-### Phase requirements at the floor
+### If the machine changes
 
-| Phase | 8 GB single GPU | What changes at the floor |
-|---|---|---|
-| 1 Attention | ✅ trivial | CPU is enough for most of it |
-| 2 Decoder LM | ✅ | ~50M params instead of 150M; grad accumulation; scaling study uses smaller sizes |
-| 3 Inference | ✅ | Fine — inference is the light one |
-| 4 ViT & CLIP | ✅ | Small batches hurt contrastive learning — use gradient caching (already step 4.3) |
-| 5 VAE / VQ-VAE | ✅ | 128px instead of 256px |
-| 6 AR text-to-image | ✅ | Small token grid |
-| 7 Diffusion | ✅ | CIFAR 32px — already the plan |
-| 8 Latent diffusion | ✅ | **Latent caching becomes mandatory, not an optimization** |
-| 9 Text-conditioned LDM | ✅ | Cached latents + cached text embeddings; small batch + accumulation |
-| 10 Diffusion transformers | ✅ | Small DiT; the scaling comparison shrinks but still shows the trend |
-| **11 Scale engineering** | ⚠️ **gated** | Multi-GPU parallelism cannot be taught on one GPU. Single-GPU parts (profiling, memory math, Triton kernel, data pipelines) still work; **DDP/FSDP postpone until multiple GPUs exist** |
-| 12 Adapting pretrained | ⚠️ partial | SDXL LoRA does not fit comfortably in 8 GB. **Substitute SD1.5** + gradient checkpointing + 8-bit optimizer. Same mechanisms, smaller model |
-| 13 Distillation | ✅ | Distill your own small model rather than SDXL |
-| 14 Motion adapters | ⚠️ tight | SD1.5-based AnimateDiff at low resolution and few frames |
-| **15 Native video** | ⚠️ **gated** | Capped even at 24 GB. At 8 GB, toy scale only — architecture and memory reasoning are the objective, samples are not |
-| 16 Multimodal (VLM) | ✅ | Frozen vision encoder + small LM; LoRA rather than full fine-tune |
-| 17 Alignment / DPO | ✅ | DPO holds policy **and** reference model — use LoRA-DPO so the reference is the base weights with adapters disabled |
+A weaker box does not invalidate the roadmap — most of it is small by design, because
+`TEACHING.md`'s "smallest thing that demonstrates the phenomenon" rule keeps parts to a few
+hours regardless of hardware. Phases 1–10 and 12–13 have configurations that run on a single
+small GPU; a 32×32 CIFAR DDPM teaches every mechanism a 256px run does.
 
-**Two phases are genuinely gated: 11 and 15.** Both are Tier 3. If the machine drops to the
-floor, work around them and return when hardware allows — that is exactly what the tiers in
-§6 are for.
+**Adjust at that point, not in advance.** The phases that would actually need rework:
 
-### Storage at 200 GB
+| Phase | If the GPU is much smaller |
+|---|---|
+| 2 Decoder LM | Fewer params, more gradient accumulation; scaling study shrinks |
+| 4 ViT & CLIP | Gradient caching becomes required, not optional — small batches wreck contrastive learning |
+| 8–9 Latent diffusion | Latent + text-embedding caching becomes required, not a speedup |
+| **11 Scale engineering** | **Gated.** DDP/FSDP cannot be taught on one GPU. Single-GPU parts (profiling, memory math, Triton kernel, data pipelines) still work; the parallelism half waits |
+| 12 Adapting pretrained | Substitute SD1.5 for SDXL — same mechanisms, smaller model |
+| 14 Motion adapters | Lower resolution, fewer frames |
+| **15 Native video** | **Gated.** Already capped at 24 GB; below that it is toy-scale only |
+| 17 Alignment | LoRA-DPO, so the reference model is the base weights with adapters disabled rather than a second full copy |
 
-Disk discipline stops being optional:
+**11 and 15 are the two that genuinely gate**, and both are Tier 3 — postpone rather than
+fake, and return when hardware allows. That is what the tiers in §6 are for.
 
-- **Pre-resize datasets on download.** Never keep full-resolution originals — a CC3M slice at
-  256px is a fraction of the raw download.
+Anything below ~8 GB VRAM or ~200 GB disk stops being an adjustment and starts being a
+different curriculum; at that point rescope explicitly rather than quietly shrinking.
+
+### Storage discipline
+
+Independent of disk size — this is about run hygiene, not scarcity:
+
+- **Pre-resize datasets on download.** Full-resolution originals are almost never needed.
 - **Cache latents, then delete the images.** VAE latents are ~48× smaller than the RGB they
-  encode. This is Phase 8.2, and at the floor it is a requirement rather than a speedup.
-- **Budget the pretrained zoo.** SD1.5 ≈ 4 GB, SDXL ≈ 7 GB, T5-XXL ≈ 9 GB. Keep only what a
-  current section needs.
-- **Prune checkpoints.** Keep the best and the last per run, not every epoch. Record what was
-  deleted in `checkpoints/MANIFEST.md`.
-- Working target: **under 50 GB of datasets at any one time.**
+  encode (Phase 8.2). On a big disk this is a speedup; on a small one it is a requirement.
+- **Budget the pretrained zoo.** SD1.5 ≈ 4 GB, SDXL ≈ 7 GB, T5-XXL ≈ 9 GB.
+- **Prune checkpoints.** Best and last per run, not every epoch. Record deletions in
+  `checkpoints/MANIFEST.md`.
 
-### Constant across machines
+### Constant regardless of machine
 
-- **Single-GPU-first everywhere.** Multi-GPU is Phase 11's *subject*, never an ambient
-  assumption — that is what makes the curriculum portable.
-- **Checkpoint and resume is mandatory** for anything long. Shared GPUs get preempted, and a
-  machine you might migrate off of makes this doubly true.
+- **Single-GPU-first by default.** Multi-GPU is Phase 11's *subject*; reach for it there and
+  where a heavy phase genuinely benefits, not as an ambient assumption in every part.
+- **Checkpoint and resume is mandatory** for anything long. These GPUs are shared and runs get
+  preempted.
 - Where a phase is capped by hardware, it says so rather than pretending otherwise.
 
 ---

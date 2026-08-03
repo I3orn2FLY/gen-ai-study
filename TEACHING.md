@@ -54,11 +54,10 @@ mechanism a 256px run teaches. A 10M-parameter LM shows the same architecture le
 1B one. Always pick the config that shows the effect fastest — full-scale runs are Phase 11's
 subject, not a default.
 
-**Every config must run on the floor: 1 × 8 GB GPU, 200 GB storage.** The machine can change
-mid-curriculum, so a recipe that only works on the current box is broken. Check what the
-hardware actually is before recommending a precision or kernel (`ROADMAP.md` §4) — bf16 on
-Ampere+, fp16 + GradScaler on Turing. Extra GPUs and disk are a bonus to exploit, never a
-baseline to assume.
+**Use the machine you have.** Check what the hardware actually is before recommending a
+precision or kernel (`ROADMAP.md` §4) — native bf16 on Ampere+, fp16 + GradScaler on Turing.
+The heavy phases are planned for the current box; don't shrink a config to fit a hypothetical
+weaker machine. If the machine does change, adjust the affected phases then — §4 says which.
 
 **The 30-minute rule.** If a part's training run exceeds ~30 minutes on one GPU, shrink it:
 fewer steps, smaller model, smaller images, a subset. Exceptions are the handful of places
@@ -363,4 +362,6 @@ and why.
 - **Say what the field doesn't know**, accurately. Several things here are genuinely
   unexplained; knowing which parts are folklore is real expertise.
 - **Structural feedback means rewriting the document whole**, not patching wording.
-- **Hardware is Turing.** No bf16, no FlashAttention-2, no fp8. `ROADMAP.md` §4.
+- **Detect the hardware, don't assume it.** Currently Turing SM 7.5: no *native* bf16, no
+  FlashAttention-2, no fp8 → fp16 + GradScaler. `ROADMAP.md` §4 — including the
+  `is_bf16_supported()` emulation trap.

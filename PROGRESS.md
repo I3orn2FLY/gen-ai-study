@@ -8,16 +8,16 @@ Current state of the curriculum. Updated at the end of every section (`TEACHING.
 
 ## Machine
 
-The curriculum is designed against a floor of **1 × 8 GB GPU, 200 GB storage** — every config
-must run there. Log the machine whenever it changes, so results stay comparable and so
-hardware-gated phases (11, 15) can be scheduled when capacity allows.
+Configs are designed for the machine actually in use — the heavy phases (11, 14, 15, 16) are
+planned for this box. Log the machine whenever it changes; `ROADMAP.md` §4 lists which phases
+need adjusting on a weaker one.
 
 | From | Machine | GPUs | Storage | Precision | Notes |
 |---|---|---|---|---|---|
-| 2026-07-29 | Linux, torch 2.10 / CUDA 12.8 | 4 × TITAN RTX 24 GB, Turing SM 7.5, **shared** | ~1.5 TB `/data` | fp16 + GradScaler (no bf16) | No FlashAttention-2, no fp8. Triton works. |
+| 2026-08-03 | Linux, torch 2.13.0 / CUDA 13.0 | 4 × TITAN RTX 24 GB, Turing SM 7.5, **shared** (GPU 0 usually busy) | ~1.5 TB `/data` | fp16 + GradScaler | No *native* bf16 — `is_bf16_supported()` returns True via emulation; pass `including_emulation=False`. No FlashAttention-2, no fp8. Triton works. |
 
-**Gated phases:** 11 (needs multiple GPUs) and 15 (native video) — both Tier 3. Postpone
-rather than fake if the machine drops to the floor.
+**Would gate on a weaker machine:** 11 (needs multiple GPUs) and 15 (native video) — both
+Tier 3. Postpone rather than fake, and only if the machine actually changes.
 
 ---
 
@@ -120,3 +120,5 @@ that never changes is one nobody is checking.
 | Date | Change | Prompted by |
 |---|---|---|
 | 2026-07-29 | Initial version | — |
+| 2026-08-03 | §4 rewritten: design for the current machine, adjust if it changes — replaces the "design against an 8 GB floor" framing that was shrinking every phase in advance | Kenessary: the heavy phases belong on this box |
+| 2026-08-03 | §4 bf16 detection corrected — `is_bf16_supported()` reports True on Turing via emulation; must pass `including_emulation=False` | Found by running the check on the actual machine |
