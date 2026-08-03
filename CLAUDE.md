@@ -39,7 +39,10 @@ Initiate these — don't wait to be asked.
 - **Never fill in an implementation body he is meant to write.** Signatures, docstrings,
   tensor shapes, empty bodies. Reviews return *analysis*, not corrected files, unless he
   explicitly asks for the fix.
-- **One lesson at a time.** Never generate material for multiple lessons or sections ahead.
+- **One part at a time, one lesson at a time.** Write part N, get it right, then part N+1.
+  Unwritten parts get a short outline stub (`Will cover` bullets), never full prose — a lesson
+  drafted in one pass inherits the same mistake eight times over. Never generate material for
+  multiple lessons or sections ahead.
 - **Short parts, plain language.** A lesson is a directory of 3–6 minute parts. He won't read
   a wall of text, and unread material teaches nothing. Simplify the prose, never the content.
 - **Define every term at first use — especially the ones that feel too basic.** The test is

@@ -2,25 +2,26 @@
 
 *Roadmap Phase 1, steps 1–2 · ~2 hours total · runs on CPU*
 
-Eight short parts. Read in order.
+Eight short parts. **Written one at a time** — each is generated after the previous one reads
+right, so the style carries forward instead of eight parts inheriting the same mistake.
 
-| # | Part | Time |
-|---|---|---|
-| 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, and the number that fixes it | ~5 min |
-| 2 | [Why not recurrence](2-why-not-rnns.md) | ~4 min |
-| 3 | [**The forward pass**](3-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min |
-| 4 | [Query, key, value](4-query-key-value.md) — a dict lookup with three things relaxed | ~7 min |
-| 5 | [The operation](5-the-operation.md) | ~4 min |
-| 6 | [**Why √d**](6-why-sqrt-d.md) — the one that matters | ~6 min |
-| 7 | [The PyTorch you need](7-pytorch-you-need.md) | ~4 min |
-| 8 | [Your task](8-your-task.md) | ~45 min doing |
+| # | Part | Time | Status |
+|---|---|---|---|
+| 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, and the number that fixes it | ~6 min | **written** |
+| 2 | [Why not recurrence](2-why-not-rnns.md) | ~4 min | outline |
+| 3 | [The forward pass](3-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min | outline |
+| 4 | [Query, key, value](4-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |
+| 5 | [The operation](5-the-operation.md) | ~4 min | outline |
+| 6 | [Why √d](6-why-sqrt-d.md) — the one to slow down for | ~6 min | outline |
+| 7 | [The PyTorch you need](7-pytorch-you-need.md) | ~4 min | outline |
+| 8 | [Your task](8-your-task.md) | ~45 min doing | outline |
+
+The outlines say what each part will contain, so the shape of the lesson is visible without
+committing eight files of prose to it.
 
 Each part opens on something that doesn't work yet, then earns the mechanism that fixes it.
-Parts 1 and 3 anchor on a concrete forward pass with real shapes, so no formula shows up
-without a home. History is structure, not subject.
-
-~34 min reading, then you write code. Terms get defined where they appear — no part assumes
-you remember jargon from another one.
+Symbols are defined beside the formula that uses them — no part assumes you remember notation
+from another one. History is structure, not subject.
 
 ---
 

@@ -2,10 +2,9 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** Section 01, lesson 1 — read `01-attention/lesson1/` (7 short parts, ~25 min),
-then **implement `01-attention/attention.py`** (`causal_mask`,
-`scaled_dot_product_attention`, `attention_entropy`) and run
-`python 01-attention/check_lesson1.py`.
+**Next action:** Section 01, lesson 1 — **part 1 written**, parts 2–8 are outline stubs.
+Read `lesson1/1-the-scoring-function.md`; if the style is right, write part 2. One part at a
+time.
 
 ---
 
@@ -132,4 +131,5 @@ that never changes is one nobody is checking.
 | 2026-08-03 | Rule added: **open with the problem, not the answer** — setup → what breaks → what would fix it → mechanism → what it cost. Lesson 1 parts 1, 2, 5 re-opened accordingly | Kenessary: start with the problem; keep the story-like logic |
 | 2026-08-03 | Rule added: **math is LaTeX in `.md`, every symbol defined with dimensions, no magic numbers in formulas**. Lesson 1 part 1 rewritten with math | Kenessary: formulas looked awful; `s_{i-1}` was never defined and 512 was used where $d$ belongs |
 | 2026-08-03 | Rule refined: notation is **just-in-time** — two or three symbols beside the formula that uses them, never a glossary up front. Matters most on unfamiliar material | Kenessary: the notation table was overload before terms were introduced |
+| 2026-08-03 | Rule added: **write one part at a time**; unwritten parts get outline stubs. A lesson drafted in one pass inherits the same mistake in every part | Kenessary: "if you generate whole lesson you suck" |
 | 2026-08-03 | §4 bf16 detection corrected — `is_bf16_supported()` reports True on Turing via emulation; must pass `including_emulation=False` | Found by running the check on the actual machine |

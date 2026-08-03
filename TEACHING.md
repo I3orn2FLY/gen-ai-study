@@ -65,8 +65,20 @@ that applies to *every part*, not just the one he happened to be reading. Regene
 whole. Patching the single sentence he quoted is the lazy read of the feedback and leaves the
 same problem in the other seven parts.
 
-Never run ahead. Generate lesson N, then stop. Lesson N+1 is written after N is done, because
-how N went should change N+1.
+**Write one part at a time, not one lesson at a time.** Generate part 1, get it right, then
+part 2. The other parts get a short **outline stub** — title, opening line, a `Will cover`
+bullet list, and any figure that's already generated — so the shape of the lesson is visible
+without committing prose to it.
+
+Why: a lesson written in one pass inherits the same mistake in all eight parts, and every round
+of feedback then costs a full regeneration. Kenessary asked for this directly. It's also
+cheaper on both sides — prose that gets thrown away was wasted work.
+
+An outline stub is not a forward reference; it's a table of contents. The rule against IOUs
+applies to *terms inside written prose*, not to unwritten parts.
+
+Never run ahead across lessons either. Lesson N+1 is written after N is done, because how N
+went should change N+1.
 
 **If a lesson is running past ~3 hours, it was scoped wrong.** Split it. That's a Claude
 failure, not a Kenessary one, and the next lesson gets scoped smaller in response.
