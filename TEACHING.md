@@ -81,21 +81,41 @@ The test is **not** "is this advanced?" It is:
 > **Would someone with strong deep-learning fundamentals and zero generative-AI background
 > have met this word before?**
 
-If no, define it. Every time, on first use, in the lesson where it first appears. Never defer
-it to a later lesson and never assume an earlier one covered it — check.
+If no, define it. **At the moment it first appears — not in a later part.**
 
-What that means concretely:
+### No forward references. Ever.
+
+*"We'll define this properly in part 3"* is not a fix, it's the bug. It asks the reader to
+carry an undefined word through several pages, which is exactly the thing that makes material
+unreadable. If a term appears, it gets its meaning **right there, in one or two lines**, even
+if a fuller treatment comes later.
+
+Layering is fine and good: a one-line working definition on first use, the full mechanical
+account when the lesson gets to it. What's not fine is an IOU.
+
+Applies to formulas too. **A formula shown is a formula explained, symbol by symbol**, at the
+point it appears. Dropping `score(q,k) = vᵀ tanh(W[q;k])` as an aside teaches nothing — say
+that `[q;k]` is concatenation, `W` and `v` are learned, and the whole thing is a one-hidden-
+layer MLP run once per pair. If a formula isn't worth explaining, it isn't worth showing.
+
+### History parts still have to teach
+
+An origin story is not a substitute for the mechanism. "Bahdanau introduced attention in 2014"
+carries nothing on its own. The narrative parts should be where terms get *introduced*,
+because that's where they first come up — the history and the explanation interleave rather
+than living in separate parts.
+
+### The rest
 
 - **Name the metaphor and then discard it.** "Query/key/value are borrowed from databases" is
-  a naming story, not a mechanism. Say where the name comes from, then say what the thing
-  actually *is* — usually a matrix, a projection, or a loss term.
+  a naming story, not a mechanism. Say where the name comes from, then what the thing actually
+  *is* — usually a matrix, a projection, or a loss term.
 - **Say where it comes from mechanically.** `Q = x @ W_Q`. A term is much less intimidating
   once it's a line of code.
 - **Answer "why does this exist separately?"** Why are Q and K different matrices? Why is V
   not K? Those are the interview questions, and they're only askable once the term is defined.
-- **Give it its own part if it needs one.** Cheaper than a lesson that half-lands.
-- **Flag forward references explicitly.** If a word must appear before its definition, say
-  *"defined properly in part N"* inline rather than hoping it slides past.
+- **Give it its own part if it needs one** — in addition to the inline definition, never
+  instead of it.
 
 Terms coming up that will need this treatment: latent, ELBO, posterior, score, SNR, guidance
 scale, denoiser, timestep embedding, classifier-free guidance, reward model, KL penalty.

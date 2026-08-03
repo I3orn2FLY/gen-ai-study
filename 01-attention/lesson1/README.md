@@ -8,13 +8,14 @@ Seven short parts. Read in order.
 |---|---|---|
 | 1 | [Where it came from](1-where-it-came-from.md) | ~3 min |
 | 2 | [Why not RNNs](2-why-not-rnns.md) | ~4 min |
-| 3 | [Query, key, value](3-query-key-value.md) — what the three actually are | ~5 min |
+| 3 | [Query, key, value](3-query-key-value.md) — where the three come from, why three | ~5 min |
 | 4 | [The operation](4-the-operation.md) | ~4 min |
 | 5 | [**Why √d**](5-why-sqrt-d.md) — the one that matters | ~6 min |
 | 6 | [The PyTorch you need](6-pytorch-you-need.md) | ~4 min |
 | 7 | [Your task](7-your-task.md) | ~45 min doing |
 
-~25 min reading, then you write code.
+~25 min reading, then you write code. Terms get defined where they appear — no part assumes
+you remember jargon from another one.
 
 ---
 

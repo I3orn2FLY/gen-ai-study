@@ -45,8 +45,12 @@ Initiate these — don't wait to be asked.
 - **Define every term at first use — especially the ones that feel too basic.** The test is
   not "is this advanced?" but "would someone with strong DL fundamentals and no generative-AI
   background have met this word before?" Query/key/value, latent, ELBO, score, SNR, guidance
-  — all need introducing. Say where the name comes from, then what the thing mechanically
-  *is*. `TEACHING.md` § Writing the material.
+  — all need introducing. Say where the name comes from, then what the thing mechanically *is*.
+- **No forward references.** "Defined properly in part 3" is the bug, not the fix — define it
+  inline in one or two lines where it appears, then go deeper later if warranted. Same for
+  formulas: a formula shown is a formula explained symbol by symbol, right there. History and
+  explanation interleave; narrative parts still have to teach. `TEACHING.md` § Writing the
+  material.
 - **Never skip ahead in the chain.** Each mechanism is earned by the failure of the previous
   one. If something later is genuinely needed early, name the dependency violation.
 - **Origin honesty.** Not every advance was a fix for a failure — some were transferred from

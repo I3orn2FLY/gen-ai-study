@@ -2,7 +2,11 @@
 
 *~5 min. Lesson 1, part 3 of 7.*
 
-Three names that sound profound and aren't. Let's kill the mystery before using them.
+Part 1 gave you the working definition: **query** = the thing searching, **key** = the thing
+being searched. That's enough to read a paper.
+
+This part is the rest of it — the third name, where all three physically come from, and why
+they're three separate things instead of one.
 
 ---
 

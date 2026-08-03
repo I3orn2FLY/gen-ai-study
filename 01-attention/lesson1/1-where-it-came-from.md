@@ -28,27 +28,60 @@ weighted average of them — with the weights learned.
 
 > **Origin tag: Fix.** A concrete failure (the bottleneck), a targeted response.
 
+### The two words you now need
+
+Those learned weights come from comparing two things, and both have names:
+
+**Query** — what the thing doing the looking is after.
+Here: the decoder's current state. *"I'm about to emit a French noun, what do I need?"*
+
+**Key** — what a thing being looked at advertises about itself.
+Here: each encoder state. *"I'm the word 'cat', position 2."*
+
+You feed a query and a key into a scoring function and get one number out: **how well do these
+two match?** Big number = this is what I was looking for.
+
+Do that for every (query, key) pair and you get a grid of match scores. Normalize each row to
+sum to 1, and those are your weights.
+
+That's it. Two names for "the thing searching" and "the thing being searched."
+
 ---
 
 ## 2015 — Luong: use a dot product
 
-Bahdanau scored a **query** against a **key** with a small neural net.
-
-*(Those two words get defined properly in part 3. For now: a query is what one position is
-looking for; a key is what another position advertises about itself.)*
+Bahdanau's scoring function was a tiny neural network:
 
 ```
-score(q, k) = vᵀ tanh(W[q; k])        # an MLP, per query-key pair
+score(q, k) = vᵀ tanh(W[q; k])
 ```
+
+Reading it right to left:
+
+| Piece | What it does |
+|---|---|
+| `[q; k]` | glue the two vectors end to end — if each is length 512, this is length 1024 |
+| `W` | a **learned** matrix; multiply to get a hidden vector |
+| `tanh` | squash it |
+| `vᵀ` | a **learned** vector; dot it down to a single number |
+
+So: a one-hidden-layer MLP that eats a (query, key) pair and outputs one score. It has real
+learned parameters (`W` and `v`), and you run it **once per pair**. 40 words attending to 40
+words = 1600 tiny forward passes.
 
 Luong tried the boring thing instead:
 
 ```
-score(q, k) = qᵀk                     # just a dot product
+score(q, k) = qᵀk        # multiply elementwise, add it all up. one number.
 ```
 
-It worked about as well and was **much** faster. Why? A whole matrix of dot products is one
-matmul, and matmul is the one thing GPUs are built to do.
+No parameters. No hidden layer. Just a dot product — and dot products are big when two vectors
+point the same way, which is exactly the "do these match?" question.
+
+It worked about as well and was **much** faster. Why so much faster? Those 1600 dot products
+aren't 1600 separate operations — stack the queries into a matrix, stack the keys into a
+matrix, and **one matmul produces the entire grid of scores at once**. Matmul is the one thing
+GPUs are built to do.
 
 > **Origin tag: Empirical / efficiency.** Not more expressive. Just a better fit for the
 > hardware.
