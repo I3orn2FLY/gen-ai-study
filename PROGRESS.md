@@ -18,6 +18,13 @@ need adjusting on a weaker one.
 |---|---|---|---|---|---|
 | 2026-08-03 | Linux, torch 2.13.0 / CUDA 13.0 | 4 × TITAN RTX 24 GB, Turing SM 7.5, **shared** (GPU 0 usually busy) | ~1.5 TB `/data` | fp16 + GradScaler | No *native* bf16 — `is_bf16_supported()` returns True via emulation; pass `including_emulation=False`. No FlashAttention-2, no fp8. Triton works. |
 
+**Machine change expected (noted 2026-08-03).** Kenessary is moving to another box and will
+return here for the GPU-heavy phases. **Re-run the detection snippet in `ROADMAP.md` §4 before
+recommending any precision or kernel** — in particular `is_bf16_supported(including_emulation=False)`,
+since the default flag lies on Turing. Add a row above when it changes.
+
+Lesson 1 is CPU-only, so nothing there is blocked by the move.
+
 **Would gate on a weaker machine:** 11 (needs multiple GPUs) and 15 (native video) — both
 Tier 3. Postpone rather than fake, and only if the machine actually changes.
 

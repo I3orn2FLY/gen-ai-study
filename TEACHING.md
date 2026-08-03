@@ -539,8 +539,8 @@ requirements.txt        grows section by section
   README.md             section overview; interview writeup added at the end
   lesson1/              one sitting, split into short readable parts
     README.md           part index + one-paragraph summary + interview questions
-    1-where-it-came-from.md
-    2-why-not-rnns.md
+    1-the-scoring-function.md
+    2-why-not-rnns.md          ← outline stub until part 1 is right
     ...
   lesson2/
   attention.py          his implementation
