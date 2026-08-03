@@ -41,7 +41,7 @@ Three levels. A **lesson** is the sit-down unit; **parts** are how it's chopped 
 ```
 01-attention/            section  = roadmap phase
   lesson1/               lesson   = one sitting
-    1-where-it-came-from.md    part = one idea, one screen
+    1-the-scoring-function.md  part = one idea, one screen
     2-why-not-rnns.md
     ...
     README.md            index + the one-paragraph summary + interview questions
@@ -144,13 +144,6 @@ What "in the forward pass" means concretely:
   logits, and the residual stream rather than starting from vacuum.
 
 If a lesson can't say where its mechanism lives in a forward pass, the lesson isn't ready.
-
-### History parts still have to teach
-
-An origin story is not a substitute for the mechanism. "Bahdanau introduced attention in 2014"
-carries nothing on its own. The narrative parts should be where terms get *introduced*,
-because that's where they first come up — the history and the explanation interleave rather
-than living in separate parts.
 
 ### The rest
 
