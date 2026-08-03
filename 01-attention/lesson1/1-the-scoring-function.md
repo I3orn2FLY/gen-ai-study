@@ -33,75 +33,67 @@ a replacement for it. **Origin tag: Fix** — named failure, targeted response.)
 
 ---
 
-## Notation
-
-Every symbol used below. Nothing here is assumed.
-
-| Symbol | Type | What it is |
-|---|---|---|
-| $T_x$ | scalar | **source** length. $T_x = 3$ for "the cat sat" |
-| $T_y$ | scalar | **target** length. $T_y = 4$ for "le chat s'assit" |
-| $d$ | scalar | hidden width, same for both RNNs. $d = 512$ in the paper |
-| $h_j$ | $\mathbb{R}^{d}$ | **encoder state** at source position $j$ |
-| $s_{i-1}$ | $\mathbb{R}^{d}$ | **decoder state** just before emitting target word $i$ |
-| $e_{ij}$ | $\mathbb{R}$ | the **score**: how relevant $h_j$ is to $s_{i-1}$ |
-| $\alpha_{ij}$ | $\mathbb{R}$ | the score turned into a weight, $\sum_j \alpha_{ij} = 1$ |
-| $c_i$ | $\mathbb{R}^{d}$ | **context vector** — the blend handed to the decoder |
-
-Two of these are worth spelling out, because "state" is doing a lot of quiet work.
-
-**Encoder state $h_j$.** An RNN reads the source one word at a time, carrying a vector forward
-and updating it at each step. $h_j$ is that vector after reading word $j$ — a $d$-dimensional
-summary of the source, as of position $j$. There are $T_x$ of them, one per source word. In the
-old pipeline only $h_{T_x}$ survived; that discard *is* the bottleneck.
-
-**Decoder state $s_{i-1}$.** The same idea on the output side: a $d$-dimensional vector holding
-everything generated so far. The subscript is $i-1$ because when producing word $i$, the state
-you have is the one left over from word $i-1$. It's the decoder's "where am I in this
-sentence" — and it's what does the asking.
-
----
-
 ## Where the score is computed
 
-The encoder runs **once**, producing $T_x$ vectors:
+Running example: translate "the cat sat" → "le chat s'assit".
 
-$$h_1,\; h_2,\; \dots,\; h_{T_x} \qquad h_j \in \mathbb{R}^{d}$$
+### The encoder runs once
 
-The decoder runs **once per output word**. At step $i$ it holds $s_{i-1}$, and before emitting
-anything it does three things.
+It reads the source one word at a time, carrying a vector forward and updating it each step.
+Keep that vector at every position instead of only the last one:
 
-**1 · Score every candidate.** One number per source position:
+$$h_1,\; h_2,\; h_3$$
 
-$$e_{ij} \;=\; \mathrm{score}\!\left(s_{i-1},\, h_j\right) \;\in\; \mathbb{R}
-\qquad j = 1, \dots, T_x$$
+> $h_j \in \mathbb{R}^{d}$ — the encoder's state after reading source word $j$: a summary of
+> the source as of position $j$. One per source word, so $T_x = 3$ of them.
+> $d$ is the width, $512$ in the paper.
 
-Collect them and you have a vector $e_i \in \mathbb{R}^{T_x}$ — **these are the scores.**
-With $T_x = 3$:
+Keeping all $T_x$ instead of just $h_{T_x}$ *is* the fix. Everything below is about choosing
+between them.
 
-$$e_i = \big[\,e_{i1},\; e_{i2},\; e_{i3}\,\big] \qquad \text{shape } (3,)$$
+### The decoder runs once per output word
 
-**2 · Normalize into weights.** Scores are unbounded reals; you need them to sum to 1 so they
-can act as mixing proportions. That's exactly softmax:
+At step $i$ it holds $s_{i-1}$ and does three things before emitting anything.
 
-$$\alpha_{ij} \;=\; \frac{\exp(e_{ij})}{\sum_{k=1}^{T_x} \exp(e_{ik})}
-\qquad\Longrightarrow\qquad \sum_{j=1}^{T_x} \alpha_{ij} = 1$$
+> $s_{i-1} \in \mathbb{R}^{d}$ — the decoder's state: a vector holding everything generated so
+> far. The subscript is $i-1$ because when producing word $i$, the state you have is the one
+> left over from word $i-1$. This is the thing doing the asking.
 
-The denominator sums over **all** source positions, which is what forces the row to total 1.
-Concretely $\alpha_i = [0.02,\ 0.95,\ 0.03]$ — *while producing this French word, 95% of my
+**1 · Score every candidate.**
+
+$$e_{ij} \;=\; \mathrm{score}\!\left(s_{i-1},\, h_j\right) \qquad j = 1, \dots, T_x$$
+
+> $e_{ij} \in \mathbb{R}$ — **one number.** How relevant source word $j$ is to what the decoder
+> needs right now.
+
+Collect them across $j$ and step $i$ has a vector $e_i \in \mathbb{R}^{T_x}$, here shape
+$(3,)$. **These are the scores.**
+
+**2 · Normalize into weights.** Scores are unbounded reals. To use them as mixing proportions
+they have to be positive and sum to 1 — which is what softmax does:
+
+$$\alpha_{ij} \;=\; \frac{\exp(e_{ij})}{\sum_{k=1}^{T_x} \exp(e_{ik})}$$
+
+> $\alpha_{ij} \in \mathbb{R}$ — the weight on source word $j$ at step $i$. The denominator
+> sums over **every** source position, which is exactly what forces $\sum_j \alpha_{ij} = 1$.
+
+Concretely $\alpha_i = [0.02,\ 0.95,\ 0.03]$: *while producing this French word, 95% of my
 attention is on "cat".*
 
-**3 · Blend.** Weighted sum of the encoder states, back in $\mathbb{R}^{d}$:
+**3 · Blend.**
 
-$$c_i \;=\; \sum_{j=1}^{T_x} \alpha_{ij}\, h_j \;\in\; \mathbb{R}^{d}$$
+$$c_i \;=\; \sum_{j=1}^{T_x} \alpha_{ij}\, h_j$$
 
-Then the decoder emits word $i$ from $s_{i-1}$ **and** $c_i$, instead of from one frozen vector.
+> $c_i \in \mathbb{R}^{d}$ — the **context vector**. A weighted average of the $h_j$, so it
+> lands back in the same space they live in.
+
+The decoder emits word $i$ from $s_{i-1}$ **and** $c_i$, instead of from one frozen vector.
 
 ### So where is it, exactly
 
 Inside the decoder loop, recomputed at every step, once per source position. Step $i$ builds a
-fresh $e_i$ of shape $(T_x,)$; over the whole sentence that's $T_y$ of them — a
-$T_y \times T_x = 4 \times 3$ table.
+fresh $e_i$ of shape $(T_x,)$; the sentence has $T_y = 4$ output words, so that's $4$ of them —
+a $T_y \times T_x = 4 \times 3$ table over the whole translation.
 
 And watch its lifetime: built → softmaxed into $\alpha$ → used to weight the $h_j$ → **dropped**.
 Scores are never stored. That stays true in the transformer; part 3 puts these same three steps
@@ -138,7 +130,7 @@ $$\mathrm{score}(q, k) \;=\; v^{\top} \tanh\!\big(W\,[\,q;\,k\,]\big)$$
 | Piece | Type | What it does |
 |---|---|---|
 | $[\,q;\,k\,]$ | $\mathbb{R}^{2d}$ | concatenate — stack the two vectors into one of length $2d$ |
-| $W$ | $\mathbb{R}^{d_a \times 2d}$ | **learned** matrix → a hidden vector of size $d_a$ |
+| $W$ | $\mathbb{R}^{d_a \times 2d}$ | **learned** matrix → a hidden vector of size $d_a$ (its own hyperparameter) |
 | $\tanh$ | — | elementwise squash |
 | $v^{\top}$ | $\mathbb{R}^{d_a}$ | **learned** vector; dot it down to one number |
 
@@ -156,12 +148,15 @@ which is already the "do these match?" question.
 
 It scored about as well and is **much** faster — but not for the reason usually given.
 
-Those 12 dot products aren't 12 operations. Stack the queries as rows of
-$Q \in \mathbb{R}^{T_y \times d}$ and the keys as rows of $K \in \mathbb{R}^{T_x \times d}$,
-and the entire score table is **one matmul**:
+Those 12 dot products aren't 12 operations. Stack all the queries into one matrix and all the
+keys into another, and the entire score table falls out of **one matmul**:
 
-$$E \;=\; Q K^{\top} \;\in\; \mathbb{R}^{T_y \times T_x}
-\qquad\text{where } E_{ij} = e_{ij}$$
+$$E \;=\; Q K^{\top}$$
+
+> $Q \in \mathbb{R}^{T_y \times d}$ — the $T_y$ decoder states as rows.
+> $K \in \mathbb{R}^{T_x \times d}$ — the $T_x$ encoder states as rows.
+> $E \in \mathbb{R}^{T_y \times d} \cdot \mathbb{R}^{d \times T_x} = \mathbb{R}^{T_y \times T_x}$,
+> and $E_{ij} = e_{ij}$ — every score at once.
 
 The additive version can't collapse that way — its $\tanh$ sits *between* the two vectors, so
 there's no matrix product to factor out.

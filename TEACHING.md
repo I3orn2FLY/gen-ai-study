@@ -111,10 +111,25 @@ and the JetBrains Markdown preview both render LaTeX in `.md`, so this costs not
 `.tex` build step is needed. Code fences are for *code*; `e_i1 = score(s_{i-1}, h₁)` in a fence
 is neither.
 
-**Define every symbol where the formula appears, dimensions included.** A derivation gets a
-notation table first — symbol, type, meaning:
+**Define symbols just-in-time — beside the formula that first uses them, never as a glossary
+up front.** A notation table listing eight symbols before any of them have appeared is a wall
+of undefined names; it costs more to hold in memory than it saves. Two or three symbols at a
+time, attached to the equation that needs them:
 
-| $h_j$ | $\mathbb{R}^{d}$ | encoder state at source position $j$ |
+```markdown
+$$\alpha_{ij} = \frac{\exp(e_{ij})}{\sum_{k=1}^{T_x} \exp(e_{ik})}$$
+
+> $\alpha_{ij} \in \mathbb{R}$ — the weight on source word $j$ at step $i$. The denominator
+> sums over **every** source position, which is what forces $\sum_j \alpha_{ij} = 1$.
+```
+
+The blockquote-after-formula pattern reads well and keeps the definition adjacent to the use.
+A table is fine when the symbols are *parts of one formula* being decomposed — but not as a
+preamble.
+
+**This matters more as the material gets harder, not less.** On familiar ground a symbol dump
+is merely annoying; on genuinely new material it is the thing that makes a lesson take an hour
+instead of ten minutes. Front-loaded notation is a tax paid before any of it means anything.
 
 Two failure modes, both real, both caught in lesson 1:
 
