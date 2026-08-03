@@ -2,11 +2,10 @@
 
 *~4 min. Lesson 1, part 2 of 8.*
 
-Part 1 ended with the recurrence being deleted. This is the engineering case for that —
-and the reason we never build an RNN in this roadmap.
+Part 1 solved the bottleneck and left the RNN in place. So why delete it?
 
-There are two reasons, and people constantly mash them together. **They are different, and one
-of them is the real one.**
+Because it has two problems of its own — and people constantly mash them together. **They are
+different, and only one of them actually decided it.**
 
 ---
 

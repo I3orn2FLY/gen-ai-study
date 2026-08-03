@@ -2,19 +2,7 @@
 
 *~5 min. Lesson 1, part 1 of 8.*
 
-Attention answers one question:
-
-> **Given this position, which other positions should it pull information from?**
-
-The answer is a **score** — one number per pair, saying how relevant one position is to
-another. Everything in this lesson is built on that number: how it's computed, how it becomes
-weights, and how those weights mix information.
-
-Dates and names are attached where they're useful. The mechanism is the subject.
-
----
-
-## The problem that forces it
+## The problem
 
 Sequence-to-sequence models used to be a straight pipeline:
 
@@ -22,13 +10,21 @@ Sequence-to-sequence models used to be a straight pipeline:
 "the cat sat on the mat"  →  [RNN encoder]  →  [512 numbers]  →  [RNN decoder]  →  "le chat..."
 ```
 
-A 4-word sentence and a 40-word sentence both get **the same 512 numbers**. Everything
-squeezes through one vector, and quality collapses on long inputs.
+Spot it? A 4-word sentence and a 40-word sentence both get **the same 512 numbers**.
+Everything squeezes through one vector, and translation quality collapsed on long inputs.
 
-The fix: stop squeezing. Keep one vector per input word, and let the consumer pick which ones
-it needs, per output step. Picking requires a relevance number per candidate.
+The obvious fix is to stop squeezing: keep one vector per input word, and let the consumer
+pick which ones it needs at each output step.
 
-**That number is the score.**
+Which raises the actual question:
+
+> **Given this position, which other positions should it pull information from?**
+
+"Pick" isn't differentiable, so you can't learn it. What you *can* do is put a number on every
+candidate — how relevant is this one to what I need right now — and blend by those numbers.
+
+**That number is the score.** It's the whole of this lesson: how it's computed, how it becomes
+weights, and how those weights mix information.
 
 ![the fixed-vector bottleneck, and attention removing it](figures/fig1-bottleneck.png)
 
@@ -177,4 +173,4 @@ fixed-vector bottleneck
     → fix those 3 things
 ```
 
-**→ [2 · Why not RNNs](2-why-not-rnns.md)**
+**→ [2 · Why not recurrence](2-why-not-rnns.md)**

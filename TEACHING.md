@@ -104,6 +104,40 @@ point it appears. Dropping `score(q,k) = vᵀ tanh(W[q;k])` as an aside teaches 
 that `[q;k]` is concatenation, `W` and `v` are learned, and the whole thing is a one-hidden-
 layer MLP run once per pair. If a formula isn't worth explaining, it isn't worth showing.
 
+### Open with the problem, not the answer
+
+**Every part starts from something that doesn't work yet.** Show the broken thing, let it
+land, then reveal the mechanism as the resolution.
+
+Answer-first openings read as definitions and get skimmed:
+
+> ~~"Attention answers one question: given this position, which others should it pull from?
+> The answer is a score…"~~
+
+Problem-first openings put the question in the reader's head first, so the mechanism arrives
+as a resolution instead of a fact to memorize:
+
+> "Here's the pipeline. A 4-word sentence and a 40-word sentence get **the same 512 numbers**.
+> …The obvious fix is to stop squeezing and let the consumer pick — which raises the actual
+> question…"
+
+The shape, in order:
+
+1. **The setup**, concretely — real shapes, a real sentence
+2. **What breaks**, made visible — a number, a figure, a failure you can point at
+3. **What would fix it**, stated as a requirement before naming anything
+4. **The mechanism**, as the thing that meets that requirement
+5. **What it cost** — every fix incurs something; say what
+
+This is `ROADMAP.md` §3's pressure-and-response chain applied at the scale of one part, and it
+is why the material reads as a story rather than a reference. **Keep that arc.** A part that
+opens by recapping the previous part has skipped step 1 — open on the *unresolved thing*
+instead.
+
+Where the honest origin isn't a fix (**Transfer**, **Empirical**, **Unification**), still open
+on the problem — it's just "here's the gap this filled" or "here's what nobody could explain"
+rather than "here's what broke." Never manufacture a failure that didn't happen.
+
 ### This is a deep-learning course, not a history course
 
 History is **structure, not subject**. It's a good spine — technique X exists because Y broke —

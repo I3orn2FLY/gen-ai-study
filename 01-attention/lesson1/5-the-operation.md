@@ -2,13 +2,17 @@
 
 *~4 min. Lesson 1, part 5 of 8.*
 
-Everything so far, compressed into one line:
+Part 1 described scoring as a loop: for each query, score it against every key, one pair at a
+time. That's fine for understanding and wrong for running — a Python loop over pairs is the
+worst possible shape for a GPU.
+
+So write the whole thing as matrices, and it collapses to one line:
 
 ```
 Attention(Q, K, V) = softmax( Q Kᵀ / √d_k ) V
 ```
 
-Nothing new is happening here. This is parts 1, 3 and 4 written as matrices instead of loops.
+Nothing new happens here. This is parts 1, 3 and 4 with the loops removed.
 
 ---
 

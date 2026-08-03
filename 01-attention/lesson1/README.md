@@ -6,7 +6,7 @@ Eight short parts. Read in order.
 
 | # | Part | Time |
 |---|---|---|
-| 1 | [The scoring function](1-the-scoring-function.md) — what a score is and where it's computed | ~5 min |
+| 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, and the number that fixes it | ~5 min |
 | 2 | [Why not recurrence](2-why-not-rnns.md) | ~4 min |
 | 3 | [**The forward pass**](3-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min |
 | 4 | [Query, key, value](4-query-key-value.md) — a dict lookup with three things relaxed | ~7 min |
@@ -15,8 +15,9 @@ Eight short parts. Read in order.
 | 7 | [The PyTorch you need](7-pytorch-you-need.md) | ~4 min |
 | 8 | [Your task](8-your-task.md) | ~45 min doing |
 
-Parts 1 and 3 both anchor on a concrete forward pass with real shapes, so no formula shows up
-without a home. History is used as structure, not as the subject.
+Each part opens on something that doesn't work yet, then earns the mechanism that fixes it.
+Parts 1 and 3 anchor on a concrete forward pass with real shapes, so no formula shows up
+without a home. History is structure, not subject.
 
 ~34 min reading, then you write code. Terms get defined where they appear — no part assumes
 you remember jargon from another one.

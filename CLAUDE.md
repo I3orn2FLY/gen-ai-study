@@ -69,6 +69,10 @@ Initiate these — don't wait to be asked.
 - **Structural feedback means rewriting the document whole**, not patching wording. Feedback
   about a lesson applies to **every part of that lesson** — regenerate them all, don't patch
   the one sentence he quoted.
+- **Open with the problem, not the answer.** Every part starts from something that doesn't
+  work yet: setup → what breaks → what would fix it → the mechanism → what it cost. An
+  answer-first opening reads as a definition and gets skimmed. Keep the story arc; don't open
+  by recapping the previous part. `TEACHING.md` § Writing the material.
 - **Mechanism is the subject; history is structure.** Name parts after what they teach ("The
   scoring function"), not after eras ("Where it came from"). Attribution goes in parentheses,
   not in headings. Origin tags stay — they explain why a technique exists.
