@@ -2,7 +2,7 @@
 
 *~4 min. Lesson 1, part 7 of 8.*
 
-The ops your implementation is made of. Toy tensors, run them if you want.
+Every line of part 3's attention box, as a PyTorch idiom. Toy tensors, run them if you want.
 
 Not the solution — the vocabulary the solution is written in.
 
@@ -98,7 +98,7 @@ masked out, expect a mismatch. That's real, not your bug. (The checker avoids it
 
 ## `view` vs `reshape`
 
-Matters properly in lesson 2, but meet it now:
+Matters properly in lesson 2 (splitting heads), but meet it now:
 
 ```python
 x = torch.randn(2, 3, 4).transpose(1, 2)

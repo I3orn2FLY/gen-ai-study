@@ -2,8 +2,14 @@
 
 *~6 min — the one to actually slow down for. Lesson 1, part 6 of 8.*
 
-This is the whiteboard question. Interviewers love it because the derivation is short and you
-either followed it or you memorized it.
+Part 3 had one line we walked straight past:
+
+```
+scores = scores / √64
+```
+
+It's the only non-obvious piece of the whole operation — and the whiteboard question.
+The derivation is short, so you either followed it or you memorized it.
 
 ---
 
@@ -57,7 +63,7 @@ scores. Automatically.
 
 ## Step 3 — why big scores are bad
 
-With `d = 64`, scores land around ±8. And `e⁸ ≈ 3000`, so softmax comes out essentially
+With `d = 64` — our running example — scores land around ±8. And `e⁸ ≈ 3000`, so softmax comes out essentially
 one-hot: one key gets ~1.0, everything else ~0.
 
 ![attention collapsing to one key as d grows](figures/fig8-saturation.png)

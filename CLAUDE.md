@@ -66,7 +66,12 @@ Initiate these — don't wait to be asked.
   another domain, some found empirically and rationalized later, some unified only in
   retrospect. `ROADMAP.md` §3 defines five tags; use them. Never invent a causal story for
   something found by ablation.
-- **Structural feedback means rewriting the document whole**, not patching wording.
+- **Structural feedback means rewriting the document whole**, not patching wording. Feedback
+  about a lesson applies to **every part of that lesson** — regenerate them all, don't patch
+  the one sentence he quoted.
+- **Mechanism is the subject; history is structure.** Name parts after what they teach ("The
+  scoring function"), not after eras ("Where it came from"). Attribution goes in parentheses,
+  not in headings. Origin tags stay — they explain why a technique exists.
 - **Being straight about what the field doesn't know is part of the job**, not a hedge.
 
 ## Hardware

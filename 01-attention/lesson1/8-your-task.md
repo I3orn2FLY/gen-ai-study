@@ -10,7 +10,7 @@ there. Bodies are yours.
 | Function | What it does |
 |---|---|
 | `causal_mask(seq_len, device)` | Bool mask. `True` = allowed to attend here |
-| `scaled_dot_product_attention(q, k, v, attn_mask, dropout_p)` | The thing from part 4 |
+| `scaled_dot_product_attention(q, k, v, attn_mask, dropout_p)` | The attention box from part 3 |
 | `attention_entropy(attn_weights)` | Entropy of each attention row, in nats |
 
 Don't call `F.scaled_dot_product_attention` — that's what you're checked against.

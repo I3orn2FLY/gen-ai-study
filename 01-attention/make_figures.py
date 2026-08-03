@@ -257,7 +257,93 @@ def fig_heatmap():
     save(fig, "fig7-attention-heatmap.png")
 
 
-# ---------------------------------------------------------------- part 5
+# ---------------------------------------------------------------- part 3
+def fig_forward_pass():
+    fig, ax = blank((12.6, 7.2))
+    ax.set_xlim(0, 12.6); ax.set_ylim(0, 7.2)
+    ax.text(0.1, 6.95, '"The cat sat because it was tired"  ·  T = 7,  $d_{model}$ = 64',
+            fontsize=12, weight="bold")
+
+    # ---- left: the stack
+    ax.text(1.65, 6.55, "the model", ha="center", fontsize=10, weight="bold", color=MUTED)
+    stack = [("token ids", "(7,)", "#f3f4f6", MUTED),
+             ("embedding + position", "(7, 64)", "#f3f4f6", MUTED),
+             ("BLOCK 1", "(7, 64)", "#eff6ff", BLUE),
+             ("BLOCK 2", "(7, 64)", "#eff6ff", BLUE),
+             ("LayerNorm", "(7, 64)", "#f3f4f6", MUTED),
+             ("output projection", "(7, 1000)", "#f3f4f6", MUTED)]
+    for i, (lab, shp, fc, ec) in enumerate(stack):
+        y = 5.8 - i * 0.86
+        box(ax, 0.35, y, 2.6, 0.56, lab, fc=fc, ec=ec, fs=9,
+            weight="bold" if "BLOCK" in lab else "normal")
+        ax.text(3.05, y + 0.28, shp, fontsize=8.5, va="center", color=MUTED,
+                family="monospace")
+        if i < len(stack) - 1:
+            arrow(ax, 1.65, y, 1.65, y - 0.3, color=MUTED)
+
+    # ---- middle: inside a block
+    ax.text(5.6, 6.55, "inside a block", ha="center", fontsize=10, weight="bold", color=BLUE)
+    blk = [("LayerNorm", "#f9fafb", MUTED), ("ATTENTION", "#fee2e2", RED),
+           ("+ residual", "#f9fafb", MUTED), ("LayerNorm", "#f9fafb", MUTED),
+           ("MLP", "#f9fafb", MUTED), ("+ residual", "#f9fafb", MUTED)]
+    ax.add_patch(FancyBboxPatch((4.25, 0.9), 2.7, 5.15,
+                                boxstyle="round,pad=0.03,rounding_size=0.08",
+                                fc="#f8fbff", ec=BLUE, lw=1.4, ls="--", zorder=0))
+    for i, (lab, fc, ec) in enumerate(blk):
+        y = 5.35 - i * 0.78
+        box(ax, 4.5, y, 2.2, 0.52, lab, fc=fc, ec=ec, fs=9.5,
+            weight="bold" if lab == "ATTENTION" else "normal")
+        if i < len(blk) - 1:
+            arrow(ax, 5.6, y, 5.6, y - 0.26, color=MUTED)
+    ax.annotate("", xy=(4.3, 4.5), xytext=(3.0, 4.35),
+                arrowprops=dict(arrowstyle="-|>", color=BLUE, lw=1.4,
+                                connectionstyle="arc3,rad=-0.25"))
+    ax.text(5.6, 0.6, "everything stays (7, 64)", ha="center", fontsize=8.5, color=MUTED,
+            style="italic")
+
+    # ---- right: inside attention
+    ax.text(9.85, 6.55, "inside ATTENTION", ha="center", fontsize=10, weight="bold", color=RED)
+    box(ax, 8.9, 5.35, 1.9, 0.5, "$x$   (7, 64)", fc="#f3f4f6", ec=MUTED, fs=9.5)
+    # Q, K, V computed in PARALLEL from x
+    par = [(7.75, "$Q = x\\,W_Q$", BLUE, "#eff6ff"),
+           (9.25, "$K = x\\,W_K$", GREEN, "#f0fdf4"),
+           (10.75, "$V = x\\,W_V$", ORANGE, "#fff7ed")]
+    for x0, lab, c, fc in par:
+        box(ax, x0, 4.35, 1.4, 0.52, lab, fc=fc, ec=c, fs=9)
+        ax.text(x0 + 0.7, 4.18, "(7, 64)", ha="center", fontsize=8, color=MUTED,
+                family="monospace")
+        arrow(ax, 9.85, 5.35, x0 + 0.7, 4.89, color=c, lw=1.2)
+
+    box(ax, 8.45, 3.15, 2.8, 0.55, "scores $= QK^\\top$", fc="#fee2e2", ec=RED, fs=10.5,
+        weight="bold")
+    ax.text(11.35, 3.43, "(7, 7)", fontsize=9, color=RED, weight="bold", va="center",
+            family="monospace")
+    arrow(ax, 8.45, 4.35, 9.2, 3.72, color=BLUE, lw=1.3)
+    arrow(ax, 9.95, 4.35, 10.2, 3.72, color=GREEN, lw=1.3)
+
+    box(ax, 8.45, 2.25, 2.8, 0.55, "/ $\\sqrt{64}$ · mask · softmax", fc="#fee2e2", ec=RED,
+        fs=9.5)
+    ax.text(11.35, 2.53, "(7, 7)", fontsize=8.5, color=MUTED, va="center", family="monospace")
+    arrow(ax, 9.85, 3.15, 9.85, 2.82, color=RED)
+
+    box(ax, 8.45, 1.35, 2.8, 0.55, "out $= A\\,V$", fc="#fff7ed", ec=ORANGE, fs=10.5)
+    ax.text(11.35, 1.63, "(7, 64)", fontsize=8.5, color=MUTED, va="center", family="monospace")
+    arrow(ax, 9.85, 2.25, 9.85, 1.92, color=RED)
+    ax.annotate("", xy=(11.1, 1.9), xytext=(11.45, 4.35),
+                arrowprops=dict(arrowstyle="-|>", color=ORANGE, lw=1.3,
+                                connectionstyle="arc3,rad=0.35"))
+
+    ax.annotate("", xy=(8.85, 5.6), xytext=(6.75, 4.6),
+                arrowprops=dict(arrowstyle="-|>", color=RED, lw=1.6,
+                                connectionstyle="arc3,rad=-0.2"))
+    ax.text(9.85, 0.78, "a (7, 7) table:  row i = token i asking,\ncol j = token j asked about",
+            ha="center", fontsize=9.5, color=RED, weight="bold", linespacing=1.5)
+    ax.text(9.85, 0.12, "built, used, discarded — every block, every forward pass",
+            ha="center", fontsize=8.5, color=MUTED, style="italic")
+    save(fig, "fig11-forward-pass.png")
+
+
+# ---------------------------------------------------------------- cross-attention aside
 def fig_shape_trace():
     fig, ax = blank((11, 5.6))
     ax.set_xlim(0, 11); ax.set_ylim(0, 5.6)
@@ -366,8 +452,8 @@ def fig_softmax_jacobian():
 
 if __name__ == "__main__":
     print("writing figures to", OUT)
-    for fn in (fig_bottleneck, fig_path_length, fig_dict_to_attention, fig_qkv,
-               fig_symmetry, fig_three_steps, fig_heatmap, fig_shape_trace,
+    for fn in (fig_bottleneck, fig_path_length, fig_forward_pass, fig_dict_to_attention,
+               fig_qkv, fig_symmetry, fig_three_steps, fig_heatmap, fig_shape_trace,
                fig_saturation, fig_softmax_jacobian):
         fn()
     print("done")

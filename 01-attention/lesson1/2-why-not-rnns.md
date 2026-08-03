@@ -1,8 +1,9 @@
-# 2 · Why not RNNs
+# 2 · Why not recurrence
 
 *~4 min. Lesson 1, part 2 of 8.*
 
-We never build an RNN in this roadmap. Here's the argument for skipping them.
+Part 1 ended with the recurrence being deleted. This is the engineering case for that —
+and the reason we never build an RNN in this roadmap.
 
 There are two reasons, and people constantly mash them together. **They are different, and one
 of them is the real one.**
@@ -85,4 +86,4 @@ It doesn't go away. We pay it repeatedly:
 - FlashAttention (lesson 7)
 - every long-context trick in Phase 2
 
-**→ [3 · Query, key, value](3-query-key-value.md)**
+**→ [3 · The forward pass](3-the-forward-pass.md)**

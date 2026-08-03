@@ -1,10 +1,18 @@
-# 3 · Query, key, value
+# 4 · Query, key, value
 
-*~7 min — the names, properly. Lesson 1, part 3 of 8.*
+*~7 min — the names, properly. Lesson 1, part 4 of 8.*
 
-The names come from **key-value stores** — dictionaries, hash maps, databases. Not loosely.
-Attention is a dictionary lookup with three specific things relaxed, and if you follow which
-three, every name earns itself.
+Part 3 had three tensors appear out of nowhere inside the attention box:
+
+```
+Q = x @ W_Q      K = x @ W_K      V = x @ W_V        each (7, 64)
+```
+
+This part is what they are, and why there are three of them.
+
+The names come from **key-value stores** — dictionaries, hash maps, databases. Not loosely:
+attention *is* a dictionary lookup with three specific things relaxed, and following which
+three makes every name earn itself.
 
 Start with an actual dict.
 
@@ -214,7 +222,7 @@ what Memory Networks discovered was worth doing.
 ## In this lesson you don't build the projections
 
 So you don't go looking for them: in `attention.py`, `q`, `k`, and `v` **arrive as tensors
-already**. Somebody upstream did the `x @ W_Q` part.
+already** — part 3's diagram shows somebody upstream doing the `x @ W_Q` part.
 
 You implement the operation that consumes them. `W_Q`/`W_K`/`W_V` show up in lesson 2, wrapped
 into multi-head attention.
@@ -230,4 +238,4 @@ You should be able to say, without looking:
 - Sharing `W_Q` and `W_K` → symmetric scores → no direction, and self-attention dominates
 - The names came from key-value stores via Memory Networks; the K/V split was deliberate
 
-**→ [4 · The operation](4-the-operation.md)**
+**→ [5 · The operation](5-the-operation.md)**

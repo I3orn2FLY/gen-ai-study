@@ -59,6 +59,12 @@ go.
 Every lesson directory gets a `README.md` with the part index and a **one-paragraph version**
 of the whole lesson, so it can be re-read in 30 seconds months later.
 
+**Feedback about a lesson means rewriting the whole lesson.** When he says something is wrong
+with how a lesson teaches — too dense, too abstract, wrong framing, a term never explained —
+that applies to *every part*, not just the one he happened to be reading. Regenerate the parts
+whole. Patching the single sentence he quoted is the lazy read of the feedback and leaves the
+same problem in the other seven parts.
+
 Never run ahead. Generate lesson N, then stop. Lesson N+1 is written after N is done, because
 how N went should change N+1.
 
@@ -97,6 +103,23 @@ Applies to formulas too. **A formula shown is a formula explained, symbol by sym
 point it appears. Dropping `score(q,k) = vᵀ tanh(W[q;k])` as an aside teaches nothing — say
 that `[q;k]` is concatenation, `W` and `v` are learned, and the whole thing is a one-hidden-
 layer MLP run once per pair. If a formula isn't worth explaining, it isn't worth showing.
+
+### This is a deep-learning course, not a history course
+
+History is **structure, not subject**. It's a good spine — technique X exists because Y broke —
+and it's genuinely interview-relevant. It is never the point of a part.
+
+Concretely:
+
+- **Name parts after mechanisms, not eras.** "The scoring function", not "Where it came from".
+  A reader should be able to tell what they'll *know* afterwards from the title alone.
+- **Lead with the mechanism**, then attach the attribution. `(Luong et al., 2015)` in
+  parentheses beats a `## 2015 — Luong` heading, because the heading promises a story and the
+  parenthetical delivers a citation.
+- **Origin tags stay** — they're about *why a technique exists*, which is mechanism, not
+  chronology.
+- A dated section header is a smell. Ask what the reader is supposed to be able to *do*, and
+  title it that.
 
 ### Never teach a mechanism in isolation
 

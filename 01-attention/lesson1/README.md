@@ -6,14 +6,17 @@ Eight short parts. Read in order.
 
 | # | Part | Time |
 |---|---|---|
-| 1 | [Where it came from](1-where-it-came-from.md) | ~3 min |
-| 2 | [Why not RNNs](2-why-not-rnns.md) | ~4 min |
-| 3 | [**Query, key, value**](3-query-key-value.md) — a dict lookup with three things relaxed | ~7 min |
-| 4 | [The operation](4-the-operation.md) | ~4 min |
-| 5 | [Where the scores actually live](5-where-scores-live.md) — real shapes, end to end | ~6 min |
+| 1 | [The scoring function](1-the-scoring-function.md) — what a score is and where it's computed | ~5 min |
+| 2 | [Why not recurrence](2-why-not-rnns.md) | ~4 min |
+| 3 | [**The forward pass**](3-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min |
+| 4 | [Query, key, value](4-query-key-value.md) — a dict lookup with three things relaxed | ~7 min |
+| 5 | [The operation](5-the-operation.md) | ~4 min |
 | 6 | [**Why √d**](6-why-sqrt-d.md) — the one that matters | ~6 min |
 | 7 | [The PyTorch you need](7-pytorch-you-need.md) | ~4 min |
 | 8 | [Your task](8-your-task.md) | ~45 min doing |
+
+Parts 1 and 3 both anchor on a concrete forward pass with real shapes, so no formula shows up
+without a home. History is used as structure, not as the subject.
 
 ~34 min reading, then you write code. Terms get defined where they appear — no part assumes
 you remember jargon from another one.
@@ -22,11 +25,13 @@ you remember jargon from another one.
 
 ## The one-paragraph version
 
-Attention is a Python dict lookup with three things relaxed: matching is a dot product instead
-of equality, retrieval is a blend of *all* values instead of one, and the keys are learned
-(`x @ W_K`) instead of written by hand. Query = what you're asking for, key = the label a token
-is filed under, value = what it hands over — key and value are different objects, which is the
-whole point. `softmax(QKᵀ/√d_k)V`. The `√d_k` is there because the
+Inside every transformer block sits an attention op. It projects the input `x` `(T, d)` three
+ways — `Q = x W_Q`, `K = x W_K`, `V = x W_V` — builds a `(T, T)` **score** table `S = QKᵀ/√d`,
+softmaxes each row into weights, and returns `A V`: each position replaced by a weighted blend
+of all positions. The scores are a temporary, rebuilt and discarded every forward pass; only
+the three `W` matrices are learned. It's a Python dict lookup with three things relaxed —
+matching is a dot product not equality, retrieval blends *all* values not one, and the keys are
+learned not hand-written. `softmax(QKᵀ/√d_k)V`. The `√d_k` is there because the
 variance of a `d`-term dot product is `d`, and unscaled scores saturate the softmax — which
 zeroes its Jacobian, which means no gradient reaches `W_Q` and `W_K`, which means the model
 can't learn where to look. It's `d_head`, not `d_model`. And it only fixes the scale at
