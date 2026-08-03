@@ -8,23 +8,24 @@ Seven short parts. Read in order.
 |---|---|---|
 | 1 | [Where it came from](1-where-it-came-from.md) | ~3 min |
 | 2 | [Why not RNNs](2-why-not-rnns.md) | ~4 min |
-| 3 | [Query, key, value](3-query-key-value.md) — where the three come from, why three | ~5 min |
+| 3 | [**Query, key, value**](3-query-key-value.md) — a dict lookup with three things relaxed | ~7 min |
 | 4 | [The operation](4-the-operation.md) | ~4 min |
 | 5 | [**Why √d**](5-why-sqrt-d.md) — the one that matters | ~6 min |
 | 6 | [The PyTorch you need](6-pytorch-you-need.md) | ~4 min |
 | 7 | [Your task](7-your-task.md) | ~45 min doing |
 
-~25 min reading, then you write code. Terms get defined where they appear — no part assumes
+~28 min reading, then you write code. Terms get defined where they appear — no part assumes
 you remember jargon from another one.
 
 ---
 
 ## The one-paragraph version
 
-Q, K, V are three learned projections of the same input — query = what a position wants, key =
-how it advertises itself, value = what it hands over. Attention is a soft dictionary lookup
-over them: score the query against every key, softmax the scores, return the value-weighted
-average. `softmax(QKᵀ/√d_k)V`. The `√d_k` is there because the
+Attention is a Python dict lookup with three things relaxed: matching is a dot product instead
+of equality, retrieval is a blend of *all* values instead of one, and the keys are learned
+(`x @ W_K`) instead of written by hand. Query = what you're asking for, key = the label a token
+is filed under, value = what it hands over — key and value are different objects, which is the
+whole point. `softmax(QKᵀ/√d_k)V`. The `√d_k` is there because the
 variance of a `d`-term dot product is `d`, and unscaled scores saturate the softmax — which
 zeroes its Jacobian, which means no gradient reaches `W_Q` and `W_K`, which means the model
 can't learn where to look. It's `d_head`, not `d_model`. And it only fixes the scale at

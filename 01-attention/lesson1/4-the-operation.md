@@ -12,27 +12,10 @@ That's it. The rest of this part is reading it properly.
 
 ---
 
-## The "soft" part
+## Same three steps as part 3, now batched
 
-Part 3 covered what Q, K, V are. Now the other half of the metaphor: why *soft*.
-
-A Python dict lookup is hard:
-
-```python
-d[key]          # exact match. one winner, everyone else gets nothing.
-```
-
-Attention never picks a winner:
-
-1. Compare the query against **every** key (dot product)
-2. Turn those scores into probabilities (softmax)
-3. Return the **weighted average of all values**
-
-Nothing is retrieved. Everything is blended, in proportion to how well it matched.
-
-That's not a compromise — it's the requirement. A hard lookup has no useful derivative, so
-you can't learn *what to look up*. A weighted average does. Softness is what makes the
-mechanism trainable.
+Part 3 built this one query at a time: score against every key, softmax, weighted average of
+values. The formula is that, done for all queries at once with matrices instead of loops.
 
 ---
 

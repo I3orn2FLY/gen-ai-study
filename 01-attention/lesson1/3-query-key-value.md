@@ -1,128 +1,224 @@
 # 3 · Query, key, value
 
-*~5 min. Lesson 1, part 3 of 7.*
+*~7 min — the names, properly. Lesson 1, part 3 of 7.*
 
-Part 1 gave you the working definition: **query** = the thing searching, **key** = the thing
-being searched. That's enough to read a paper.
+The names come from **key-value stores** — dictionaries, hash maps, databases. Not loosely.
+Attention is a dictionary lookup with three specific things relaxed, and if you follow which
+three, every name earns itself.
 
-This part is the rest of it — the third name, where all three physically come from, and why
-they're three separate things instead of one.
-
----
-
-## The names are borrowed from databases
-
-That's the whole metaphor:
-
-| Database | Attention |
-|---|---|
-| **query** — what you're looking for | what this token wants to know |
-| **key** — what's in the index | what a token advertises about itself |
-| **value** — what you get back | what a token actually hands over |
-
-You search with a **query**, it's matched against **keys**, and you receive **values**.
-
-Vaswani introduced these names without much justification. They're a metaphor, not a
-derivation. Don't over-think them.
+Start with an actual dict.
 
 ---
 
-## Where they actually come from
+## Step 0 — a Python dict already has all three
 
-Mechanically, they're just three linear layers applied to the same input.
+```python
+memory = {
+    "cat": [0.2, 0.9, 0.1],      # ← key: "cat"   value: [0.2, 0.9, 0.1]
+    "sat": [0.7, 0.1, 0.4],
+    "mat": [0.3, 0.3, 0.8],
+}
 
-Say token embeddings come in as `x` of shape `(L, d_model)`:
-
-```
-Q = x @ W_Q          "what am I looking for?"
-K = x @ W_K          "what am I, as a search target?"
-V = x @ W_V          "what do I contribute if selected?"
+memory["cat"]        # ← "cat" here is the QUERY
+# [0.2, 0.9, 0.1]    # ← you get back the VALUE
 ```
 
-Three learned weight matrices. That's it. Same input, three different views of it.
+Three roles, already distinct:
 
-This is **self-attention**: Q, K, V all come from the same sequence.
+| Role | In the dict | Job |
+|---|---|---|
+| **query** | the thing in the brackets | what I'm asking for |
+| **key** | the thing on the left of `:` | the label something is filed under |
+| **value** | the thing on the right of `:` | the actual content you receive |
 
-In **cross-attention**, Q comes from one sequence and K, V from another — that's how Phase 9
-makes an image attend to a text prompt. Same math, different source.
+**Look at that middle row and that bottom row.** `"cat"` is a 3-letter string. Its value is a
+3-number vector. They are *not the same object*. You **search by** one and **receive** the
+other.
+
+That's the distinction to hang on to. Everything else is detail.
+
+Now break the dict three times.
 
 ---
 
-## A concrete example
+## Break 1 — exact match is too strict
 
-Sentence: **"The cat sat because it was tired."**
+```python
+memory["kitten"]     # KeyError
+```
 
-Take the token **"it"**. To represent it usefully, the model needs to know what "it" refers to.
+A dict compares by equality. Miss by one character, get nothing.
 
-- **"it" emits a query**: *"I'm a pronoun, I need a noun that could be tired."*
-- **"cat" emits a key**: *"I'm an animate singular noun."*
-- Those match → high dot product → high attention weight.
-- **"cat" emits a value**: the actual features about cats that get mixed into "it"'s
-  representation.
+**Fix:** replace equality with a **score**. Make keys vectors instead of strings, and measure
+match by dot product — big when two vectors point the same way.
 
-The output for "it" becomes mostly "cat"'s value, plus a bit of everything else.
+```
+score(query, key) = q · k        # "how well do these match?", as a number
+```
+
+Now `"kitten"` scores 0.8 against `"cat"` instead of failing.
+
+---
+
+## Break 2 — one winner takes everything
+
+A dict returns one value. But "kitten" is a bit like "cat" and a bit like "dog," and you'd
+like some of each.
+
+**Fix:** score against **every** key, softmax the scores into weights summing to 1, and return
+the **weighted average of all values**.
+
+```
+weights = softmax([q·k₁, q·k₂, q·k₃, ...])
+output  = w₁v₁ + w₂v₂ + w₃v₃ + ...
+```
+
+Nothing is retrieved. Everything is blended, in proportion to match quality.
+
+This is also what makes it *learnable*: `d["cat"]` has no useful derivative, a weighted average
+does. You can't gradient-descend your way to a better hash lookup.
+
+---
+
+## Break 3 — you had to write the keys by hand
+
+In a dict, *you* decide that this vector is filed under `"cat"`.
+
+**Fix:** learn them. Each token produces its own query, key, and value by multiplying its
+embedding by a learned matrix:
+
+```
+Q = x @ W_Q        what I'm looking for
+K = x @ W_K        what I'm filed under
+V = x @ W_V        what I hand over if selected
+```
+
+Three learned matrices. Same input `x`, three different views of it.
+
+**That's attention.** A dict where matching is soft, retrieval is a blend, and the index is
+learned instead of written.
+
+---
+
+## Two things worth un-learning
+
+If you half-remember this from somewhere, these are the two spots it usually goes wrong.
+
+### ❌ "the key is the thing I need"
+
+No — **the key is the label, the value is the thing you need.**
+
+This is the single most important split, and the dict makes it obvious: you look up by
+`"cat"`, you receive `[0.2, 0.9, 0.1]`. Nobody wants the string `"cat"`. They want what's
+filed under it.
+
+Same in a library: you search the **card catalogue entry** (key), you walk away with the
+**book** (value). Same in web search: the page is indexed by keywords (key), you read the page
+(value).
+
+### ❌ "key = the encoder"
+
+True in one setting, and it's the setting attention was invented in — so this is a reasonable
+thing to have absorbed. But it's a special case, not the definition:
+
+| | Query from | Key & value from |
+|---|---|---|
+| **Self-attention** (this lesson) | the sequence | **the same sequence** |
+| **Cross-attention** (Bahdanau; Phase 9) | decoder / image | encoder / text |
+
+"Key comes from the encoder" describes *cross*-attention. In self-attention a token is both
+searcher and search target.
+
+### ✅ "query is a filter"
+
+That one's good, keep it. A query is a request pattern: *"I want something that looks like
+this."* The only thing to add is that the query is **learned and per-token**, not a filter you
+write by hand.
+
+---
+
+## Where the names actually come from
+
+You're right to expect names to mean something. This lineage is real:
+
+**1970s–, key-value stores.** Hash maps, associative arrays, `SELECT ... WHERE`. Query, key,
+value have meant exactly this for fifty years.
+
+**2014 — Bahdanau.** Query and key exist here, but **there is no separate value**. The
+encoder state `h_j` is used both to compute the score *and* as the thing being averaged. One
+vector, two jobs.
+
+**2014–15 — Memory Networks** (Weston; Sukhbaatar et al.). This is where the split happens.
+Their memory stores each fact **twice**, under two different embeddings: one used for matching
+against the query, one used for the output. Miller et al. then named the idea outright:
+**"Key-Value Memory Networks"** (2016).
+
+**2017 — Vaswani.** Inherits the vocabulary and makes all three learned projections of the
+same input. The paper defines it in one line: *the output is a weighted sum of the **values**,
+where each weight comes from a compatibility function of the **query** with the corresponding
+**key***.
+
+So the names are inherited, not invented — and the key/value split was a deliberate design
+decision by people who had a reason for it.
+
+**Where honesty is required:** the names describe the *mechanism's structure*, not the meaning
+of any learned vector. You cannot open a trained model and read a key as "I am a plural noun."
+The names tell you what each projection is *for*. Interpretations of what individual heads
+learn are reverse-engineered after the fact, and often wrong.
 
 ---
 
 ## Why three matrices and not fewer?
 
-Good question to be asked, so here's the reasoning.
+Now the names are earned, this is answerable — and it's a standard interview question.
 
-### Why not use the same matrix for Q and K?
+### Why not share W_Q and W_K?
 
-Suppose `W_Q = W_K = W`. Then the score matrix is:
+If `W_Q = W_K = W`, the whole score matrix is:
 
 ```
 S = (xW)(xW)ᵀ
 ```
 
-That's **symmetric**. `S[i,j] = S[j,i]`, always.
+Which is **symmetric**: `S[i,j] = S[j,i]`, always. Two problems:
 
-Two problems:
+**Relationships have direction.** In *"The cat sat because it was tired"*, the token **"it"**
+badly needs to look at **"cat"**. "cat" has little reason to look at "it". Symmetric scores
+can't express that.
 
-**1. Relationships are directional.** "it" badly wants to look at "cat". "cat" has little
-reason to look at "it". A symmetric matrix can't express that.
+**Everything would attend to itself.** The diagonal is `S[i,i] = ‖xᵢW‖²` — a squared norm,
+almost always the biggest number in its row. Every token's top match would be itself.
 
-**2. Every token would mostly attend to itself.** The diagonal is `S[i,i] = ‖xᵢW‖²`, a squared
-norm — almost always the biggest number in its row. Attention would collapse to "each token
-looks at itself," which is a very expensive way to do nothing.
-
-Separate `W_Q` and `W_K` break the symmetry. That's what buys directional relationships.
+Separate matrices break the symmetry. That's what buys directional relationships.
 
 ### Why is V separate from K?
 
-Because **how you get found** and **what you deliver** are different jobs.
+Because **being findable** and **being useful** are different jobs.
 
-A token might be a great search target for one reason and carry useful information for a
-totally different reason. Think of a library card catalogue: the index entry ("Physics,
-1687") is not the book.
-
-Tying them would force a token to advertise exactly what it contains. Separating them lets it
-be findable by one property and useful for another.
+Back to the catalogue: a book is indexed by title and author, but that's not what you read.
+Tying `K` and `V` would force every token to advertise exactly what it contains. Splitting
+them lets a token be found for one reason and contribute something else — which is precisely
+what Memory Networks discovered was worth doing.
 
 ---
 
-## For this lesson: you don't build the projections
+## In this lesson you don't build the projections
 
-Important, so you don't go looking for them.
+So you don't go looking for them: in `attention.py`, `q`, `k`, and `v` **arrive as tensors
+already**. Somebody upstream did the `x @ W_Q` part.
 
-In `attention.py`, `q`, `k`, and `v` **arrive as tensors already**. Somebody upstream already
-did the `x @ W_Q` part.
-
-You're implementing the operation that consumes them, nothing more.
-
-The `W_Q`/`W_K`/`W_V` layers show up in **lesson 2**, when we wrap this in multi-head
-attention. Splitting it this way keeps each piece small.
+You implement the operation that consumes them. `W_Q`/`W_K`/`W_V` show up in lesson 2, wrapped
+into multi-head attention.
 
 ---
 
 ## Sanity check
 
-Before moving on, you should be able to say:
+You should be able to say, without looking:
 
-- Q, K, V are three linear projections of the same input (in self-attention)
-- Sharing `W_Q` and `W_K` would make attention symmetric and self-dominated
-- K is the address, V is the payload
-- The database names are a metaphor, not a mechanism
+- A dict lookup with three things relaxed: soft matching, blended retrieval, learned keys
+- **Key = the label you search by. Value = what you receive.** Not the same thing
+- Sharing `W_Q` and `W_K` → symmetric scores → no direction, and self-attention dominates
+- The names came from key-value stores via Memory Networks; the K/V split was deliberate
 
 **→ [4 · The operation](4-the-operation.md)**

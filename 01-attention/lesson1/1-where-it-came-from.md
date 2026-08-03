@@ -44,7 +44,9 @@ two match?** Big number = this is what I was looking for.
 Do that for every (query, key) pair and you get a grid of match scores. Normalize each row to
 sum to 1, and those are your weights.
 
-That's it. Two names for "the thing searching" and "the thing being searched."
+One detail that matters later: in Bahdanau's version the encoder state is used **both** for
+scoring *and* as the thing being averaged. One vector doing two jobs. Splitting those two jobs
+apart is where the third name — *value* — comes from, and that's part 3.
 
 ---
 
