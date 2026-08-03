@@ -133,6 +133,10 @@ subordinate clauses, and paragraphs that restate the previous paragraph.
 - Mark the part that actually matters (`— the one to slow down for`) so attention goes where
   it pays.
 
+**Reading setup.** He works over JetBrains Remote Development, where the Markdown preview
+does not render local images. `render_lesson.py` builds a self-contained HTML per lesson
+(base64 images, single file) — mention it whenever a lesson ships with figures.
+
 **Draw the diagrams.** A mechanism with shapes, a flow, or a failure mode gets a figure, and
 figures are *generated* by a committed `make_figures.py` in the section — matplotlib, no
 external images, no network dependency. Two rules: the diagram must show something the prose
