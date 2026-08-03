@@ -69,6 +69,10 @@ Initiate these — don't wait to be asked.
 - **Structural feedback means rewriting the document whole**, not patching wording. Feedback
   about a lesson applies to **every part of that lesson** — regenerate them all, don't patch
   the one sentence he quoted.
+- **Math is LaTeX (`$$…$$` / `$…$`), never ASCII in a code fence** — GitHub and JetBrains both
+  render it in `.md`, so no `.tex` build step. Every derivation gets a notation table; define
+  each symbol *and its dimensions* where it appears. Never put a magic number where a symbol
+  belongs (`(512,)` when the symbol is $d$) and never name a symbol you don't explain.
 - **Open with the problem, not the answer.** Every part starts from something that doesn't
   work yet: setup → what breaks → what would fix it → the mechanism → what it cost. An
   answer-first opening reads as a definition and gets skimmed. Keep the story arc; don't open

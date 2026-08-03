@@ -1,6 +1,6 @@
 # 1 · The scoring function
 
-*~5 min. Lesson 1, part 1 of 8.*
+*~6 min. Lesson 1, part 1 of 8.*
 
 ## The problem
 
@@ -33,63 +33,97 @@ a replacement for it. **Origin tag: Fix** — named failure, targeted response.)
 
 ---
 
+## Notation
+
+Every symbol used below. Nothing here is assumed.
+
+| Symbol | Type | What it is |
+|---|---|---|
+| $T_x$ | scalar | **source** length. $T_x = 3$ for "the cat sat" |
+| $T_y$ | scalar | **target** length. $T_y = 4$ for "le chat s'assit" |
+| $d$ | scalar | hidden width, same for both RNNs. $d = 512$ in the paper |
+| $h_j$ | $\mathbb{R}^{d}$ | **encoder state** at source position $j$ |
+| $s_{i-1}$ | $\mathbb{R}^{d}$ | **decoder state** just before emitting target word $i$ |
+| $e_{ij}$ | $\mathbb{R}$ | the **score**: how relevant $h_j$ is to $s_{i-1}$ |
+| $\alpha_{ij}$ | $\mathbb{R}$ | the score turned into a weight, $\sum_j \alpha_{ij} = 1$ |
+| $c_i$ | $\mathbb{R}^{d}$ | **context vector** — the blend handed to the decoder |
+
+Two of these are worth spelling out, because "state" is doing a lot of quiet work.
+
+**Encoder state $h_j$.** An RNN reads the source one word at a time, carrying a vector forward
+and updating it at each step. $h_j$ is that vector after reading word $j$ — a $d$-dimensional
+summary of the source, as of position $j$. There are $T_x$ of them, one per source word. In the
+old pipeline only $h_{T_x}$ survived; that discard *is* the bottleneck.
+
+**Decoder state $s_{i-1}$.** The same idea on the output side: a $d$-dimensional vector holding
+everything generated so far. The subscript is $i-1$ because when producing word $i$, the state
+you have is the one left over from word $i-1$. It's the decoder's "where am I in this
+sentence" — and it's what does the asking.
+
+---
+
 ## Where the score is computed
 
-Concretely, with shapes. Translate **"the cat sat"** (3 words) → **"le chat s'assit"**
-(4 words), `d = 512`.
+The encoder runs **once**, producing $T_x$ vectors:
 
-**The encoder runs once,** one vector per source word:
+$$h_1,\; h_2,\; \dots,\; h_{T_x} \qquad h_j \in \mathbb{R}^{d}$$
 
-```
-h₁, h₂, h₃           each (512,)      "the", "cat", "sat"
-```
+The decoder runs **once per output word**. At step $i$ it holds $s_{i-1}$, and before emitting
+anything it does three things.
 
-**The decoder runs one step per output word.** At step `i` it holds state `s_{i-1}`, also
-`(512,)`. Before emitting anything:
+**1 · Score every candidate.** One number per source position:
 
-```
-1.  compare its state against every encoder vector
-      e_i1 = score(s_{i-1}, h₁)     → one number
-      e_i2 = score(s_{i-1}, h₂)     → one number
-      e_i3 = score(s_{i-1}, h₃)     → one number
-    e_i = [e_i1, e_i2, e_i3]          (3,)      ←←← THE SCORES
+$$e_{ij} \;=\; \mathrm{score}\!\left(s_{i-1},\, h_j\right) \;\in\; \mathbb{R}
+\qquad j = 1, \dots, T_x$$
 
-2.  turn them into weights that sum to 1
-    α_i = softmax(e_i)                (3,)      e.g. [0.02, 0.95, 0.03]
+Collect them and you have a vector $e_i \in \mathbb{R}^{T_x}$ — **these are the scores.**
+With $T_x = 3$:
 
-3.  mix the encoder vectors with those weights
-    c_i = α_i1·h₁ + α_i2·h₂ + α_i3·h₃  (512,)   the "context vector"
+$$e_i = \big[\,e_{i1},\; e_{i2},\; e_{i3}\,\big] \qquad \text{shape } (3,)$$
 
-4.  emit French word i using s_{i-1} AND c_i
-```
+**2 · Normalize into weights.** Scores are unbounded reals; you need them to sum to 1 so they
+can act as mixing proportions. That's exactly softmax:
 
-**That's the location.** Inside the consumer's loop, recomputed every step, once per candidate.
-Step `i` produces a fresh `(3,)` score vector; four output words give four of them — a `(4, 3)`
-table over the sentence.
+$$\alpha_{ij} \;=\; \frac{\exp(e_{ij})}{\sum_{k=1}^{T_x} \exp(e_{ik})}
+\qquad\Longrightarrow\qquad \sum_{j=1}^{T_x} \alpha_{ij} = 1$$
 
-`α_i = [0.02, 0.95, 0.03]` reads as: *while producing this French word, 95% of my attention is
-on "cat".*
+The denominator sums over **all** source positions, which is what forces the row to total 1.
+Concretely $\alpha_i = [0.02,\ 0.95,\ 0.03]$ — *while producing this French word, 95% of my
+attention is on "cat".*
 
-Watch what happens to the scores: built → softmaxed → used to mix → **dropped**. Never stored.
-That stays true in the transformer, and part 3 puts these same three steps inside a modern
-block.
+**3 · Blend.** Weighted sum of the encoder states, back in $\mathbb{R}^{d}$:
+
+$$c_i \;=\; \sum_{j=1}^{T_x} \alpha_{ij}\, h_j \;\in\; \mathbb{R}^{d}$$
+
+Then the decoder emits word $i$ from $s_{i-1}$ **and** $c_i$, instead of from one frozen vector.
+
+### So where is it, exactly
+
+Inside the decoder loop, recomputed at every step, once per source position. Step $i$ builds a
+fresh $e_i$ of shape $(T_x,)$; over the whole sentence that's $T_y$ of them — a
+$T_y \times T_x = 4 \times 3$ table.
+
+And watch its lifetime: built → softmaxed into $\alpha$ → used to weight the $h_j$ → **dropped**.
+Scores are never stored. That stays true in the transformer; part 3 puts these same three steps
+inside a modern block.
 
 ---
 
 ## Query and key
 
-Two names for the two sides of the comparison.
+Two names for the two sides of $\mathrm{score}(\cdot,\cdot)$.
 
 **Query** — what the thing doing the looking is after.
-Here: `s_{i-1}`, the decoder state. *"I'm about to emit a French word, what do I need?"*
+Here $s_{i-1}$. *"I'm about to emit a French word, what do I need?"*
 
 **Key** — what a thing being looked at advertises about itself.
-Here: each `h_j`. *"I'm the word 'cat', position 2."*
+Here each $h_j$. *"I'm the word 'cat', position 2."*
 
-One query + one key → the scoring function → one number.
+One query, one key, one number out.
 
-Notice `h_j` is doing **two jobs**: it's what gets scored against, *and* it's what gets
-averaged. Splitting those jobs apart produces the third name — *value* — in part 4.
+Now notice: $h_j$ appears **twice** — once inside $\mathrm{score}$ (step 1) and once in the
+weighted sum (step 3). One vector, two jobs: *how you get found* and *what you contribute*.
+Splitting those apart produces the third name, **value**, in part 4.
 
 ---
 
@@ -99,26 +133,21 @@ A real design choice, and the winner won for a reason worth internalizing.
 
 ### Additive — a small neural network
 
-```
-score(q, k) = vᵀ tanh(W[q; k])
-```
+$$\mathrm{score}(q, k) \;=\; v^{\top} \tanh\!\big(W\,[\,q;\,k\,]\big)$$
 
-| Piece | What it does |
-|---|---|
-| `[q; k]` | glue the two vectors end to end — 512 + 512 = length 1024 |
-| `W` | a **learned** matrix; multiply to get a hidden vector |
-| `tanh` | squash it |
-| `vᵀ` | a **learned** vector; dot it down to a single number |
+| Piece | Type | What it does |
+|---|---|---|
+| $[\,q;\,k\,]$ | $\mathbb{R}^{2d}$ | concatenate — stack the two vectors into one of length $2d$ |
+| $W$ | $\mathbb{R}^{d_a \times 2d}$ | **learned** matrix → a hidden vector of size $d_a$ |
+| $\tanh$ | — | elementwise squash |
+| $v^{\top}$ | $\mathbb{R}^{d_a}$ | **learned** vector; dot it down to one number |
 
-A one-hidden-layer MLP eating a (query, key) pair. It has its own learned parameters and runs
-**once per pair** — 4 output words × 3 source words = 12 tiny forward passes for this one
-short sentence.
+A one-hidden-layer MLP eating a (query, key) pair. It has its own parameters $W$ and $v$, and
+it runs **once per pair** — $T_y \times T_x = 12$ tiny forward passes for this short sentence.
 
 ### Multiplicative — just a dot product
 
-```
-score(q, k) = qᵀk        # multiply elementwise, add it up. one number.
-```
+$$\mathrm{score}(q, k) \;=\; q^{\top} k \;=\; \sum_{m=1}^{d} q_m k_m$$
 
 No parameters. No hidden layer. A dot product is large when two vectors point the same way,
 which is already the "do these match?" question.
@@ -127,17 +156,22 @@ which is already the "do these match?" question.
 
 It scored about as well and is **much** faster — but not for the reason usually given.
 
-Those 12 dot products aren't 12 operations. Stack the queries into a matrix, stack the keys
-into a matrix, and **one matmul produces the entire `(4, 3)` score table at once**. The
-additive version can't collapse that way: its nonlinearity sits *between* the two vectors.
+Those 12 dot products aren't 12 operations. Stack the queries as rows of
+$Q \in \mathbb{R}^{T_y \times d}$ and the keys as rows of $K \in \mathbb{R}^{T_x \times d}$,
+and the entire score table is **one matmul**:
 
-Matmul is the operation GPUs are built for. So the technique that won is the one that maps
-onto the hardware — **not** the one with more expressive power.
+$$E \;=\; Q K^{\top} \;\in\; \mathbb{R}^{T_y \times T_x}
+\qquad\text{where } E_{ij} = e_{ij}$$
+
+The additive version can't collapse that way — its $\tanh$ sits *between* the two vectors, so
+there's no matrix product to factor out.
+
+Matmul is the operation GPUs are built for. **The technique that won is the one that maps onto
+the hardware, not the one with more expressive power.**
 
 *(Luong et al., 2015. **Origin tag: Empirical / efficiency** — this was not fixing a failure.)*
 
-**This pattern decides a lot of this roadmap.** FlashAttention, GQA, and MoE all win the same
-way. Recognizing it is worth more than any single one of them.
+This pattern decides a lot of this roadmap. FlashAttention, GQA, and MoE all win the same way.
 
 ---
 
@@ -150,14 +184,14 @@ But the RNN had quietly been doing three other jobs, and all three needed replac
 
 | Removing the RNN broke | Patched with | Covered in |
 |---|---|---|
-| Score scale blows up with dimension | `1/√d` scaling | part 6 |
+| Score scale grows with $d$ | $1/\sqrt{d}$ scaling | part 6 |
 | One attention pattern isn't enough | multi-head | lesson 2 |
-| No sense of word order at all | positional encoding | lesson 5 |
+| No notion of word order at all | positional encoding | lesson 5 |
 
 The honest framing of the transformer: **not three good ideas, but one idea and three repairs
 it forced.**
 
-It also moves where scores live. No decoder loop any more — every position computes its scores
+It also moves where scores live. No decoder loop any more — every position scores every other
 simultaneously, in one matmul, inside every block. **Part 3 traces exactly where.**
 
 ---

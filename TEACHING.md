@@ -104,6 +104,30 @@ point it appears. Dropping `score(q,k) = vᵀ tanh(W[q;k])` as an aside teaches 
 that `[q;k]` is concatenation, `W` and `v` are learned, and the whole thing is a one-hidden-
 layer MLP run once per pair. If a formula isn't worth explaining, it isn't worth showing.
 
+### Math is LaTeX. Every symbol is defined.
+
+**Formulas go in `$$…$$` blocks and `$…$` inline — never ASCII art in a code fence.** GitHub
+and the JetBrains Markdown preview both render LaTeX in `.md`, so this costs nothing and no
+`.tex` build step is needed. Code fences are for *code*; `e_i1 = score(s_{i-1}, h₁)` in a fence
+is neither.
+
+**Define every symbol where the formula appears, dimensions included.** A derivation gets a
+notation table first — symbol, type, meaning:
+
+| $h_j$ | $\mathbb{R}^{d}$ | encoder state at source position $j$ |
+
+Two failure modes, both real, both caught in lesson 1:
+
+- **A named-but-undefined symbol.** Writing "at step $i$ it holds state $s_{i-1}$" and never
+  saying what an RNN state *is* or what it contains. If a symbol carries meaning, spend the
+  two lines.
+- **Magic numbers inside formulas.** `(512,)` in a formula where the symbol is $d$. Use the
+  symbol in the math, and state the concrete value beside it — "$d = 512$ in the paper". Then
+  worked examples can plug in real numbers without the algebra becoming instance-specific.
+
+Also spell out what a formula's parts *do*: which factor forces the rows to sum to 1, what the
+summation index ranges over, which pieces are learned.
+
 ### Open with the problem, not the answer
 
 **Every part starts from something that doesn't work yet.** Show the broken thing, let it
