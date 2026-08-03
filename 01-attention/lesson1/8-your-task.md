@@ -1,6 +1,6 @@
-# 6 · Your task
+# 8 · Your task
 
-*~3 min to read, ~45 min to do. Lesson 1, part 7 of 7.*
+*~3 min to read, ~45 min to do. Lesson 1, part 8 of 8.*
 
 Implement three functions in `01-attention/attention.py`. Signatures and shapes are already
 there. Bodies are yours.

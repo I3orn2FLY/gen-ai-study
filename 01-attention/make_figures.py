@@ -258,6 +258,74 @@ def fig_heatmap():
 
 
 # ---------------------------------------------------------------- part 5
+def fig_shape_trace():
+    fig, ax = blank((11, 5.6))
+    ax.set_xlim(0, 11); ax.set_ylim(0, 5.6)
+    ax.text(0.1, 5.35, '"the cat sat" → "le chat s\'assit"   ·   where the score matrix appears',
+            fontsize=12, weight="bold")
+
+    # encoder column
+    ax.text(1.5, 4.85, "ENCODER (source, 3 tokens)", ha="center", fontsize=9.5,
+            weight="bold", color=GREEN)
+    enc = [("source ids", "(3,)"), ("embedding", "(3, 512)"), ("encoder stack", "H  (3, 512)")]
+    for i, (lab, shp) in enumerate(enc):
+        y = 4.25 - i * 0.72
+        box(ax, 0.35, y, 2.3, 0.5, lab, fc="#f0fdf4", ec=GREEN, fs=9)
+        ax.text(2.75, y + 0.25, shp, fontsize=8.5, va="center", color=MUTED, family="monospace")
+        if i < 2:
+            arrow(ax, 1.5, y, 1.5, y - 0.22, color=GREEN)
+
+    # decoder column
+    ax.text(8.9, 4.85, "DECODER (target, 4 tokens)", ha="center", fontsize=9.5,
+            weight="bold", color=BLUE)
+    dec = [("target ids", "(4,)"), ("embedding + self-attn", "D  (4, 512)")]
+    for i, (lab, shp) in enumerate(dec):
+        y = 4.25 - i * 0.72
+        box(ax, 7.75, y, 2.3, 0.5, lab, fc="#eff6ff", ec=BLUE, fs=9)
+        ax.text(10.15, y + 0.25, shp, fontsize=8.5, va="center", color=MUTED,
+                family="monospace")
+        if i < 1:
+            arrow(ax, 8.9, y, 8.9, y - 0.22, color=BLUE)
+
+    # projections
+    for x, lab, src, c, fc in ((3.55, "$K = H\\,W_K$", "(3, 64)", GREEN, "#f0fdf4"),
+                               (5.15, "$V = H\\,W_V$", "(3, 64)", GREEN, "#f0fdf4"),
+                               (6.9,  "$Q = D\\,W_Q$", "(4, 64)", BLUE, "#eff6ff")):
+        box(ax, x, 2.45, 1.35, 0.5, lab, fc=fc, ec=c, fs=9.5)
+        ax.text(x + 0.68, 2.28, src, ha="center", fontsize=8.5, color=MUTED,
+                family="monospace")
+    arrow(ax, 2.65, 2.85, 3.5, 2.75, color=GREEN)
+    ax.annotate("", xy=(5.5, 2.4), xytext=(2.0, 2.5),
+                arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=1.4,
+                                connectionstyle="arc3,rad=0.25"))
+    arrow(ax, 8.9, 3.53, 7.65, 2.98, color=BLUE)
+
+    # the score matrix
+    box(ax, 3.9, 1.15, 2.6, 0.62, "scores $= QK^\\top$", fc="#fee2e2", ec=RED, fs=11,
+        weight="bold")
+    ax.text(5.2, 0.93, "(4, 3)   ← 4 queries × 3 keys", ha="center", fontsize=9.5,
+            weight="bold", color=RED, family="monospace")
+    arrow(ax, 4.2, 2.45, 4.6, 1.79, color=RED, lw=1.6)
+    arrow(ax, 7.4, 2.45, 6.2, 1.79, color=RED, lw=1.6)
+
+    ax.text(0.35, 1.46, "the one\nyou asked about", fontsize=9.5, color=RED, weight="bold",
+            style="italic", ha="left", va="center")
+
+    box(ax, 7.1, 1.15, 2.9, 0.62, "softmax(·/$\\sqrt{64}$) @ $V$", fc="#fff7ed", ec=ORANGE,
+        fs=9.5)
+    ax.text(8.55, 0.93, "(4, 64) → ... → (4, 12000)", ha="center", fontsize=8.5, color=MUTED,
+            family="monospace")
+    arrow(ax, 6.5, 1.46, 7.05, 1.46, color=ORANGE, lw=1.6)
+    ax.annotate("", xy=(8.6, 1.79), xytext=(5.9, 2.42),
+                arrowprops=dict(arrowstyle="-|>", color=ORANGE, lw=1.0, ls=":",
+                                connectionstyle="arc3,rad=-0.3"))
+
+    ax.text(5.5, 0.35, "self-attention: Q, K, V all from one side → square.   "
+            "cross-attention: Q from the other side → rectangular.",
+            ha="center", fontsize=9.5, color=INK, style="italic")
+    save(fig, "fig10-shape-trace.png")
+
+
 def fig_saturation():
     torch.manual_seed(0)
     L = 24
@@ -299,7 +367,7 @@ def fig_softmax_jacobian():
 if __name__ == "__main__":
     print("writing figures to", OUT)
     for fn in (fig_bottleneck, fig_path_length, fig_dict_to_attention, fig_qkv,
-               fig_symmetry, fig_three_steps, fig_heatmap, fig_saturation,
-               fig_softmax_jacobian):
+               fig_symmetry, fig_three_steps, fig_heatmap, fig_shape_trace,
+               fig_saturation, fig_softmax_jacobian):
         fn()
     print("done")

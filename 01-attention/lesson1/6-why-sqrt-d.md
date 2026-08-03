@@ -1,6 +1,6 @@
-# 4 · Why √d
+# 6 · Why √d
 
-*~6 min — the one to actually slow down for. Lesson 1, part 5 of 7.*
+*~6 min — the one to actually slow down for. Lesson 1, part 6 of 8.*
 
 This is the whiteboard question. Interviewers love it because the derivation is short and you
 either followed it or you memorized it.
@@ -144,4 +144,4 @@ something.
 Also worth knowing: Vaswani's footnote 4 says they *hypothesized* saturation was the cause. It
 was a reasoned guess that worked, not a proof. It held up.
 
-**→ [6 · The PyTorch you need](6-pytorch-you-need.md)**
+**→ [7 · The PyTorch you need](7-pytorch-you-need.md)**

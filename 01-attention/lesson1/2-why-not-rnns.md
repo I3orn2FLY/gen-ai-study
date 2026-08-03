@@ -1,6 +1,6 @@
 # 2 · Why not RNNs
 
-*~4 min. Lesson 1, part 2 of 7.*
+*~4 min. Lesson 1, part 2 of 8.*
 
 We never build an RNN in this roadmap. Here's the argument for skipping them.
 

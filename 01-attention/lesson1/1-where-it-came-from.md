@@ -1,6 +1,6 @@
 # 1 · Where attention came from
 
-*~3 min. Lesson 1, part 1 of 7.*
+*~3 min. Lesson 1, part 1 of 8.*
 
 Most people say "attention replaced RNNs." That's backwards. Attention was invented **inside**
 an RNN, three years before the transformer.
@@ -106,7 +106,7 @@ to be rebuilt:
 
 | Removing the RNN broke | Patched with | Covered in |
 |---|---|---|
-| Logit scale blows up with dimension | `1/√d` scaling | part 5 |
+| Logit scale blows up with dimension | `1/√d` scaling | part 6 |
 | One attention pattern isn't enough | multi-head | lesson 2 |
 | No sense of word order at all | positional encoding | lesson 5 |
 

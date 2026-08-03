@@ -2,7 +2,7 @@
 
 *Roadmap Phase 1, steps 1–2 · ~2 hours total · runs on CPU*
 
-Seven short parts. Read in order.
+Eight short parts. Read in order.
 
 | # | Part | Time |
 |---|---|---|
@@ -10,11 +10,12 @@ Seven short parts. Read in order.
 | 2 | [Why not RNNs](2-why-not-rnns.md) | ~4 min |
 | 3 | [**Query, key, value**](3-query-key-value.md) — a dict lookup with three things relaxed | ~7 min |
 | 4 | [The operation](4-the-operation.md) | ~4 min |
-| 5 | [**Why √d**](5-why-sqrt-d.md) — the one that matters | ~6 min |
-| 6 | [The PyTorch you need](6-pytorch-you-need.md) | ~4 min |
-| 7 | [Your task](7-your-task.md) | ~45 min doing |
+| 5 | [Where the scores actually live](5-where-scores-live.md) — real shapes, end to end | ~6 min |
+| 6 | [**Why √d**](6-why-sqrt-d.md) — the one that matters | ~6 min |
+| 7 | [The PyTorch you need](7-pytorch-you-need.md) | ~4 min |
+| 8 | [Your task](8-your-task.md) | ~45 min doing |
 
-~28 min reading, then you write code. Terms get defined where they appear — no part assumes
+~34 min reading, then you write code. Terms get defined where they appear — no part assumes
 you remember jargon from another one.
 
 ---
@@ -51,15 +52,17 @@ python 01-attention/check_lesson1.py
 1. **Why are Q and K separate matrices?** Sharing them makes the score matrix symmetric —
    relationships would lose direction — and the diagonal `‖xW‖²` would dominate every row, so
    every token would mostly attend to itself.
-2. **Why is there a √d in attention?** Variance of a `d`-term dot product is `d` → unscaled
+2. **Self-attention vs cross-attention?** Same operation; only where Q, K, V come from
+   changes. Self → square score matrix, cross → rectangular `(T_q, T_k)`.
+3. **Why is there a √d in attention?** Variance of a `d`-term dot product is `d` → unscaled
    logits saturate softmax → saturated softmax has ~zero Jacobian → no gradient to `W_Q`/`W_K`,
    at init.
-3. **`d_model` or `d_head`?** `d_head`. The dot product lives inside one head.
-4. **What if you divided by `d`?** Attention goes uniform. Gradients survive, selectivity dies.
-5. **Why did transformers beat RNNs?** Parallelism first — `O(1)` vs `O(n)` sequential steps.
+4. **`d_model` or `d_head`?** `d_head`. The dot product lives inside one head.
+5. **What if you divided by `d`?** Attention goes uniform. Gradients survive, selectivity dies.
+6. **Why did transformers beat RNNs?** Parallelism first — `O(1)` vs `O(n)` sequential steps.
    Path length second. And attention is *more* expensive in FLOPs past `n ≈ d`; saying it's
    "more efficient" is wrong.
-6. **Does √d solve softmax saturation?** No — at init only. Logits drift up during training,
+7. **Does √d solve softmax saturation?** No — at init only. Logits drift up during training,
    which is what QK-norm and logit soft-capping are for.
 
 ---

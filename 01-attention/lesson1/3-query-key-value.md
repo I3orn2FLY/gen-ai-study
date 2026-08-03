@@ -1,6 +1,6 @@
 # 3 · Query, key, value
 
-*~7 min — the names, properly. Lesson 1, part 3 of 7.*
+*~7 min — the names, properly. Lesson 1, part 3 of 8.*
 
 The names come from **key-value stores** — dictionaries, hash maps, databases. Not loosely.
 Attention is a dictionary lookup with three specific things relaxed, and if you follow which

@@ -1,6 +1,6 @@
 # 4 · The operation
 
-*~4 min. Lesson 1, part 4 of 7.*
+*~4 min. Lesson 1, part 4 of 8.*
 
 The whole thing:
 
@@ -93,4 +93,4 @@ Your implementation shouldn't assume either is square.
 
 Next: the one part of that formula that isn't obvious.
 
-**→ [5 · Why √d](5-why-sqrt-d.md)**
+**→ [5 · Where the scores actually live](5-where-scores-live.md)**
