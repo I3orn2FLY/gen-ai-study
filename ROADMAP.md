@@ -32,7 +32,7 @@ Three structural defenses, and they are the most important part of this document
 2. **Grounded in published curricula** (§9), not invention. Coverage is cross-mapped against
    Stanford CS236, Stanford CS336, MIT 6.S184, and others, so gaps are checkable against an
    external standard rather than trusted.
-3. **Gap audits** (§10). At each part boundary, Claude generates interview questions spanning
+3. **Gap audits** (§10). At each block boundary, Claude generates interview questions spanning
    the *entire field at that level* — deliberately including topics not yet covered — grades
    the answers, and produces a written gap list. This is the mechanism for finding unknown
    unknowns. It is not optional.
@@ -187,7 +187,7 @@ Independent of disk size — this is about run hygiene, not scarcity:
 ### Constant regardless of machine
 
 - **Single-GPU-first by default.** Multi-GPU is Phase 11's *subject*; reach for it there and
-  where a heavy phase genuinely benefits, not as an ambient assumption in every part.
+  where a heavy phase genuinely benefits, not as an ambient assumption in every lesson.
 - **Checkpoint and resume is mandatory** for anything long. These GPUs are shared and runs get
   preempted.
 - Where a phase is capped by hardware, it says so rather than pretending otherwise.
@@ -209,10 +209,11 @@ requirements.txt        grows section by section
 
 01-attention/
   README.md             overview; interview writeup added when the section closes
-  part1-scaled-dot-product.md
-  part2-multi-head.md
+  lesson1/              one sitting; short parts inside (TEACHING.md)
+    README.md  1-where-it-came-from.md  2-why-not-rnns.md  ...
+  lesson2/
   attention.py          his implementation
-  train.py              Claude's boilerplate
+  check_lesson1.py      Claude's boilerplate — one per lesson
   experiments/          runs: config, logs, results, failures
 
 02-decoder-lm/
@@ -251,7 +252,7 @@ scale — first at Phase 8's reality gate.
 
 ## 6. The Build track
 
-Seventeen phases in six parts. Ordered by dependency, not by time.
+Seventeen phases in six blocks. Ordered by dependency, not by time.
 
 Most phases open with the pressure that created them and the mechanism answering it. Where
 that framing would be dishonest — transferred in, discovered independently, unified after the
@@ -279,12 +280,13 @@ can be run compressed if time is short. **Phase 3** (inference) is Tier 2 only b
 isn't a prerequisite for anything visual; by interview frequency alone it would be Tier 1, so
 don't defer it indefinitely.
 
-Pace: a **part** is 1–3 hours, a **section** is 4–8 parts. See `TEACHING.md` for the scope
+Pace: a **lesson** is 1–3 hours and splits into short **parts**; a **section** is 4–8
+lessons. See `TEACHING.md` for the scope
 discipline that keeps it there — the 30-minute training-run rule especially.
 
 ---
 
-## Part I — Language foundations
+## Block I — Language foundations
 
 *Front-loaded deliberately. The transformer is the shared substrate: the DiT, the CLIP text
 encoder, the video backbone, and the VLM are all this same block under different conditioning.
@@ -396,7 +398,7 @@ with measured tokens/sec against a naive baseline.
 
 ---
 
-## Part II — Bridging to vision
+## Block II — Bridging to vision
 
 ---
 
@@ -486,7 +488,7 @@ it returns as Chameleon/Janus in Phase 16.
 
 ---
 
-## Part III — Diffusion
+## Block III — Diffusion
 
 ---
 
@@ -597,7 +599,7 @@ grid. When you can explain every cell of that table, you understand diffusion.
 
 ---
 
-## Part IV — Engineering
+## Block IV — Engineering
 
 ---
 
@@ -669,7 +671,7 @@ the Phase 7 baseline.
 
 ---
 
-## Part V — Video
+## Block V — Video
 
 ---
 
@@ -718,7 +720,7 @@ of exactly where the hardware ceiling bound you and what you'd change with more.
 
 ---
 
-## Part VI — Convergence
+## Block VI — Convergence
 
 ---
 
@@ -860,7 +862,7 @@ external material for topics this roadmap missed**, and add them.
 
 **The defense against unknown unknowns. Do not skip these.**
 
-At each part boundary — after Phases 3, 6, 10, 13, 15, 17 — Claude runs an audit:
+At each block boundary — after Phases 3, 6, 10, 13, 15, 17 — Claude runs an audit:
 
 1. Generates **20–30 interview questions** spanning the whole field at that level,
    deliberately including topics *outside* what has been built, drawn from §9's curricula and
@@ -910,7 +912,7 @@ Current state, checkpoints, and next action live in **`PROGRESS.md`**.
 Two responsibilities that belong to Claude rather than Kenessary, because they are precisely
 what he cannot yet see:
 
-- **Gap audits** (§10) at part boundaries. Initiate them.
+- **Gap audits** (§10) at block boundaries. Initiate them.
 - **External curriculum checks** (§9) when starting a section — read the corresponding CS236 /
   CS336 / 6.S184 material for topics this roadmap missed, and say what's missing.
 

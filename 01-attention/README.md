@@ -1,19 +1,20 @@
 # Section 01 — Attention and the transformer
 
-**Roadmap:** Phase 1 · **Tier 1 (Core)** · 8 parts
+**Roadmap:** Phase 1 · **Tier 1 (Core)** · 8 lessons
 
-The transformer is the shared substrate for everything downstream: the DiT in Phase 10, the
-CLIP text encoder in Phase 4, the video backbone in Phase 15, and the VLM in Phase 16 are all
-this same block under different conditioning. Building it once here means Phase 10 is a
-reparameterization rather than a new architecture.
+Everything downstream is this same block wearing a different hat: the DiT in Phase 10, the
+CLIP text encoder in Phase 4, the video backbone in Phase 15, the VLM in Phase 16. Build it
+properly once here and Phase 10 becomes a reparameterization instead of a new architecture.
 
-It is also the densest interview material in the field.
+It's also the densest interview material in the field.
 
-## Parts
+## Lessons
 
-| # | Part | Status |
+Each lesson is one sitting (~1–3h), split into short parts you can read one at a time.
+
+| # | Lesson | Status |
 |---|---|---|
-| 1 | [Scaled dot-product attention](part1-scaled-dot-product.md) — the operation, the √d derivation, why not recurrence | in progress |
+| 1 | [Scaled dot-product attention](lesson1/) — the operation, the √d derivation, why not RNNs | **ready** |
 | 2 | Multi-head attention | not written |
 | 3 | Causal masking and the AR factorization | not written |
 | 4 | The block: residual stream, MLP, LayerNorm | not written |
@@ -22,19 +23,20 @@ It is also the densest interview material in the field.
 | 7 | Complexity and the memory-bandwidth view | not written |
 | 8 | Train a GPT-2-style model on TinyShakespeare | not written |
 
-Parts are written one at a time (`TEACHING.md`) — how part N goes determines part N+1.
+Lessons get written one at a time (`TEACHING.md`) — how lesson N goes decides lesson N+1.
 
 ## Files
 
 ```
+lesson1/           the lesson, in 6 short parts
 attention.py       implementations (Kenessary)
-check_part1.py     correctness checks + scaling ablation (boilerplate)
+check_lesson1.py   checks + ablation (boilerplate)
 experiments/       run outputs — plots and notes, tracked
 ```
 
-Run: `python 01-attention/check_part1.py`
+Run: `python 01-attention/check_lesson1.py`
 
-Everything in this section runs on CPU in seconds; no GPU needed until part 8.
+Everything here runs on CPU in seconds. No GPU needed until lesson 8.
 
 ## Added to requirements
 
@@ -42,4 +44,4 @@ Everything in this section runs on CPU in seconds; no GPU needed until part 8.
 
 ## Interview writeup
 
-*Added at the end of the section (`TEACHING.md` stage 9).*
+*Added when the section closes (`TEACHING.md` stage 9).*

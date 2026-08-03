@@ -1,12 +1,12 @@
-"""Checks and ablation for Section 01, part 1.
+"""Checks and ablation for Section 01, lesson 1.
 
 Boilerplate — this is plumbing, not the mechanism. Run it after implementing
 `attention.py`:
 
-    python 01-attention/check_part1.py
+    python 01-attention/check_lesson1.py
 
 Five correctness checks, then the scaling ablation, which writes
-`01-attention/experiments/part1_scaling.png`.
+`01-attention/experiments/lesson1_scaling.png`.
 """
 
 from __future__ import annotations
@@ -55,7 +55,7 @@ def check_matches_reference() -> None:
 
     # Random bool mask, kept row-wise non-empty so both implementations agree.
     # (A fully masked row is NaN in a naive impl and 0.0 in torch's fused kernel
-    #  — a real divergence, not a bug in your code. See part1 §2.)
+    #  — a real divergence, not a bug in your code. See lesson1 part 5.)
     mask = torch.rand(B, H, L, L) > 0.3
     mask[..., 0] = True
     out, _ = scaled_dot_product_attention(q, k, v, attn_mask=mask)
@@ -209,7 +209,7 @@ def ablation() -> None:
             _, attn = scaled_dot_product_attention(qq, k, v)
             # Trace of the softmax Jacobian, Σ_j p_j(1 - p_j), averaged over rows.
             # Uniform over L keys -> 1 - 1/L ~= 1.  One-hot -> 0.  This is exactly
-            # the quantity part1 §1.4 argues vanishes, and unlike a `max` it is not
+            # the quantity lesson1 part 4 argues vanishes, and unlike a `max` it is not
             # rescued by one lucky row somewhere in the batch.
             row[label] = (
                 attention_entropy(attn).mean().item(),
@@ -259,16 +259,16 @@ def ablation() -> None:
     ax2.legend(fontsize=8)
     ax2.grid(alpha=0.3)
 
-    fig.suptitle("Part 1 ablation — why the $1/\\sqrt{d_k}$", y=1.0)
+    fig.suptitle("Lesson 1 ablation — why the $1/\\sqrt{d_k}$", y=1.0)
     fig.tight_layout()
-    path = OUT_DIR / "part1_scaling.png"
+    path = OUT_DIR / "lesson1_scaling.png"
     fig.savefig(path, dpi=130, bbox_inches="tight")
     print(f"\nWrote {path}")
 
 
 def main() -> None:
     print("=" * 74)
-    print("Section 01 · Part 1 — scaled dot-product attention")
+    print("Section 01 · Lesson 1 — scaled dot-product attention")
     print("=" * 74)
     for fn in (check_matches_reference, check_rows_sum_to_one, check_causality_semantic,
                check_broadcasting, check_entropy):

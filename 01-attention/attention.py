@@ -1,10 +1,10 @@
 """Scaled dot-product attention, from scratch.
 
-Section 01, part 1. See `part1-scaled-dot-product.md`.
+Section 01, lesson 1. See `lesson1/`.
 
 Implement the three functions below. Do not import
 `torch.nn.functional.scaled_dot_product_attention` here — it is the reference
-`check_part1.py` compares against.
+`check_lesson1.py` compares against.
 """
 
 from __future__ import annotations

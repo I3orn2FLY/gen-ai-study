@@ -2,9 +2,10 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** Section 01, part 1 — **Kenessary implements `01-attention/attention.py`**
-(`causal_mask`, `scaled_dot_product_attention`, `attention_entropy`), then
-`python 01-attention/check_part1.py`. Theory, primitives, and task are written.
+**Next action:** Section 01, lesson 1 — read `01-attention/lesson1/` (6 short parts, ~20 min),
+then **implement `01-attention/attention.py`** (`causal_mask`,
+`scaled_dot_product_attention`, `attention_entropy`) and run
+`python 01-attention/check_lesson1.py`.
 
 ---
 
@@ -29,7 +30,7 @@ Tiers are stopping points, not skip lists — work in dependency order. See `ROA
 
 ### Tier 1 — Core (interview-capable at the end of this)
 
-| # | Section | Status | Parts | Checkpoints |
+| # | Section | Status | Lessons | Checkpoints |
 |---|---|---|---|---|
 | 01 | Attention and the transformer | **in progress** | 0 / 8 | — |
 | 02 | The modern decoder LM | not started | 0 / 13 | — |
@@ -43,7 +44,7 @@ Tiers are stopping points, not skip lists — work in dependency order. See `ROA
 
 ### Tier 2 — Competitive
 
-| # | Section | Status | Parts |
+| # | Section | Status | Lessons |
 |---|---|---|---|
 | 03 | Inference: making it run | not started | 0 / 7 |
 | 10 | Diffusion transformers | not started | 0 / 6 |
@@ -51,7 +52,7 @@ Tiers are stopping points, not skip lists — work in dependency order. See `ROA
 
 ### Tier 3 — Differentiating
 
-| # | Section | Status | Parts |
+| # | Section | Status | Lessons |
 |---|---|---|---|
 | 11 | Scale engineering | not started | 0 / 9 |
 | 13 | Fast sampling and distillation | not started | 0 / 5 |
@@ -63,7 +64,7 @@ Tiers are stopping points, not skip lists — work in dependency order. See `ROA
 
 ## Gap audits
 
-Claude initiates these at part boundaries (`ROADMAP.md` §10). A blank is information.
+Claude initiates these at block boundaries (`ROADMAP.md` §10). A blank is information.
 
 | After phase | Status | Result |
 |---|---|---|
@@ -123,4 +124,5 @@ that never changes is one nobody is checking.
 |---|---|---|
 | 2026-07-29 | Initial version | — |
 | 2026-08-03 | §4 rewritten: design for the current machine, adjust if it changes — replaces the "design against an 8 GB floor" framing that was shrinking every phase in advance | Kenessary: the heavy phases belong on this box |
+| 2026-08-03 | Vocabulary: **section → lesson → part**. Roman-numeral groupings renamed Block I–VI to stop the collision. Lessons are directories of 3–6 min parts | Kenessary: docs too long/dense to actually read |
 | 2026-08-03 | §4 bf16 detection corrected — `is_bf16_supported()` reports True on Turing via emulation; must pass `including_emulation=False` | Found by running the check on the actual machine |

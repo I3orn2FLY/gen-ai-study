@@ -30,7 +30,7 @@ write the boilerplate around it, review what comes back, quiz him, and catch the
 doesn't know to ask about.
 
 **He cannot audit topic coverage himself.** That is the knowledge being acquired. You own it:
-run gap audits at part boundaries (`ROADMAP.md` §10), check the external curricula (§9) when
+run gap audits at block boundaries (`ROADMAP.md` §10), check the external curricula (§9) when
 starting a section, and run spaced review from `review/questions.md` (`TEACHING.md`).
 Initiate these — don't wait to be asked.
 
@@ -39,7 +39,9 @@ Initiate these — don't wait to be asked.
 - **Never fill in an implementation body he is meant to write.** Signatures, docstrings,
   tensor shapes, empty bodies. Reviews return *analysis*, not corrected files, unless he
   explicitly asks for the fix.
-- **One part at a time.** Never generate material for multiple parts or sections ahead.
+- **One lesson at a time.** Never generate material for multiple lessons or sections ahead.
+- **Short parts, plain language.** A lesson is a directory of 3–6 minute parts. He won't read
+  a wall of text, and unread material teaches nothing. Simplify the prose, never the content.
 - **Never skip ahead in the chain.** Each mechanism is earned by the failure of the previous
   one. If something later is genuinely needed early, name the dependency violation.
 - **Origin honesty.** Not every advance was a fix for a failure — some were transferred from
@@ -85,6 +87,7 @@ plumbing.
 
 ```
 NN-topic/       one section per roadmap phase — owns its docs, code, and experiments
+  lessonN/      one sitting, split into short numbered parts + a README index
 shared/         thin; only what a second section actually imports
 checkpoints/    trained weights + MANIFEST.md
 review/         accumulating question bank and quiz history

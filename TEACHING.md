@@ -27,20 +27,41 @@ generative-modeling vocabulary — ELBO, score, CFG, and SNR all need introducin
 
 ## The unit of work
 
-One **part** = one sitting = one `.md` file. A part is the right size when it has a single
-mechanism to implement and one clear "it works" signal.
+Three levels. A **lesson** is the sit-down unit; **parts** are how it's chopped up for reading.
 
 | Unit | Size | Reality |
 |---|---|---|
-| **Part** | **1–3 hours** | One mechanism, implemented and run. The sit-down unit. |
-| **Section** | 4–8 parts | One Roadmap phase. Several sessions, not one. |
+| **Part** | **3–6 min read** | One idea, one `.md` file. Short on purpose — see below. |
+| **Lesson** | **1–3 hours** | One mechanism, implemented and run. A directory of 4–7 parts. |
+| **Section** | 4–8 lessons | One Roadmap phase. Several sessions, not one. |
 | **Tier 1** | 8 sections | Interview-capable. See `ROADMAP.md` §6. |
 
-Never run ahead. Generate part N, then stop. Part N+1 is written after N is done, because how
-N went should change N+1.
+```
+01-attention/            section  = roadmap phase
+  lesson1/               lesson   = one sitting
+    1-where-it-came-from.md    part = one idea, one screen
+    2-why-not-rnns.md
+    ...
+    README.md            index + the one-paragraph summary + interview questions
+  attention.py           his code (shared across the section's lessons)
+  check_lesson1.py       boilerplate, one per lesson
+```
 
-**If a part is running past ~3 hours, it was scoped wrong.** Split it. That's a Claude
-failure, not a Kenessary one, and the next part gets scoped smaller in response.
+**Keep parts short.** Kenessary has said plainly he won't read long documents, and a document
+that doesn't get read teaches nothing — this is a hard constraint, not a style preference.
+Aim for one idea per file, a few minutes each, with a `→ next` link at the bottom. Prose
+should be plain: short sentences, concrete examples, tables over paragraphs. **Simplify the
+language, never the content** — the derivations stay, the hedging and the subordinate clauses
+go.
+
+Every lesson directory gets a `README.md` with the part index and a **one-paragraph version**
+of the whole lesson, so it can be re-read in 30 seconds months later.
+
+Never run ahead. Generate lesson N, then stop. Lesson N+1 is written after N is done, because
+how N went should change N+1.
+
+**If a lesson is running past ~3 hours, it was scoped wrong.** Split it. That's a Claude
+failure, not a Kenessary one, and the next lesson gets scoped smaller in response.
 
 ---
 
@@ -59,21 +80,21 @@ precision or kernel (`ROADMAP.md` §4) — native bf16 on Ampere+, fp16 + GradSc
 The heavy phases are planned for the current box; don't shrink a config to fit a hypothetical
 weaker machine. If the machine does change, adjust the affected phases then — §4 says which.
 
-**The 30-minute rule.** If a part's training run exceeds ~30 minutes on one GPU, shrink it:
+**The 30-minute rule.** If a lesson's training run exceeds ~30 minutes on one GPU, shrink it:
 fewer steps, smaller model, smaller images, a subset. Exceptions are the handful of places
 where the long run *is* the lesson (Phase 2's scaling study, Phase 11's throughput work,
 Phase 15's video) — and those are stated in advance, with the run started in the background so
 the session continues.
 
-**Every part ends with something to look at.** Samples, a loss curve, a metric, a
-side-by-side against a broken version. Never end a part on "the tests pass" — that is
+**Every lesson ends with something to look at.** Samples, a loss curve, a metric, a
+side-by-side against a broken version. Never end a lesson on "the tests pass" — that is
 invisible progress, and invisible progress is what makes people stop.
 
 **Cheap ablations only.** An ablation that costs an afternoon is a bad ablation. If it can't
-run in a few minutes at the part's scale, cut the scale or cut the ablation.
+run in a few minutes at the lesson's scale, cut the scale or cut the ablation.
 
 **Long runs go in the background.** Start them, then continue the session with the next
-part's theory. Never sit and watch a progress bar.
+lesson's theory. Never sit and watch a progress bar.
 
 **Prefer pretrained where the training isn't the lesson.** Building a CLIP teaches
 contrastive learning. Training it to actually-good quality teaches patience. Build it, train
@@ -94,7 +115,7 @@ what comes next.
   │                            │ ←────────────────────────────┘
   │                        correct
   │                            ↓
-  └─ more parts? ←── 7. Run and observe ──→ 8. Quiz ──→ 9. Consolidate
+  └─ more lessons? ←── 7. Run and observe ──→ 8. Quiz ──→ 9. Consolidate
 ```
 
 ---
@@ -105,7 +126,7 @@ The derivation, worked through — not cited, not linked. Notation defined befor
 Intermediate algebra shown. If a step is skipped because it's tedious, say that it's being
 skipped rather than leaving a gap that reads as obvious.
 
-Open with **why this exists**: what specifically broke in the previous part. Where that
+Open with **why this exists**: what specifically broke in the previous lesson. Where that
 framing would be dishonest — the technique was transferred in, found empirically, or unified
 in retrospect — say so instead. `ROADMAP.md` §3 has the tags and why this matters for
 interviews.
@@ -157,7 +178,7 @@ Cover the shape manipulations that are actually error-prone — `transpose` vs. 
 Shape bugs are the dominant time sink, and they're silent: wrong-dim softmax trains fine and
 produces garbage.
 
-Skip this stage when a part introduces no new ops.
+Skip this stage when a lesson introduces no new ops.
 
 ---
 
@@ -176,7 +197,7 @@ What he implements. Written to a `.py` file in the section directory:
   after softmax instead of before, missing `.detach()`, forgotten scaling by √d, `view` on a
   non-contiguous tensor.
 
-Scope one part to roughly 30–100 lines of real implementation. Bigger than that, split it.
+Scope one lesson to roughly 30–100 lines of real implementation. Bigger than that, split it.
 
 ---
 
@@ -217,7 +238,7 @@ question is also the interview question.
 
 Back to 4. If two rounds pass and he's still stuck on the same point, the *explanation* is the
 problem, not him — re-teach that specific piece differently rather than restating it, and
-consider whether the part was scoped too large.
+consider whether the lesson was scoped too large.
 
 ---
 
@@ -233,7 +254,7 @@ Then actually run it, and look:
 
 - What does the loss curve do, and does it match what the theory predicts?
 - What do samples/outputs look like at 10%, 50%, 100% of training?
-- What happens when it's broken deliberately? Some parts should include a *deliberate
+- What happens when it's broken deliberately? Some lessons should include a *deliberate
   sabotage*: remove the scaling, drop the mask, use the wrong parameterization — and watch
   the failure. Seeing the failure mode is what makes the mechanism stick.
 
@@ -293,7 +314,7 @@ pulled from `review/questions.md`, weighted toward
 Five minutes. Then move on. Log the results — a grade that drops from solid to shaky is the
 most useful signal in the whole system, and it's invisible without a log.
 
-**Gap audits** (`ROADMAP.md` §10) are the other half: at part boundaries, questions spanning
+**Gap audits** (`ROADMAP.md` §10) are the other half: at section boundaries, questions spanning
 the *whole field at that level*, including topics never covered, to find what he doesn't know
 to ask about. Claude initiates these. They are not optional, and a blank is information rather
 than failure.
@@ -311,11 +332,14 @@ requirements.txt        grows section by section
 
 01-attention/
   README.md             section overview; interview writeup added at the end
-  part1-scaled-dot-product.md
-  part2-multi-head.md
-  part3-positional.md
+  lesson1/              one sitting, split into short readable parts
+    README.md           part index + one-paragraph summary + interview questions
+    1-where-it-came-from.md
+    2-why-not-rnns.md
+    ...
+  lesson2/
   attention.py          his implementation
-  train.py              Claude's boilerplate
+  check_lesson1.py      Claude's boilerplate — checks and ablation, one per lesson
   experiments/          runs: config, logs, results, and failures
 
 02-decoder-lm/
@@ -348,7 +372,9 @@ and why.
 ## Standing rules
 
 - **Never fill in a body he's meant to write.** Signatures, docstrings, shapes, empty bodies.
-- **One part at a time.** Never generate material for multiple parts or sections ahead.
+- **One lesson at a time.** Never generate material for multiple lessons or sections ahead.
+- **Keep parts short and the language plain.** He won't read a wall of text; unread material
+  teaches nothing. Simplify the prose, not the substance.
 - **Reviews return analysis, not patches**, unless he asks for the fix outright.
 - **Never skip ahead** to a later technique because it's better. Each mechanism is earned by
   the failure of the previous one. If something later is genuinely needed early, name the
