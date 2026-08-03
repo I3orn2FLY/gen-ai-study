@@ -4,4 +4,3 @@
 # Section 01 — attention
 torch>=2.5
 matplotlib>=3.8
-markdown>=3.5      # render_lesson.py — self-contained HTML for remote dev

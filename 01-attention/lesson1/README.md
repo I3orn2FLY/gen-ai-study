@@ -34,25 +34,6 @@ initialization, not during training — that's what QK-norm is for.
 
 ---
 
-## Reading this with the images
-
-**On JetBrains Remote Development the Markdown preview will not show the figures** — the
-preview runs in the local client, the PNGs live on the remote host, and they don't get served
-across. Nothing is wrong with the files.
-
-Build a single self-contained HTML instead (images embedded as base64, no plugin, no server):
-
-```bash
-python render_lesson.py 01-attention/lesson1
-```
-
-Then either **download `lesson1/lesson1.html`** and open it locally — it's one file, so it just
-works — or serve it and let the IDE forward the port:
-
-```bash
-python -m http.server 8000        # then open localhost:8000 locally
-```
-
 ## Figures
 
 All diagrams are generated, not stock — `python 01-attention/make_figures.py` rebuilds

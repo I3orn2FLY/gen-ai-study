@@ -98,6 +98,30 @@ point it appears. Dropping `score(q,k) = vᵀ tanh(W[q;k])` as an aside teaches 
 that `[q;k]` is concatenation, `W` and `v` are learned, and the whole thing is a one-hidden-
 layer MLP run once per pair. If a formula isn't worth explaining, it isn't worth showing.
 
+### Never teach a mechanism in isolation
+
+A formula on its own is unplaceable. **Every mechanism gets shown in the forward pass it
+belongs to, with real shapes and real numbers**, in the same lesson it's introduced.
+
+Lesson 1 defined the score matrix correctly and still left the question *"where is this
+actually used?"* unanswered, because it never traced a tensor through anything. The formula
+was right and the placement was missing.
+
+What "in the forward pass" means concretely:
+
+- **Trace one concrete example end to end.** `(3,) → (3, 512) → (3, 64) → (4, 3) → (4, 64)`.
+  Pick real numbers — 3 source tokens, 4 target tokens — never `n` and `m`.
+- **Point at the exact tensor** the lesson is about, and say what its axes mean. *"A (4,3)
+  table: 4 French positions × 3 English words."*
+- **Say what happens to it afterwards.** Is it stored, returned, or discarded? Attention
+  scores are an intermediate — knowing they vanish is as important as knowing they exist.
+- **Say where it sits in the whole model**, and which variant we're actually building. The
+  translation example teaches cross-attention; the model we build is decoder-only.
+- **Connect to what he already knows.** He has solid DL. Anchor new machinery to embeddings,
+  logits, and the residual stream rather than starting from vacuum.
+
+If a lesson can't say where its mechanism lives in a forward pass, the lesson isn't ready.
+
 ### History parts still have to teach
 
 An origin story is not a substitute for the mechanism. "Bahdanau introduced attention in 2014"
@@ -132,10 +156,6 @@ subordinate clauses, and paragraphs that restate the previous paragraph.
   be re-read in 30 seconds six months later.
 - Mark the part that actually matters (`— the one to slow down for`) so attention goes where
   it pays.
-
-**Reading setup.** He works over JetBrains Remote Development, where the Markdown preview
-does not render local images. `render_lesson.py` builds a self-contained HTML per lesson
-(base64 images, single file) — mention it whenever a lesson ships with figures.
 
 **Draw the diagrams.** A mechanism with shapes, a flow, or a failure mode gets a figure, and
 figures are *generated* by a committed `make_figures.py` in the section — matplotlib, no
