@@ -1,0 +1,6 @@
+# Grows section by section. Each section README notes what it added and why.
+# Not pinned deliberately — the machine can change (ROADMAP.md §4).
+
+# Section 01 — attention
+torch>=2.5
+matplotlib>=3.8

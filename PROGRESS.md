@@ -2,7 +2,9 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** Section 01, part 1 — scaled dot-product attention. Nothing started yet.
+**Next action:** Section 01, part 1 — **Kenessary implements `01-attention/attention.py`**
+(`causal_mask`, `scaled_dot_product_attention`, `attention_entropy`), then
+`python 01-attention/check_part1.py`. Theory, primitives, and task are written.
 
 ---
 
@@ -29,7 +31,7 @@ Tiers are stopping points, not skip lists — work in dependency order. See `ROA
 
 | # | Section | Status | Parts | Checkpoints |
 |---|---|---|---|---|
-| 01 | Attention and the transformer | not started | 0 / 8 | — |
+| 01 | Attention and the transformer | **in progress** | 0 / 8 | — |
 | 02 | The modern decoder LM | not started | 0 / 13 | — |
 | 04 | ViT and CLIP | not started | 0 / 7 | — |
 | 05 | Learned compression (VAE → VQ-VAE) | not started | 0 / 7 | — |
