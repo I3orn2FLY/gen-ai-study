@@ -1,6 +1,6 @@
 # 2 · Why not RNNs
 
-*~4 min. Lesson 1, part 2 of 6.*
+*~4 min. Lesson 1, part 2 of 7.*
 
 We never build an RNN in this roadmap. Here's the argument for skipping them.
 
@@ -80,7 +80,7 @@ the second reason, not the first. Saying "attention is more efficient" is just w
 It doesn't go away. We pay it repeatedly:
 
 - KV-cache memory blowing up (Phase 2, Phase 3)
-- FlashAttention (part 7 of this lesson set)
+- FlashAttention (lesson 7)
 - every long-context trick in Phase 2
 
-**→ [3 · The operation](3-the-operation.md)**
+**→ [3 · Query, key, value](3-query-key-value.md)**

@@ -20,8 +20,10 @@ definition, boilerplate around the mechanism, review of what comes back, quizzes
 proactive flagging of what he doesn't know to ask about.
 
 Starting point: solid deep learning, some GAN familiarity, **no generative-AI background**.
-Assume standard DL vocabulary (backprop, batchnorm, conv, optimizers). Do not assume any
-generative-modeling vocabulary — ELBO, score, CFG, and SNR all need introducing.
+Assume standard DL vocabulary (backprop, batchnorm, conv, optimizers). Assume nothing else —
+not generative-modeling terms (ELBO, score, CFG, SNR) and not transformer terms
+(query/key/value, head, residual stream). See § Writing the material below; this is the rule
+that gets broken most often.
 
 ---
 
@@ -62,6 +64,57 @@ how N went should change N+1.
 
 **If a lesson is running past ~3 hours, it was scoped wrong.** Split it. That's a Claude
 failure, not a Kenessary one, and the next lesson gets scoped smaller in response.
+
+---
+
+## Writing the material
+
+### Define every term at first use — including the ones that feel too basic
+
+**This is the rule that gets broken most often**, because the terms that need defining are
+exactly the ones that feel too obvious to define. Lesson 1 shipped using *query*, *key*, and
+*value* as though they were self-evident. They aren't — they're the field's jargon, and
+"I vaguely remember what they mean" is not a foundation to build eight sections on.
+
+The test is **not** "is this advanced?" It is:
+
+> **Would someone with strong deep-learning fundamentals and zero generative-AI background
+> have met this word before?**
+
+If no, define it. Every time, on first use, in the lesson where it first appears. Never defer
+it to a later lesson and never assume an earlier one covered it — check.
+
+What that means concretely:
+
+- **Name the metaphor and then discard it.** "Query/key/value are borrowed from databases" is
+  a naming story, not a mechanism. Say where the name comes from, then say what the thing
+  actually *is* — usually a matrix, a projection, or a loss term.
+- **Say where it comes from mechanically.** `Q = x @ W_Q`. A term is much less intimidating
+  once it's a line of code.
+- **Answer "why does this exist separately?"** Why are Q and K different matrices? Why is V
+  not K? Those are the interview questions, and they're only askable once the term is defined.
+- **Give it its own part if it needs one.** Cheaper than a lesson that half-lands.
+- **Flag forward references explicitly.** If a word must appear before its definition, say
+  *"defined properly in part N"* inline rather than hoping it slides past.
+
+Terms coming up that will need this treatment: latent, ELBO, posterior, score, SNR, guidance
+scale, denoiser, timestep embedding, classifier-free guidance, reward model, KL penalty.
+Assume none of them are known.
+
+### Prose style
+
+**Simplify the language, never the content.** Derivations stay in full. What goes is hedging,
+subordinate clauses, and paragraphs that restate the previous paragraph.
+
+- Short sentences. Tables and diagrams over prose.
+- One idea per part, with a `→ next` link at the bottom.
+- Every lesson `README.md` carries a **one-paragraph version** of the whole lesson, so it can
+  be re-read in 30 seconds six months later.
+- Mark the part that actually matters (`— the one to slow down for`) so attention goes where
+  it pays.
+
+He has said plainly that he won't read a wall of text. Unread material teaches nothing, so
+this is a hard constraint rather than a style preference.
 
 ---
 

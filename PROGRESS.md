@@ -2,7 +2,7 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** Section 01, lesson 1 — read `01-attention/lesson1/` (6 short parts, ~20 min),
+**Next action:** Section 01, lesson 1 — read `01-attention/lesson1/` (7 short parts, ~25 min),
 then **implement `01-attention/attention.py`** (`causal_mask`,
 `scaled_dot_product_attention`, `attention_entropy`) and run
 `python 01-attention/check_lesson1.py`.
@@ -125,4 +125,5 @@ that never changes is one nobody is checking.
 | 2026-07-29 | Initial version | — |
 | 2026-08-03 | §4 rewritten: design for the current machine, adjust if it changes — replaces the "design against an 8 GB floor" framing that was shrinking every phase in advance | Kenessary: the heavy phases belong on this box |
 | 2026-08-03 | Vocabulary: **section → lesson → part**. Roman-numeral groupings renamed Block I–VI to stop the collision. Lessons are directories of 3–6 min parts | Kenessary: docs too long/dense to actually read |
+| 2026-08-03 | Rule added (`TEACHING.md` § Writing the material): define every term at first use, including ones that feel too basic. Lesson 1 gained a Query/key/value part | Kenessary: q/k/v were used without ever being explained |
 | 2026-08-03 | §4 bf16 detection corrected — `is_bf16_supported()` reports True on Turing via emulation; must pass `including_emulation=False` | Found by running the check on the actual machine |

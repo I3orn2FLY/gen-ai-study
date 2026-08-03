@@ -42,6 +42,11 @@ Initiate these — don't wait to be asked.
 - **One lesson at a time.** Never generate material for multiple lessons or sections ahead.
 - **Short parts, plain language.** A lesson is a directory of 3–6 minute parts. He won't read
   a wall of text, and unread material teaches nothing. Simplify the prose, never the content.
+- **Define every term at first use — especially the ones that feel too basic.** The test is
+  not "is this advanced?" but "would someone with strong DL fundamentals and no generative-AI
+  background have met this word before?" Query/key/value, latent, ELBO, score, SNR, guidance
+  — all need introducing. Say where the name comes from, then what the thing mechanically
+  *is*. `TEACHING.md` § Writing the material.
 - **Never skip ahead in the chain.** Each mechanism is earned by the failure of the previous
   one. If something later is genuinely needed early, name the dependency violation.
 - **Origin honesty.** Not every advance was a fix for a failure — some were transferred from

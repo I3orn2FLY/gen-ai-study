@@ -55,7 +55,7 @@ def check_matches_reference() -> None:
 
     # Random bool mask, kept row-wise non-empty so both implementations agree.
     # (A fully masked row is NaN in a naive impl and 0.0 in torch's fused kernel
-    #  — a real divergence, not a bug in your code. See lesson1 part 5.)
+    #  — a real divergence, not a bug in your code. See lesson1 part 6.)
     mask = torch.rand(B, H, L, L) > 0.3
     mask[..., 0] = True
     out, _ = scaled_dot_product_attention(q, k, v, attn_mask=mask)
@@ -209,7 +209,7 @@ def ablation() -> None:
             _, attn = scaled_dot_product_attention(qq, k, v)
             # Trace of the softmax Jacobian, Σ_j p_j(1 - p_j), averaged over rows.
             # Uniform over L keys -> 1 - 1/L ~= 1.  One-hot -> 0.  This is exactly
-            # the quantity lesson1 part 4 argues vanishes, and unlike a `max` it is not
+            # the quantity lesson1 part 5 argues vanishes, and unlike a `max` it is not
             # rescued by one lucky row somewhere in the batch.
             row[label] = (
                 attention_entropy(attn).mean().item(),

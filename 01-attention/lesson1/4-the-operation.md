@@ -1,6 +1,6 @@
-# 3 · The operation
+# 4 · The operation
 
-*~4 min. Lesson 1, part 3 of 6.*
+*~4 min. Lesson 1, part 4 of 7.*
 
 The whole thing:
 
@@ -12,24 +12,27 @@ That's it. The rest of this part is reading it properly.
 
 ---
 
-## The mental model: a soft dictionary
+## The "soft" part
+
+Part 3 covered what Q, K, V are. Now the other half of the metaphor: why *soft*.
 
 A Python dict lookup is hard:
 
 ```python
-d[key]          # exact match, returns one value
+d[key]          # exact match. one winner, everyone else gets nothing.
 ```
 
-Attention is the soft version:
+Attention never picks a winner:
 
 1. Compare the query against **every** key (dot product)
 2. Turn those scores into probabilities (softmax)
 3. Return the **weighted average of all values**
 
-Nothing gets retrieved. Everything gets blended, weighted by how well it matched.
+Nothing is retrieved. Everything is blended, in proportion to how well it matched.
 
-"Soft" is the whole point — a hard lookup isn't differentiable, so you can't learn it. A
-weighted average is.
+That's not a compromise — it's the requirement. A hard lookup has no useful derivative, so
+you can't learn *what to look up*. A weighted average does. Softness is what makes the
+mechanism trainable.
 
 ---
 
@@ -95,4 +98,4 @@ Your implementation shouldn't assume either is square.
 
 Next: the one part of that formula that isn't obvious.
 
-**→ [4 · Why √d](4-why-sqrt-d.md)**
+**→ [5 · Why √d](5-why-sqrt-d.md)**

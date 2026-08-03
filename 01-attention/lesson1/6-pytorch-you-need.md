@@ -1,6 +1,6 @@
 # 5 · The PyTorch you need
 
-*~4 min. Lesson 1, part 5 of 6.*
+*~4 min. Lesson 1, part 6 of 7.*
 
 The ops your implementation is made of. Toy tensors, run them if you want.
 
@@ -110,4 +110,4 @@ print(x.reshape(2, -1).shape)  # works — copies when it has to
 `reshape` = `view` when possible, silent copy when not. Convenient, and it hides a memory
 allocation from you.
 
-**→ [6 · Your task](6-your-task.md)**
+**→ [7 · Your task](7-your-task.md)**

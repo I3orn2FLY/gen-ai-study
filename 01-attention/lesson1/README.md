@@ -2,25 +2,28 @@
 
 *Roadmap Phase 1, steps 1–2 · ~2 hours total · runs on CPU*
 
-Six short parts. Read in order.
+Seven short parts. Read in order.
 
 | # | Part | Time |
 |---|---|---|
 | 1 | [Where it came from](1-where-it-came-from.md) | ~3 min |
 | 2 | [Why not RNNs](2-why-not-rnns.md) | ~4 min |
-| 3 | [The operation](3-the-operation.md) | ~4 min |
-| 4 | [**Why √d**](4-why-sqrt-d.md) — the one that matters | ~6 min |
-| 5 | [The PyTorch you need](5-pytorch-you-need.md) | ~4 min |
-| 6 | [Your task](6-your-task.md) | ~45 min doing |
+| 3 | [Query, key, value](3-query-key-value.md) — what the three actually are | ~5 min |
+| 4 | [The operation](4-the-operation.md) | ~4 min |
+| 5 | [**Why √d**](5-why-sqrt-d.md) — the one that matters | ~6 min |
+| 6 | [The PyTorch you need](6-pytorch-you-need.md) | ~4 min |
+| 7 | [Your task](7-your-task.md) | ~45 min doing |
 
-~20 min reading, then you write code.
+~25 min reading, then you write code.
 
 ---
 
 ## The one-paragraph version
 
-Attention is a soft dictionary lookup: score the query against every key, softmax the scores,
-return the value-weighted average. `softmax(QKᵀ/√d_k)V`. The `√d_k` is there because the
+Q, K, V are three learned projections of the same input — query = what a position wants, key =
+how it advertises itself, value = what it hands over. Attention is a soft dictionary lookup
+over them: score the query against every key, softmax the scores, return the value-weighted
+average. `softmax(QKᵀ/√d_k)V`. The `√d_k` is there because the
 variance of a `d`-term dot product is `d`, and unscaled scores saturate the softmax — which
 zeroes its Jacobian, which means no gradient reaches `W_Q` and `W_K`, which means the model
 can't learn where to look. It's `d_head`, not `d_model`. And it only fixes the scale at
@@ -38,15 +41,18 @@ python 01-attention/check_lesson1.py
 
 ## Interview questions this covers
 
-1. **Why is there a √d in attention?** Variance of a `d`-term dot product is `d` → unscaled
+1. **Why are Q and K separate matrices?** Sharing them makes the score matrix symmetric —
+   relationships would lose direction — and the diagonal `‖xW‖²` would dominate every row, so
+   every token would mostly attend to itself.
+2. **Why is there a √d in attention?** Variance of a `d`-term dot product is `d` → unscaled
    logits saturate softmax → saturated softmax has ~zero Jacobian → no gradient to `W_Q`/`W_K`,
    at init.
-2. **`d_model` or `d_head`?** `d_head`. The dot product lives inside one head.
-3. **What if you divided by `d`?** Attention goes uniform. Gradients survive, selectivity dies.
-4. **Why did transformers beat RNNs?** Parallelism first — `O(1)` vs `O(n)` sequential steps.
+3. **`d_model` or `d_head`?** `d_head`. The dot product lives inside one head.
+4. **What if you divided by `d`?** Attention goes uniform. Gradients survive, selectivity dies.
+5. **Why did transformers beat RNNs?** Parallelism first — `O(1)` vs `O(n)` sequential steps.
    Path length second. And attention is *more* expensive in FLOPs past `n ≈ d`; saying it's
    "more efficient" is wrong.
-5. **Does √d solve softmax saturation?** No — at init only. Logits drift up during training,
+6. **Does √d solve softmax saturation?** No — at init only. Logits drift up during training,
    which is what QK-norm and logit soft-capping are for.
 
 ---

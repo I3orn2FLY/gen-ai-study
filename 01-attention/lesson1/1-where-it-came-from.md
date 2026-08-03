@@ -1,6 +1,6 @@
 # 1 · Where attention came from
 
-*~3 min. Lesson 1, part 1 of 6.*
+*~3 min. Lesson 1, part 1 of 7.*
 
 Most people say "attention replaced RNNs." That's backwards. Attention was invented **inside**
 an RNN, three years before the transformer.
@@ -32,7 +32,10 @@ weighted average of them — with the weights learned.
 
 ## 2015 — Luong: use a dot product
 
-Bahdanau scored a query against a key with a small neural net:
+Bahdanau scored a **query** against a **key** with a small neural net.
+
+*(Those two words get defined properly in part 3. For now: a query is what one position is
+looking for; a key is what another position advertises about itself.)*
 
 ```
 score(q, k) = vᵀ tanh(W[q; k])        # an MLP, per query-key pair
@@ -66,7 +69,7 @@ to be rebuilt:
 
 | Removing the RNN broke | Patched with | Covered in |
 |---|---|---|
-| Logit scale blows up with dimension | `1/√d` scaling | part 4 |
+| Logit scale blows up with dimension | `1/√d` scaling | part 5 |
 | One attention pattern isn't enough | multi-head | lesson 2 |
 | No sense of word order at all | positional encoding | lesson 5 |
 
