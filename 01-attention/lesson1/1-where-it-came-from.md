@@ -24,6 +24,8 @@ long sentences.
 Bahdanau's fix: stop squeezing. Let the decoder look back at *every* encoder state, and take a
 weighted average of them — with the weights learned.
 
+![the fixed-vector bottleneck, and attention removing it](figures/fig1-bottleneck.png)
+
 **The RNN stayed.** Attention was an add-on, not a replacement.
 
 > **Origin tag: Fix.** A concrete failure (the bottleneck), a targeted response.

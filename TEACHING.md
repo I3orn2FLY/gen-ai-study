@@ -133,6 +133,13 @@ subordinate clauses, and paragraphs that restate the previous paragraph.
 - Mark the part that actually matters (`— the one to slow down for`) so attention goes where
   it pays.
 
+**Draw the diagrams.** A mechanism with shapes, a flow, or a failure mode gets a figure, and
+figures are *generated* by a committed `make_figures.py` in the section — matplotlib, no
+external images, no network dependency. Two rules: the diagram must show something the prose
+can't say as well (a symmetric score matrix, an attention heatmap, entropy collapsing), and
+**every generated figure must actually be looked at before shipping** — matplotlib overlaps
+labels constantly. Never embed a figure sight-unseen.
+
 He has said plainly that he won't read a wall of text. Unread material teaches nothing, so
 this is a hard constraint rather than a style preference.
 

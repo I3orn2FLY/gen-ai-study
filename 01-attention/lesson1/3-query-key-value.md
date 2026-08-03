@@ -95,8 +95,12 @@ V = x @ W_V        what I hand over if selected
 
 Three learned matrices. Same input `x`, three different views of it.
 
+![x projected into query, key and value](figures/fig4-qkv-projections.png)
+
 **That's attention.** A dict where matching is soft, retrieval is a blend, and the index is
-learned instead of written.
+learned instead of written. All three breaks together:
+
+![a dict lookup relaxed three times](figures/fig3-dict-to-attention.png)
 
 ---
 
@@ -188,6 +192,11 @@ can't express that.
 
 **Everything would attend to itself.** The diagonal is `S[i,i] = ‖xᵢW‖²` — a squared norm,
 almost always the biggest number in its row. Every token's top match would be itself.
+
+![shared vs separate projections](figures/fig5-symmetry.png)
+
+The left panel is the failure: a bright diagonal and almost nothing else. Every token's best
+match is itself.
 
 Separate matrices break the symmetry. That's what buys directional relationships.
 

@@ -28,9 +28,11 @@ Lessons get written one at a time (`TEACHING.md`) — how lesson N goes decides 
 ## Files
 
 ```
-lesson1/           the lesson, in 6 short parts
+lesson1/           the lesson, in 7 short parts
+  figures/         generated diagrams, committed
 attention.py       implementations (Kenessary)
 check_lesson1.py   checks + ablation (boilerplate)
+make_figures.py    regenerates lesson1/figures/ (boilerplate)
 experiments/       run outputs — plots and notes, tracked
 ```
 

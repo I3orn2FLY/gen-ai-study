@@ -29,6 +29,8 @@ K: (B, H, L_k, d_k)      L = sequence length, d = dimension
 V: (B, H, L_k, d_v)
 ```
 
+![the three steps and their shapes](figures/fig6-three-steps.png)
+
 **Step 1 — scores.**
 
 ```
@@ -67,6 +69,16 @@ means nothing. The rows won't sum to 1.
 This is the single most common attention bug — a one-character typo.
 
 ---
+
+## What it looks like
+
+Real attention weights for *"The cat sat because it was tired"* — `it` finds `cat`:
+
+![attention heatmaps, unmasked and causal](figures/fig7-attention-heatmap.png)
+
+Every **row** is one query's distribution over the keys, and every row sums to 1. The right
+panel is the causal mask from lesson 3 — the upper triangle is exactly zero, so no token can
+see the future.
 
 ## Two shapes that don't have to match
 

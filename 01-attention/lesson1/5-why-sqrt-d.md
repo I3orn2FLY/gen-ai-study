@@ -60,6 +60,8 @@ scores. Automatically.
 With `d = 64`, scores land around ±8. And `e⁸ ≈ 3000`, so softmax comes out essentially
 one-hot: one key gets ~1.0, everything else ~0.
 
+![attention collapsing to one key as d grows](figures/fig8-saturation.png)
+
 You might think "great, confident attention." No. Look at the gradient.
 
 Softmax Jacobian:
@@ -77,6 +79,8 @@ Now plug in a one-hot `p` (say `p_m ≈ 1`, everything else `≈ 0`):
 | `i = m, j ≠ m` | `p_m(0 − pⱼ) ≈ −pⱼ` | **0** |
 
 **Every entry is 0.** The Jacobian vanishes.
+
+![p(1-p) collapses at both ends](figures/fig9-softmax-jacobian.png)
 
 No gradient reaches `W_Q` and `W_K`. The model cannot learn *where to look*, because the
 derivative of "where to look" is zero.

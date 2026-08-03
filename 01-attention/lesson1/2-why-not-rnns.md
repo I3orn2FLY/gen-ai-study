@@ -25,6 +25,8 @@ tok1 → tok2 → tok3 → ... → tok100        path length = 99
 tok1 ─────────────────────→ tok100       path length = 1
 ```
 
+![path length: RNN walks, attention jumps](figures/fig2-path-length.png)
+
 Why does this matter? Backprop through a path of length `n` multiplies `n` Jacobians together.
 If each has typical scale `σ`, the gradient scales like `σⁿ`:
 

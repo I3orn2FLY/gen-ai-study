@@ -33,6 +33,11 @@ initialization, not during training — that's what QK-norm is for.
 
 ---
 
+## Figures
+
+All diagrams are generated, not stock — `python 01-attention/make_figures.py` rebuilds
+`lesson1/figures/`. Edit the script if a diagram is wrong or unclear.
+
 ## Run it
 
 ```bash
