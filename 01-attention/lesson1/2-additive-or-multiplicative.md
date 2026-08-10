@@ -80,22 +80,66 @@ $2000$-wide bidirectional encoder states, no reshaping anywhere.
 
 $$\mathrm{score}(q, k) \;=\; q^{\top} k \;=\; \sum_{m=1}^{d} q_m k_m$$
 
-No parameters. No hidden layer. A dot product is large when two vectors point the same way,
-which is already the "do these match?" question — so the claim is that if the model *wants* a
-similarity measure, it can shape the two spaces during training and skip the machinery.
-
-It gives up the freedom the additive form had: $q$ and $k$ must now share a width $d$, or the
-sum has no meaning. That constraint is why the transformer projects everything to a common
-$d_{\text{head}}$ before scoring — part 5.
-
-Batched over the keys it's one line:
+No parameters at all. No hidden layer, no $W$, no $v$. Batched over the keys it's one line:
 
 ```python
 e_i = K @ q                 # (T_x, d) @ (d,)  ->  (T_x,)
 ```
 
+Which should bother you. The additive form had a learned $W$ standing between the query and the
+key, and that's where the "how do these two relate?" knowledge lived. Delete it and you're
+asking two vectors, produced by two different networks doing two different jobs, to line up
+under a plain sum of products. Why would they?
+
+### Why it isn't absurd
+
+**First, it doesn't even typecheck everywhere.** $\sum_m q_m k_m$ requires $q$ and $k$ to have
+the same width. This is a hard architectural constraint, not a preference — and Bahdanau's model
+**fails it**: bidirectional encoder states at $d_h = 2000$ against a decoder at $d_s = 1000$.
+You cannot drop a dot product into his architecture at all.
+
+Luong's is built differently: stacked LSTMs, $1000$ units on the encoder side *and* the decoder
+side, and a decoder whose state chain is seeded from the encoder's final state. Same width by
+design, shared origin. The two spaces aren't strangers.
+
+**Second, the relation is still learned — by the RNNs.** Look at what a gradient step does:
+
+$$\frac{\partial e_{ij}}{\partial q} \;=\; k, \qquad \frac{\partial e_{ij}}{\partial k} \;=\; q$$
+
+Say the model should have attended to source word 2 and didn't. The loss pushes $e_{i2}$ up, and
+the gradient's instruction is: **move the query toward $h_2$, and move $h_2$ toward the query.**
+Those are directions in the state spaces themselves, so they flow straight back into the encoder
+and decoder weights.
+
+Across training, the two networks get shaped by one loss into a geometry where *relevant* means
+*aligned*. The capacity to learn the relation didn't disappear when $W$ and $v$ were deleted —
+it moved into the two RNNs, which were being trained anyway.
+
+> You need a learned comparison function when you **can't change** the things being compared —
+> frozen features, a pretrained encoder you don't own. When both sides are trainable, the
+> comparison itself can be fixed.
+
+### Luong wasn't sure either
+
+He didn't propose the dot product as the answer. He proposed **three** scoring functions and
+measured them:
+
+| Name | Form | |
+|---|---|---|
+| dot | $q^{\top} k$ | no parameters |
+| general | $q^{\top} W_a\, k$ | **a learned matrix between the two** |
+| concat | $v_a^{\top}\tanh\!\big(W_a[\,q;k\,]\big)$ | Bahdanau's additive form |
+
+The middle row is the obvious hedge against exactly the worry above: if the two spaces might not
+line up, put a learned matrix in between. It was implemented and shipped as a peer of the other
+two, and the results were mixed — no single form dominated across his settings.
+
+That is the entire empirical basis. Nobody proved a bare inner product was sufficient; it
+performed comparably and cost nothing, so it survived.
+
 *(Luong et al., 2015. **Origin tag: Empirical / efficiency** — this was not fixing a failure.
-Both forms worked; one was cheaper.)*
+The tidy explanation you'll hear today — "the dot product is the natural similarity measure" — is
+a story attached to the result afterwards. Don't carry it as a derivation.)*
 
 ---
 
@@ -129,6 +173,28 @@ product at all.
 expressive power.** This pattern decides a lot of this roadmap; FlashAttention and GQA win the
 same way, in section 03.
 
+### What the dot product cost
+
+Two things, and neither is nothing.
+
+**Expressiveness.** $v^{\top}\tanh(W_q q + W_k k)$ is a *nonlinear* function of the pair.
+$q^{\top}k$ is a sum of products. Additive can express interactions between query and key that
+the dot product cannot reach at all. It lost on cost, not on quality — don't let the outcome
+convince you it was also the better function.
+
+**Scale.** With roughly independent, zero-mean, unit-variance components,
+
+$$\mathrm{Var}\big(q^{\top}k\big) \;=\; \sum_{m=1}^{d}\mathrm{Var}(q_m k_m) \;=\; d$$
+
+so the scores have standard deviation $\sqrt{d}$ — and it grows with the width. At Luong's
+$d = 1000$ that's a spread of about $\pm 31$, wide enough that softmax collapses onto a single
+position and stops passing gradient backward. Additive is immune to this: $\tanh$ bounds its
+input, and $v$ is learned to whatever scale works.
+
+To be accurate about the history: Luong did not diagnose it this way, and it isn't why he
+preferred one form or another. It gets identified and patched later — part 7, the one to slow
+down for.
+
 ---
 
 ## The prize you can't collect yet
@@ -151,23 +217,8 @@ $$E \;=\; Q K^{\top}, \qquad (T_y \times d)(d \times T_x) \;=\; (T_y \times T_x)
 You don't hold them. Part 1's green chain is the reason: $s_i$ needs $c_i$ needs $s_{i-1}$, so
 the queries arrive strictly one at a time and $Q$ never exists as a matrix.
 
-**This is a promissory note**, and the only way to cash it is to delete the recurrence.
-
----
-
-## What that costs
-
-Deleting the recurrence is what Vaswani et al. (2017) did. But the RNN had quietly been doing
-three other jobs, and all three needed replacing:
-
-| Removing the RNN broke | Patched with | Covered in |
-|---|---|---|
-| Score scale grows with $d$ | $1/\sqrt{d}$ scaling | part 7 |
-| One attention pattern isn't enough | multi-head | lesson 2 |
-| No notion of word order at all | positional encoding | lesson 5 |
-
-The honest framing of the transformer: **not three good ideas, but one idea and three repairs it
-forced.**
+**This is a promissory note**, and the only way to cash it is to delete the recurrence — which
+is a much bigger claim than it sounds, and the whole of part 3.
 
 ---
 

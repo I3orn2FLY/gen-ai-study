@@ -2,9 +2,9 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** Section 01, lesson 1 — **parts 1–2 written**, parts 3–9 are outline stubs.
-Read `lesson1/1-the-scoring-function.md` and `2-additive-or-multiplicative.md`; if they're
-right, write part 3. One part at a time.
+**Next action:** Section 01, lesson 1 — **parts 1–3 written**, parts 4–9 are outline stubs.
+Kenessary has read parts 1–2. Next: `3-why-not-rnns.md`; if it reads
+right, write part 4. One part at a time.
 
 Four factual errors in part 1 were found and fixed on 2026-08-10 — see `review/errata.md`.
 The rule added in response (verify claims, prefer symbols to numbers, shapes before cost

@@ -9,7 +9,7 @@ right, so the style carries forward instead of nine parts inheriting the same mi
 |---|---|---|---|
 | 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, the number that fixes it, and the decoder loop it lives in | ~6 min | **written** |
 | 2 | [Additive or multiplicative](2-additive-or-multiplicative.md) — how `score()` is actually computed, and why one form died | ~6 min | **written** |
-| 3 | [Why not recurrence](3-why-not-rnns.md) | ~4 min | outline |
+| 3 | [Why not recurrence](3-why-not-rnns.md) — two arguments, one of which decided it | ~5 min | **written** |
 | 4 | [The forward pass](4-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min | outline |
 | 5 | [Query, key, value](5-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |
 | 6 | [The operation](6-the-operation.md) | ~4 min | outline |
