@@ -1,11 +1,12 @@
-# 2 · Why not recurrence
+# 3 · Why not recurrence
 
 *~4 min. Lesson 1 — **not written yet**.*
 
 > **Placeholder.** Parts are written one at a time, after the previous one is right.
 > Below is what this part will contain.
 
-Part 1 solved the bottleneck and left the RNN in place. So why delete it?
+Part 1 solved the bottleneck and part 2 made scoring cheap — and the RNN is still sitting there.
+So why delete it?
 
 **Will cover**
 

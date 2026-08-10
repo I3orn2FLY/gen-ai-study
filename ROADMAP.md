@@ -210,7 +210,7 @@ requirements.txt        grows section by section
 01-attention/
   README.md             overview; interview writeup added when the section closes
   lesson1/              one sitting; short parts inside (TEACHING.md)
-    README.md  1-the-scoring-function.md  2-why-not-rnns.md  ...
+    README.md  1-the-scoring-function.md  2-additive-or-multiplicative.md  ...
   lesson2/
   attention.py          his implementation
   check_lesson1.py      Claude's boilerplate — one per lesson

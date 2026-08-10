@@ -2,22 +2,23 @@
 
 *Roadmap Phase 1, steps 1–2 · ~2 hours total · runs on CPU*
 
-Eight short parts. **Written one at a time** — each is generated after the previous one reads
-right, so the style carries forward instead of eight parts inheriting the same mistake.
+Nine short parts. **Written one at a time** — each is generated after the previous one reads
+right, so the style carries forward instead of nine parts inheriting the same mistake.
 
 | # | Part | Time | Status |
 |---|---|---|---|
-| 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, and the number that fixes it | ~6 min | **written** |
-| 2 | [Why not recurrence](2-why-not-rnns.md) | ~4 min | outline |
-| 3 | [The forward pass](3-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min | outline |
-| 4 | [Query, key, value](4-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |
-| 5 | [The operation](5-the-operation.md) | ~4 min | outline |
-| 6 | [Why √d](6-why-sqrt-d.md) — the one to slow down for | ~6 min | outline |
-| 7 | [The PyTorch you need](7-pytorch-you-need.md) | ~4 min | outline |
-| 8 | [Your task](8-your-task.md) | ~45 min doing | outline |
+| 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, the number that fixes it, and the decoder loop it lives in | ~6 min | **written** |
+| 2 | [Additive or multiplicative](2-additive-or-multiplicative.md) — how `score()` is actually computed, and why one form died | ~6 min | **written** |
+| 3 | [Why not recurrence](3-why-not-rnns.md) | ~4 min | outline |
+| 4 | [The forward pass](4-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min | outline |
+| 5 | [Query, key, value](5-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |
+| 6 | [The operation](6-the-operation.md) | ~4 min | outline |
+| 7 | [Why √d](7-why-sqrt-d.md) — the one to slow down for | ~6 min | outline |
+| 8 | [The PyTorch you need](8-pytorch-you-need.md) | ~4 min | outline |
+| 9 | [Your task](9-your-task.md) | ~45 min doing | outline |
 
 The outlines say what each part will contain, so the shape of the lesson is visible without
-committing eight files of prose to it.
+committing nine files of prose to it.
 
 Each part opens on something that doesn't work yet, then earns the mechanism that fixes it.
 Symbols are defined beside the formula that uses them — no part assumes you remember notation
@@ -81,6 +82,6 @@ python 01-attention/check_lesson1.py
 - **Luong, Pham, Manning (2015)** — *Effective Approaches to Attention-based NMT.*
   Dot-product vs additive, compared head-to-head.
 - **Vaswani et al. (2017)** — *Attention Is All You Need.* §3.2.1 and **footnote 4** for the
-  scaling. **Table 1** for part 2's comparison.
+  scaling. **Table 1** for part 3's comparison.
 - Optional: Lilian Weng, *Attention? Attention!* — good consolidation read, **after** you
   implement it.

@@ -84,6 +84,12 @@ Initiate these — don't wait to be asked.
 - **Mechanism is the subject; history is structure.** Name parts after what they teach ("The
   scoring function"), not after eras ("Where it came from"). Attribution goes in parentheses,
   not in headings. Origin tags stay — they explain why a technique exists.
+- **Verify claims; don't ship recall.** Every non-derivable fact — widths, shapes, dates, "X
+  exists because Y" — gets checked before a part is marked written. There's no network here, so
+  **prefer the symbol to the number** ($d_h$, not $2000$) unless the number carries an argument,
+  and **write the tensor shapes before writing any sentence about cost or parallelism**. A wrong
+  fact that reads fluently is the one failure that survives ten lessons. Corrections go in
+  `review/errata.md` — logged with where they propagated, never silently patched.
 - **Being straight about what the field doesn't know is part of the job**, not a hedge.
 
 ## Hardware

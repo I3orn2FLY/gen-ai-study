@@ -2,9 +2,13 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** Section 01, lesson 1 — **part 1 written**, parts 2–8 are outline stubs.
-Read `lesson1/1-the-scoring-function.md`; if the style is right, write part 2. One part at a
-time.
+**Next action:** Section 01, lesson 1 — **parts 1–2 written**, parts 3–9 are outline stubs.
+Read `lesson1/1-the-scoring-function.md` and `2-additive-or-multiplicative.md`; if they're
+right, write part 3. One part at a time.
+
+Four factual errors in part 1 were found and fixed on 2026-08-10 — see `review/errata.md`.
+The rule added in response (verify claims, prefer symbols to numbers, shapes before cost
+sentences) is in `CLAUDE.md` and `TEACHING.md` § Writing the material.
 
 ---
 
@@ -116,6 +120,7 @@ Trained weights that later sections depend on. Full detail in `checkpoints/MANIF
 Spaced review runs at the start of roughly every third session (`TEACHING.md` § review layer).
 
 - Question bank: `review/questions.md` — **0 questions**
+- Errata: `review/errata.md` — **4 corrections** (section 01 lesson 1 part 1, none quizzed)
 - Quiz history: `review/log.md` — **no quizzes run**
 - Outstanding **shaky** or **confidently wrong** items: none
 
@@ -139,4 +144,6 @@ that never changes is one nobody is checking.
 | 2026-08-03 | Rule added: **math is LaTeX in `.md`, every symbol defined with dimensions, no magic numbers in formulas**. Lesson 1 part 1 rewritten with math | Kenessary: formulas looked awful; `s_{i-1}` was never defined and 512 was used where $d$ belongs |
 | 2026-08-03 | Rule refined: notation is **just-in-time** — two or three symbols beside the formula that uses them, never a glossary up front. Matters most on unfamiliar material | Kenessary: the notation table was overload before terms were introduced |
 | 2026-08-03 | Rule added: **write one part at a time**; unwritten parts get outline stubs. A lesson drafted in one pass inherits the same mistake in every part | Kenessary: "if you generate whole lesson you suck" |
+| 2026-08-10 | Lesson 1 split into **nine** parts — the scoring-function *choice* (additive vs dot product) became part 2 in its own right, since part 1 had grown past the length rule and the shape argument needs room | Kenessary asked for the additive formula's shapes; the honest answer didn't fit |
+| 2026-08-10 | Rule added: **verify claims, don't ship recall** — symbols over numbers, shapes written before any cost claim, corrections logged in the new `review/errata.md` rather than patched silently | Four factual errors found in part 1 after it was marked written |
 | 2026-08-03 | §4 bf16 detection corrected — `is_bf16_supported()` reports True on Turing via emulation; must pass `including_emulation=False` | Found by running the check on the actual machine |

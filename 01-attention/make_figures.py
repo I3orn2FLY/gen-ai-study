@@ -65,7 +65,7 @@ def fig_bottleneck():
         arrow(ax, 0.67 + i * 0.85, 3.2, 0.67 + i * 0.85, 2.95, color=MUTED)
     box(ax, 0.3, 2.45, 5.1, 0.5, "RNN encoder", fc="#dbeafe", ec=BLUE, fs=10)
     arrow(ax, 5.4, 2.7, 6.05, 2.7, color=RED, lw=2.2)
-    box(ax, 6.05, 2.42, 1.5, 0.56, "512\nnumbers", fc="#fee2e2", ec=RED, fs=9, weight="bold")
+    box(ax, 6.05, 2.42, 1.5, 0.56, "one fixed\nvector", fc="#fee2e2", ec=RED, fs=9, weight="bold")
     ax.text(6.8, 2.3, "everything squeezes\nthrough here", ha="center", va="top",
             fontsize=8.5, color=RED, style="italic")
     arrow(ax, 7.55, 2.7, 8.2, 2.7, color=MUTED, lw=2.2)
@@ -88,7 +88,7 @@ def fig_bottleneck():
     save(fig, "fig1-bottleneck.png")
 
 
-# ---------------------------------------------------------------- part 2
+# ---------------------------------------------------------------- part 3
 def fig_path_length():
     fig, axes = plt.subplots(1, 2, figsize=(10, 3.4))
     n = 7
@@ -118,7 +118,7 @@ def fig_path_length():
     save(fig, "fig2-path-length.png")
 
 
-# ---------------------------------------------------------------- part 3
+# ---------------------------------------------------------------- part 5
 def fig_dict_to_attention():
     fig, ax = blank((10, 5.2))
     ax.set_xlim(0, 10); ax.set_ylim(0, 5.2)
@@ -195,7 +195,7 @@ def fig_symmetry():
     save(fig, "fig5-symmetry.png")
 
 
-# ---------------------------------------------------------------- part 4
+# ---------------------------------------------------------------- part 6
 def fig_three_steps():
     fig, ax = blank((10.2, 3.2))
     ax.set_xlim(0, 10.2); ax.set_ylim(0, 3.2)
@@ -257,7 +257,7 @@ def fig_heatmap():
     save(fig, "fig7-attention-heatmap.png")
 
 
-# ---------------------------------------------------------------- part 3
+# ---------------------------------------------------------------- part 4
 def fig_forward_pass():
     fig, ax = blank((12.6, 7.2))
     ax.set_xlim(0, 12.6); ax.set_ylim(0, 7.2)
@@ -450,10 +450,103 @@ def fig_softmax_jacobian():
     save(fig, "fig9-softmax-jacobian.png")
 
 
+def fig_decoder_loop():
+    """Part 1 — the decoder loop unrolled: where s_0 comes from, and why the query
+    at step i is the state from step i-1."""
+    fig, ax = blank((11.2, 5.4))
+    ax.set_xlim(0, 9.6); ax.set_ylim(-0.6, 5.4)
+
+    LBLUE, LORANGE, LGREEN = "#dbeafe", "#ffedd5", "#dcfce7"
+    sx = [0.5, 2.3, 4.1, 5.9, 7.7]          # left edge of each decoder-state box
+    sw, sh, sy = 1.2, 0.7, 1.0
+    ax_left = [1.35, 3.15, 4.95, 6.75]      # left edge of each attention node
+    aw, ah, ay = 1.3, 0.7, 2.85
+
+    # encoder states — computed once, reused at every step
+    box(ax, 1.2, 4.25, 7.2, 0.68,
+        "encoder states   $h_1$   $h_2$   $h_3$      (computed once, before decoding)",
+        fc=LBLUE, ec=BLUE, fs=10.5)
+
+    for i in range(4):
+        cx = ax_left[i] + aw / 2
+        arrow(ax, cx, 4.25, cx, ay + ah + 0.03, color=BLUE, lw=1.1, ls=(0, (3, 2)))
+        box(ax, ax_left[i], ay, aw, ah, f"$e_{{{i+1}j}} \\to \\alpha_{{{i+1}}} \\to c_{{{i+1}}}$",
+            fc=LORANGE, ec=ORANGE, fs=10)
+
+    for i in range(5):
+        box(ax, sx[i], sy, sw, sh, f"$s_{{{i}}}$", fc=LGREEN if i else "white",
+            ec=GREEN if i else MUTED, fs=12, weight="bold")
+
+    for i in range(4):
+        arrow(ax, sx[i] + sw, sy + sh / 2, sx[i + 1], sy + sh / 2, color=GREEN, lw=1.8)
+        arrow(ax, sx[i] + sw - 0.28, sy + sh, ax_left[i] + 0.18, ay, color=ORANGE, lw=1.6)
+        arrow(ax, ax_left[i] + aw - 0.18, ay, sx[i + 1] + 0.32, sy + sh, color=ORANGE, lw=1.6)
+
+    ax.text(0.98, 2.40, "query\n$s_{i-1}$", fontsize=9, color=ORANGE, ha="center", va="center")
+    ax.text(2.91, 2.40, "context\n$c_i$", fontsize=9, color=ORANGE, ha="center", va="center")
+
+    for i, w in enumerate(["le", "chat", "s'", "assit"]):
+        ax.text(sx[i + 1] + sw / 2, 0.76, f"emit  “{w}”", fontsize=9.5, color=MUTED, ha="center")
+
+    ax.annotate("$s_0=\\tanh(W_s\\,\\overleftarrow{h}_1)$\nthe encoder starts it off",
+                xy=(sx[0] + sw / 2, sy), xytext=(sx[0] + sw / 2, 0.10),
+                fontsize=9.5, color=MUTED, ha="center", va="bottom",
+                arrowprops=dict(arrowstyle="->", color=MUTED, lw=1.1))
+    ax.text(4.8, -0.45, "the green chain is strictly sequential — step $i$ cannot start "
+                        "until step $i\\!-\\!1$ has finished",
+            fontsize=10, color=GREEN, ha="center", weight="bold")
+    ax.set_title("the query at step $i$ is the decoder state left over from step $i-1$",
+                 fontsize=12, weight="bold", y=0.99)
+    save(fig, "fig12-decoder-loop.png")
+
+
+def fig_additive_vs_dot():
+    """Part 2 — what each scoring function has to materialize on the way to T_x numbers."""
+    fig, ax = blank((10.6, 5.0))
+    ax.set_xlim(0, 10.6); ax.set_ylim(0, 5.0)
+    cell = 0.26
+
+    def grid(x0, y0, rows, cols, fc, ec):
+        for r in range(rows):
+            for c in range(cols):
+                ax.add_patch(plt.Rectangle((x0 + c * cell, y0 - r * cell), cell, cell,
+                                           fc=fc, ec=ec, lw=0.7, zorder=2))
+
+    ax.text(2.5, 4.72, "additive   $v^{\\top}\\tanh(W_q q + W_k k)$",
+            fontsize=11.5, weight="bold", ha="center", color=ORANGE)
+    ax.text(8.1, 4.72, "dot product   $q^{\\top}k$",
+            fontsize=11.5, weight="bold", ha="center", color=GREEN)
+    ax.plot([5.3, 5.3], [0.55, 4.5], color="#d1d5db", lw=1.2)
+
+    grid(0.95, 4.05, 3, 12, "#ffedd5", ORANGE)
+    ax.text(0.85, 3.79, "$T_x$", fontsize=10, ha="right", va="center", color=MUTED)
+    ax.text(2.51, 4.42, "$d_a$   (1000 in Bahdanau)", fontsize=9.5, ha="center", color=MUTED)
+    ax.text(2.51, 2.98, "$Z=(T_x,\\; d_a)$  materialized —\n$\\tanh$ runs on every cell",
+            fontsize=10, ha="center", va="top", color=ORANGE)
+    arrow(ax, 2.51, 2.52, 2.51, 2.17, color=ORANGE, lw=1.6)
+    ax.text(2.72, 2.34, "$\\cdot\\, v$", fontsize=10, va="center", color=MUTED)
+
+    grid(2.38, 1.85, 3, 1, "#dcfce7", GREEN)
+    ax.text(2.9, 1.59, "$e_i=(T_x,)$", fontsize=10, va="center", color=INK)
+
+    grid(7.97, 1.85, 3, 1, "#dcfce7", GREEN)
+    ax.text(8.49, 1.59, "$e_i=(T_x,)$", fontsize=10, va="center", color=INK)
+    ax.text(8.1, 3.4, "nothing in between.\none matrix–vector product,\nscores fall straight out",
+            fontsize=10, ha="center", va="center", color=GREEN)
+
+    ax.text(5.3, 0.28, "in self-attention every position is a query, so the orange block becomes "
+                       "$(n,n,d_a)$ against $(n,n)$\n"
+                       "— at $n=1024,\\; d_a=64$ that is 67M floats per head per layer, "
+                       "against 1M",
+            fontsize=10, ha="center", va="center", color=RED)
+    save(fig, "fig13-additive-vs-dot.png")
+
+
 if __name__ == "__main__":
     print("writing figures to", OUT)
     for fn in (fig_bottleneck, fig_path_length, fig_forward_pass, fig_dict_to_attention,
                fig_qkv, fig_symmetry, fig_three_steps, fig_heatmap, fig_shape_trace,
-               fig_saturation, fig_softmax_jacobian):
+               fig_saturation, fig_softmax_jacobian, fig_decoder_loop,
+               fig_additive_vs_dot):
         fn()
     print("done")

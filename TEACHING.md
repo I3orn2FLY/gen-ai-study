@@ -42,7 +42,7 @@ Three levels. A **lesson** is the sit-down unit; **parts** are how it's chopped 
 01-attention/            section  = roadmap phase
   lesson1/               lesson   = one sitting
     1-the-scoring-function.md  part = one idea, one screen
-    2-why-not-rnns.md
+    2-additive-or-multiplicative.md
     ...
     README.md            index + the one-paragraph summary + interview questions
   attention.py           his code (shared across the section's lessons)
@@ -245,6 +245,31 @@ If a lesson can't say where its mechanism lives in a forward pass, the lesson is
 Terms coming up that will need this treatment: latent, ELBO, posterior, score, SNR, guidance
 scale, denoiser, timestep embedding, classifier-free guidance, reward model, KL penalty.
 Assume none of them are known.
+
+### Verify the claim; never ship recall alone
+
+The expensive failure here is not a confusing explanation — that gets flagged the moment it's
+read. It's **a wrong fact that reads fluently**, survives review, and gets built on for ten
+lessons. Four habits, all cheap:
+
+- **Before a part is marked written, check every claim that isn't a derivation.** Widths, layer
+  counts, parameter shapes, dates, who did what, and every "X exists because Y". A derivation
+  can be re-derived on the spot; you cannot re-derive that Bahdanau used 1000 units per
+  direction. Those are the claims recall gets wrong.
+- **There is no network on this box.** Papers can't be fetched, so the check is an internal
+  consistency pass, not a lookup — which makes the next rule mandatory rather than stylistic.
+- **Prefer the symbol to the number.** If a specific figure doesn't teach anything, don't state
+  it: write $d_h$, not $2000$. A wrong symbol is impossible; a wrong number is invisible. State
+  a number only when it carries an argument — Bahdanau's 1000-against-2000 asymmetry earns its
+  place, because it's *why* additive scoring can take mismatched widths.
+- **Write the shapes before writing the sentence.** Claims about cost and parallelism are where
+  this goes wrong. "Additive scoring runs once per pair" was false — it batches over keys fine —
+  and one line of shapes would have caught it before it shipped.
+
+**Corrections get logged, never silently patched.** `review/errata.md`: what was claimed, what's
+true, how it was found, and where it had already propagated. If the wrong claim had ever been
+quizzed, the corrected version also goes into `review/questions.md` as its own question — a
+rehearsed wrong answer needs overwriting, not deleting.
 
 ### Prose style
 
@@ -540,7 +565,8 @@ requirements.txt        grows section by section
   lesson1/              one sitting, split into short readable parts
     README.md           part index + one-paragraph summary + interview questions
     1-the-scoring-function.md
-    2-why-not-rnns.md          ← outline stub until part 1 is right
+    2-additive-or-multiplicative.md
+    3-why-not-rnns.md          ← outline stub until part 2 is right
     ...
   lesson2/
   attention.py          his implementation
