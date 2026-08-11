@@ -26,7 +26,7 @@ out loud and corrected. Ask these first.
 | 8 | Where does $s_0$ come from? | $s_0 = \tanh(W_s\overleftarrow{h}_1)$ — the backward encoder state at position 1, the one half-vector that has read the whole sentence | — | — |
 | 9 | Why can't Bahdanau's model use a dot-product score? | Widths differ: $d_h = 2000$ against $d_s = 1000$. It doesn't typecheck | — | — |
 | 10 | If the dot product has no parameters, where is the relation learned? | In the two RNNs. $\partial e/\partial q = k$ pushes query and key into a shared geometry | — | — |
-| 11 | Why did the dot product beat additive scoring? | Additive materializes a $(T_x, d_a)$ intermediate — $(n,n,d_a)$ in self-attention. The dot product materializes nothing | — | — |
+| 11 | Why did the dot product beat additive scoring? | Additive materializes a $(T_x, d_a)$ intermediate per query; the dot product materializes nothing. Over a translation that's $T_yT_xd_a$ against $T_yT_x$ — a factor of $d_a$ | — | — |
 | 12 | Did Luong show the dot product was best? | No. Three variants, no dominant one; `general` suited local attention and `concat` underperformed suspiciously | — | — |
 | 13 | Why is additive scoring *more* expressive? | It's a nonlinear function of the pair; $q^\top k$ is a sum of products. It lost on cost, not quality | — | — |
 | 14 | Given $W[q;k] = W_qq + W_kk$, what can be cached? | $K_{\text{proj}} = HW_k^\top$ — independent of $i$, so computed once outside the decoder loop. Ancestor of the KV cache | — | — |
@@ -34,8 +34,8 @@ out loud and corrected. Ask these first.
 | 16 | Why is an unrolled RNN's vanishing gradient the same result as a deep net's? | Unrolled, step $t$ *is* layer $t$ — shared weights, input at every layer, depth set by the data. Same Jacobian product | — | — |
 | 17 | Exploding vs vanishing — why is only one of them a real problem? | Clipping rescales a too-large gradient. Nothing restores one that reached numerical zero | — | — |
 | 18 | Why does LSTM gating help the gradient? | $c_t = f_t\odot c_{t-1} + \ldots$ — with $f_t\approx 1$ the update is additive, so $\partial c_t/\partial c_{t-1}\approx I$ | — | — |
-| 19 | What three things broke when the recurrence was removed? | Word order (→ positional encoding), one pattern per layer (→ multi-head), score scale growing with $d$ (→ $1/\sqrt d$) | — | — |
-| 20 | Why is attention a *set* operation? | $\sum_j\alpha_{ij}v_j$ is order-invariant. Shuffle the input, outputs are identical | — | — |
+| 19 | ⚠ Recurrence did three jobs. How many survive its deletion? | **Two break, one survives.** Word order breaks (→ positional encoding); bounded memory breaks ($O(nd)$ keys + $O(n^2)$ scores); parameters-independent-of-length survives. Multi-head and $1/\sqrt d$ are *new* bills, not recurrence's jobs | — | — |
+| 20 | ⚠ Is attention permutation invariant or equivariant? | **Equivariant** — permute the input and the outputs permute with it, not stay put. $\alpha_{ij}$ never sees $j$ and a sum has no order, so a *single* query's output is genuinely invariant; that's the piece people over-generalize into "invariance" | — | — |
 
 ---
 
