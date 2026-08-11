@@ -14,6 +14,9 @@ Process added the same day: `lessonN/ledger.md` (claims + term order), a seeded
 `review/questions.md`, and a cold-read audit pass. Rules in `CLAUDE.md` and `TEACHING.md`
 § Writing the material.
 
+**Outstanding:** part 3 is 1655 words against the 1500 ceiling — the densest part, and the one to
+watch if he says the length still isn't right. Parts 1/2/4 are 1227/1543/1201.
+
 **Web access works from this session** even though the box itself has no network — paper
 abstracts and arXiv HTML are fetchable, and errors 5 and 6 were settled that way. Use it to
 verify claims rather than relying on recall; the symbols-over-numbers rule still stands, but

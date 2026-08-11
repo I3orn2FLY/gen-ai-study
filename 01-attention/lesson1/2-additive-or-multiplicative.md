@@ -53,9 +53,9 @@ e_i    = Z @ v              # (T_x, d_a) @ (d_a,)      ->  (T_x,)
 ```
 
 Two things fall out. **`K_proj` doesn't depend on the step** — encoder states don't change while
-decoding, so project the keys once before the loop and reuse them. Section 03 hits the same idea
+decoding, so project the keys once before the loop and reuse them; section 03 hits the same idea
 again for a much bigger payoff. And **query and key never have to be the same width**: $W_q$ and
-$W_k$ only have to agree on their *output* size. Bahdanau leaned on that.
+$W_k$ only have to agree on their *output* size.
 
 ---
 
@@ -63,16 +63,17 @@ $W_k$ only have to agree on their *output* size. Bahdanau leaned on that.
 
 $$\mathrm{score}(q, k) \;=\; q^{\top} k \;=\; \sum_{m=1}^{d} q_m k_m$$
 
-> $d$ — **the width $q$ and $k$ share.** Writing this at all forces them to have one. Part 1's
+> $m$ — the component index, running over the width.
+> $d$ — **the width $q$ and $k$ share.** Writing this at all forces them to have one, and part 1's
 > $d_s \neq d_h$ is exactly the case where no such $d$ exists.
 
 No parameters at all. Batched over the keys it's one line, `e_i = K @ q`, with
 $K \in \mathbb{R}^{T_x \times d}$ the keys as rows — the job $H$ did above, renamed because we're
 writing the general form now.
 
-Which should bother you. In the additive form the learned $W$ was where "how do these two relate"
-lived. Delete it and you're asking two vectors, made by two different networks doing two different
-jobs, to line up under a plain sum of products. Why would they?
+Which should bother you. In the additive form, $W$ was where "how do these two relate" lived.
+Delete it and you're asking two vectors, made by two different networks doing two different jobs,
+to line up under a plain sum of products. Why would they?
 
 ### Why it isn't absurd
 
@@ -108,8 +109,10 @@ He proposed **three** scoring functions and measured them:
 The middle row is the obvious hedge against the worry above — if the spaces might not line up, put
 a learned matrix between them. It shipped as a peer of the other two.
 
-**No form won.** *Dot* suited one attention variant, *general* another, and `concat` — Bahdanau's
-own form — underperformed in a way he flagged as suspicious rather than settled.
+**No form won.** Luong tried two ways of choosing which source positions to consider at all — one
+looking at the whole sentence, one at a window around a predicted position. *Dot* did better in the
+first, *general* in the second. And `concat` — Bahdanau's own form — underperformed in a way Luong
+flagged as suspicious rather than settled.
 
 That's the whole empirical basis. Nobody proved a bare inner product was enough; it performed
 comparably and cost nothing, so it survived.
@@ -131,17 +134,23 @@ The difference is what each has to **materialize** on the way to those $T_x$ num
 | additive | $Z$, shape $(T_x, d_a)$ — then reduced to $(T_x,)$ |
 | dot product | none — scores fall straight out |
 
-At $d_a = 1000$, additive touches a thousand values for every score it produces, and $\tanh$ is
-elementwise work no matmul kernel can swallow. Over a whole translation, $T_y$ steps:
+**Be careful what's being compared.** In raw arithmetic the two are close: $q^{\top}k$ also does
+$d$ multiply-adds per score, and $d \approx d_a$ here. The difference is **memory traffic**. A
+matmul does its sum inside the chip's registers and only writes out the final number. Additive
+can't: the $\tanh$ sits *between* $q$ and $k$, so all $T_x \cdot d_a$ pre-activations have to be
+written out and read back before anything is reduced.
+
+Count values written per decoder step, then over $T_y$ steps:
 
 $$\underbrace{T_y \cdot T_x \cdot d_a}_{\text{additive}} \qquad\text{versus}\qquad
-\underbrace{T_y \cdot T_x}_{\text{dot product}}$$
+\underbrace{T_y \cdot T_x}_{\text{dot product}} \qquad \text{values materialized}$$
 
 A factor of $d_a$. For 50 words into 50: $50 \cdot 50 \cdot 1000 = 2.5$ million values against
-2500. Same scores either way.
+2500. Same scores either way, and the same order of arithmetic — one of them just has to put a
+thousand times more of it through memory.
 
-The $\tanh$ sitting *between* $q$ and $k$ forces that extra dimension — and it's why there's no
-matrix product to factor out of the additive form. The two vectors never meet as a product at all.
+That $\tanh$ is also why there's no matrix product to factor out of the additive form. The two
+vectors never meet as a product at all.
 
 **The technique that won is the one that fits the hardware, not the one with more expressive
 power.** And note which way it points: every later architecture has more positions attending to
@@ -154,12 +163,15 @@ of products. Additive can express interactions the dot product can't reach. It l
 quality.
 
 **Scale.** With roughly independent, zero-mean, unit-variance components,
-$\mathrm{Var}(q^{\top}k) = d$, so scores have standard deviation $\sqrt{d}$ — growing with the
-width. At $d = 1000$ that's a spread of about $\pm 31$, wide enough that softmax collapses onto one
-position and stops passing gradient back. Additive is immune: $\tanh$ bounds its input.
+$\mathrm{Var}(q^{\top}k) = d$, so scores have standard deviation $\sqrt{d}$ — it grows with the
+width. At $d = 1000$ that's a spread of about $\pm 31$. Feed scores that far apart into softmax and
+one weight goes to essentially 1 and the rest to essentially 0; and once the output is that flat in
+its input, almost no gradient comes back through it.
 
-Luong didn't diagnose it this way, and it isn't why he preferred one form over another. It gets
-found and patched later — part 8, the one to slow down for.
+Two honest caveats. Real RNN states aren't independent or unit-variance, so $\sqrt d$ is a
+worst-case estimate, not what Luong's model actually did — which is why his dot product worked at
+$d = 1000$ at all. And he didn't diagnose it this way; it isn't why he preferred one form over
+another. It gets found and patched later — part 8, the one to slow down for.
 
 ---
 

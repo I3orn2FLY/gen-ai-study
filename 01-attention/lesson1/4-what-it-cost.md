@@ -4,9 +4,12 @@
 
 ## The problem
 
-Part 3 deleted the recurrence for parallelism. The story usually stops there, one sentence short
-of the interesting part: recurrence was doing three jobs, and the replacement doesn't do all
-three. Before building anything on top of attention, count what it owes.
+Part 3 deleted the recurrence for parallelism, and the **transformer** — Vaswani's architecture,
+stacked self-attention with no recurrence anywhere — is what's left. Part 5 builds one.
+
+The story usually stops at "and it's faster", one sentence short of the interesting part.
+Recurrence was doing three jobs and the replacement doesn't do all three, plus a fourth on the
+decoder side that nobody counts. Before building on attention, count what it owes.
 
 Start with the claim you'll hear most often, which is false.
 
@@ -45,14 +48,17 @@ later.
 |---|---|---|
 | Order, for free | **no** | nothing left in the computation refers to position |
 | Any length, fixed memory | **no** | see below |
-| Parameters don't grow with length | **yes** | the projection matrices don't depend on $n$ either |
+| Parameters don't grow with length | **yes** | whatever attention's parameters turn out to be, they act on one position at a time, so their shapes are set by the width, not by $n$ |
 
-Two of three, and the third is why the trade was tolerable.
+Two of three. Don't skip past the survivor: if parameter count scaled with sentence length you
+couldn't train on short sentences and run on long ones, and the whole design would stop being
+reusable. That one holding is why the other two were worth losing.
 
 ### Memory stops being fixed
 
-A recurrence holds one state of width $d$ no matter how long the sentence — flat. Attention holds
-everything at once, and two different things now grow:
+Running forwards, a recurrence holds one state — 2000 numbers in Bahdanau's encoder — no matter how
+long the sentence. Flat. Attention holds every position at once, and two different things now grow
+with $n$ (writing $d$ for the model's width from here on):
 
 | | Size | Why |
 |---|---|---|
@@ -70,7 +76,7 @@ years. It's a debt with a repayment schedule:
 |---|---|---|
 | $O(n^2)$ memory | FlashAttention — same result, never stores $E$ | section 03 |
 | $O(n^2)$ compute | sliding-window, sparse, linear attention | section 03 |
-| $O(nd)$ keys, redone for every generated word | KV caching | section 03 |
+| generating word by word, if each new word redoes the keys | KV caching | section 03 |
 
 Named so you know the bill gets paid. Nothing below assumes them.
 
@@ -101,6 +107,17 @@ them alone. What's derivable here, with a single query, is genuine invariance of
 the machinery for the general statement. Either way, nothing inside attention depends on where a
 token sits.)*
 
+### The decoder could never see the future
+
+Not on the list of three, because it's a decoder-side property — but it broke the same way. $s_i$
+was built from $s_{i-1}$, so word $i$ physically could not consult word $i+1$. You got that for
+free, without asking for it.
+
+Attention has no such scruple: every position sees every other, including the ones it's supposed to
+be predicting. Part 3 said teacher forcing can't parallelize an RNN; the flip side is that once you
+*can* train all positions at once, you have to explicitly forbid looking forward — a **causal
+mask**, in part 5.
+
 ---
 
 ## Two problems that were never recurrence's fault
@@ -117,12 +134,14 @@ delete the recurrence
          order              → positional encoding   (lesson 5)
          fixed memory       → O(nd) keys + O(n²) scores, paid in section 03
          params vs length   → survives untouched
+    → and one it did on the decoder side
+         can't see ahead    → causal mask           (part 5)
     → 2 new problems appear
          one pattern per layer → multi-head         (lesson 2)
          score scale grows     → 1/√d               (part 8)
 ```
 
-Five items, and only the first is what "the transformer's ideas" usually means. Being able to say
+Six items, and only the first is what "the transformer's ideas" usually means. Being able to say
 which is a repair, which is a new bill, and which was never broken is most of what separates a real
 answer from a recited one.
 

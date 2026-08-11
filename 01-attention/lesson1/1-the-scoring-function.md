@@ -87,15 +87,20 @@ $$e_{ij} \;=\; \mathrm{score}\!\left(s_{i-1},\, h_j\right) \qquad j = 1, \dots, 
 > $12.0$ are both fine.
 > **Query** — what the thing looking wants. Here $s_{i-1}$. *"I'm about to write a French word;
 > what do I need?"*
-> **Key** — what a thing being looked at advertises. Here $h_j$. *"I'm 'cat', position 2."*
+> **Key** — what a thing being looked at advertises. Here $h_j$. *"I'm the encoder state for
+> 'cat'."*
 
 $\mathrm{score}$ stays a black box until part 2, but notice its shape: one query, one key, **one
 scalar**. No $T_x$ inside it. The $T_x$ comes from running it once per input word and stacking the
 answers into $e_i$, shape $(T_x,)$.
 
-**2 · Turn scores into weights.** Raw scores can't multiply anything. Doubling all of them would
-double the output while the *preferences* between words stayed the same — output size tracking
-something meaningless. Mixing proportions must be positive and sum to 1:
+**2 · Turn scores into weights.** Raw scores can't multiply anything. Two problems. They can be
+negative — and a negative weight would *subtract* a source word from the blend, which isn't a
+thing you want. And doubling all of them would double the output while the *preferences* between
+words stayed the same, so the output size would track something meaningless.
+
+So: make them positive, then make them sum to 1. Exponentiate (positive, and it preserves the
+ordering), then divide by the total:
 
 $$\alpha_{ij} \;=\; \frac{\exp(e_{ij})}{\sum_{j'=1}^{T_x} \exp(e_{ij'})}$$
 
@@ -105,8 +110,8 @@ $$\alpha_{ij} \;=\; \frac{\exp(e_{ij})}{\sum_{j'=1}^{T_x} \exp(e_{ij'})}$$
 Scores and weights are two things one softmax apart. Everyone conflates them — papers and library
 code both call $\alpha$ "attention scores". Ask which side someone means.
 
-$\alpha_i = [0.02,\ 0.95,\ 0.03]$ reads: *while writing this word, 95% of my attention is on
-"cat".*
+Collect the row into $\alpha_i$, shape $(T_x,)$. Reading $\alpha_i = [0.02,\ 0.95,\ 0.03]$:
+*while writing this word, 95% of my attention is on "cat".*
 
 **3 · Blend.**
 
@@ -148,7 +153,8 @@ $i$**, in training or inference. That's structural, and it's part 3's subject.
 
 **Scores are activations, not parameters.** Built → softmaxed → used → dropped. Nothing in the
 optimizer touches them; training updates the *function* that makes them. (Dropped isn't free
-though — they sit in memory during the pass, and part 4 shows that becoming the dominant cost.)
+though — they sit in memory during the pass and have to survive to the backward pass. Part 4 shows
+how fast that grows.)
 
 **$h_j$ does two jobs.** It appears in the score *and* in the weighted sum — *how you get found*
 and *what you contribute once found*. No reason those must be the same vector. Splitting them

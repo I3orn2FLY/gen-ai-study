@@ -17,13 +17,17 @@ $$h_t \;=\; \mathrm{cell}(h_{t-1},\, x_t)$$
 
 > $x_t$ — the embedding of input word $t$. $h_t \in \mathbb{R}^{d}$ — the state after reading it,
 > where $d$ is just "however wide the state is". $h_0$ is zeros or learned; doesn't matter.
-> $\mathrm{cell}$ — the recurrent unit (RNN, LSTM, GRU), one weight matrix reused every step.
+> $\mathrm{cell}$ — the recurrent unit (RNN, LSTM, GRU), one weight matrix reused every step. It's
+> the same kind of object part 1 called $f$; renamed here because $f_t$ is about to mean something
+> else. A decoder cell takes an extra input or two, but the shape of the argument is identical.
 
 Three jobs, all done without being asked:
 
 - **Order, for free.** The index $t$ is in the wiring. Nothing has to *represent* word order
   because nothing can escape it.
-- **Any length, fixed memory.** One state of width $d$, however long the sentence.
+- **Any length, fixed memory.** Running forwards, one state of width $d$ carries the whole
+  sentence, however long it is. (Training is different — backprop needs every intermediate state
+  kept, so that's $n$ of them. The claim is about the model's design, not its training bill.)
 - **Parameters don't grow with length.** Same cell every step, so 5 words and 500 words use
   identical parameters.
 
@@ -54,9 +58,8 @@ nets" and "vanishing gradients in RNNs" aren't two results — they're one, foun
 > **Path length** — how many computation steps a signal passes through to get from one position to
 > another. Not distance in the sentence; distance *in the network*.
 
-In an RNN, word 1 reaches word 7 by being carried through everything between: six steps, growing
-with the gap. Attention scores word 7 against word 1 directly and pulls in one hop, however far
-apart they are.
+In an RNN, word 1 reaches word 7 through everything in between: six steps, growing with the gap.
+Attention scores them against each other directly — one hop, however far apart.
 
 ![path length: walking versus jumping](figures/fig2-path-length.png)
 
@@ -71,47 +74,50 @@ $$\frac{\partial h_n}{\partial h_1} \;=\; \prod_{t=2}^{n} \frac{\partial h_t}{\p
 > responds to each part of the old one. There are $n-1$ of them.
 
 That product behaves like $\sigma^{\,n-1}$, where $\sigma$ is a typical singular value of one. The
-exponent is the sentence length, which you don't control. Two ways to fail, not equally bad:
+exponent is the sentence length, which you don't control. It fails two ways, and only one is hard:
 
 | | $\sigma$ | Fix |
 |---|---|---|
-| Exploding | $>1$ | **gradient clipping** — shrink the gradient when it gets too big. One line, standard by 2013 |
+| Exploding | $>1$ | **gradient clipping** — shrink it when it gets too big. Standard by 2013 |
 | Vanishing | $<1$ | *nothing like it* |
 
 You can shrink a gradient that came back too large. You can't restore one that hit numerical zero
-— the direction is gone, not just the size. So "the RNN gradient problem" almost always means
-**vanishing**.
+— the direction is gone, not just the size. "The RNN gradient problem" means **vanishing**.
 
 ### Gating shortens the path, it doesn't remove it
 
-This is what LSTMs and GRUs were for. The LSTM runs a memory channel alongside the state:
+This is what LSTMs and GRUs were for — a memory channel running alongside the state:
 
 $$c_t \;=\; f_t \odot c_{t-1} \;+\; i_t \odot \tilde{c}_t$$
 
-> $c_t$ — the **cell state**. (Not part 1's context vector; the letters collide here and in the
-> literature.) $f_t \in (0,1)^{d}$ — the **forget gate**, how much old memory to keep per
-> component. $i_t \odot \tilde c_t$ — **input gate** times **candidate**, how much new to let in.
-> $\odot$ is elementwise.
+> $c_t$ — the **cell state**. $f_t \in (0,1)^{d}$ — the **forget gate**, how much old memory to keep
+> per component. $i_t \odot \tilde c_t$ — **input gate** times **candidate**, how much new to let
+> in. $\odot$ is elementwise.
+>
+> Three letters here are reused from part 1, and they're reused in the literature too, so it's
+> worth naming once: $c_t$ is a cell state, not a context vector; $f_t$ is a gate vector, not a
+> cell function; $i_t$ is a gate vector, not a decoder step index. Subscript $t$ means "gate".
 
 When $f_t \approx 1$ the update is **additive**, so $\partial c_t/\partial c_{t-1} \approx I$ — the
 identity, not a decaying matrix, and the product stops shrinking. (The forget gate wasn't in the
 1997 LSTM; Gers et al. added it in 2000.)
 
 That's a shortcut through the unrolled depth — the same move highway networks and ResNet make on
-ordinary depth in 2015. Three things in one family:
+ordinary depth in 2015. Three of a kind:
 
 | | Shortcut across | Wiring |
 |---|---|---|
-| LSTM gating | unrolled time | learned gates, still one hop per step |
+| LSTM gating | unrolled time | learned gates, one hop per step |
 | Residual connections | layers | fixed when you build the model |
 | Attention | positions, one hop | **computed from the content**, per sentence |
 
-Gating and residuals make the path easier. Attention **deletes** it — no intermediate state at all
-— and its shortcuts aren't wiring, since $\alpha_{ij}$ is recomputed every forward pass.
+Gating and residuals make the path easier. Attention **deletes** it, and its shortcuts aren't
+wiring — $\alpha_{ij}$ is recomputed every forward pass.
 
 **Now the trap.** This is the argument everyone reaches for and it's *not* the one that mattered.
-Gated RNNs were already good enough at long range that quality wasn't the blocker. Path length is
-a real advantage and a satisfying story. It decided nothing.
+Stacked LSTMs held the state of the art in machine translation right up to 2017 — Google's
+production translation system was one. Long-range quality was not what had the field stuck. Path
+length is a real advantage and a satisfying story. It decided nothing.
 
 ---
 
@@ -120,32 +126,36 @@ a real advantage and a satisfying story. It decided nothing.
 This is the one. To see it, notice the model you already have is **partly parallel** — and the
 parallel part is the attention.
 
-One Bahdanau decoder step, shapes from part 2. The question that sets wall-clock time is whether a
-line waits on an **earlier word**:
+One Bahdanau decoder step, shapes from part 2. Every line takes $s_{i-1}$ as an input — that isn't
+the problem. The problem is which line *produces* the state the **next** step needs, because that's
+what forces the steps into a queue:
 
-| Step | Shape | Waits on an earlier word? |
-|---|---|---|
-| $K_{\text{proj}} = H W_k^{\top}$ | $(T_x, d_a)$ | no — done once, before the loop |
-| $Z = \tanh(W_q s_{i-1} + K_{\text{proj}})$ | $(T_x, d_a)$ | no |
-| $e_i = Z v$ | $(T_x,)$ | no |
-| $\alpha_i = \mathrm{softmax}(e_i)$ | $(T_x,)$ | no |
-| $c_i = \alpha_i^{\top} H$ | $(d_h,)$ | no |
-| $s_i = \mathrm{cell}(s_{i-1},\, y_{i-1},\, c_i)$ | $(d_s,)$ | **yes — $s_{i-1}$** |
+| Step | Shape | Parallel over the $T_x$ keys? | Feeds the next step? |
+|---|---|---|---|
+| $K_{\text{proj}} = H W_k^{\top}$ | $(T_x, d_a)$ | yes — and done once, before the loop | no |
+| $Z = \tanh(W_q s_{i-1} + K_{\text{proj}})$ | $(T_x, d_a)$ | yes | no |
+| $e_i = Z v$ | $(T_x,)$ | yes | no |
+| $\alpha_i = \mathrm{softmax}(e_i)$ | $(T_x,)$ | yes (a sum, so $\log T_x$ deep, not $T_x$) | no |
+| $c_i = \alpha_i^{\top} H$ | $(d_h,)$ | yes (same) | no |
+| $s_i = \mathrm{cell}(s_{i-1},\, y_{i-1},\, c_i)$ | $(d_s,)$ | — | **yes — it makes $s_i$** |
 
-Rows 2–5 run in order relative to each other, of course — that's an ordinary computation graph. What
-matters is that none reaches back to a previous *word*; their work spreads across all $T_x$ input
-positions at once. **Attention is already the parallel part.** The last row is the RNN, and it's
-the only thing that serializes over words.
+Only the last row puts anything into the chain $s_0 \to s_1 \to \cdots$. Everything above it is
+one sweep across the source positions whose depth doesn't grow with $T_x$. **Attention is already
+the parallel part.** The RNN cell is the only thing that serializes over words.
 
 Count a training example: $T_x$ sequential steps for the encoder plus $T_y$ for the decoder, each a
 small matrix–vector product. A GPU with thousands of cores runs one, idles, repeats.
 
 So the question isn't "is attention parallel?" It already is. It's: **what if the parallel part
-were the whole model?**
+were the whole model?** And notice what that fixes — part 2 couldn't batch the queries because each
+$s_{i-1}$ had to be computed first. Take the RNN out and a position's query comes from its own
+input: the word embedding, or whatever the previous layer produced there. Every query exists before
+you start.
 
 > **Self-attention** — attention where queries and keys come from the *same* sequence, so every
 > position scores every other instead of scoring a separate encoder.
-> **Layer** — one attention operation over a whole sequence, the kind a model stacks many of.
+> **Layer** — from here on, one attention operation over a whole sequence, the kind a model stacks
+> many of. (Narrower than "layer" in "4 stacked LSTM layers" a moment ago — same word, new unit.)
 > Both are part 5's; here they just mean "attention with no RNN around it."
 
 | Per layer | Sequential operations |
@@ -169,7 +179,7 @@ more parallelizable, significantly less time to train.
 
 > **Recurrence wasn't replaced for learning badly. It was replaced for training slowly.**
 
-*(**Origin tag: Fix**. The failure was a training-time constraint, not a modelling one.)*
+*(**Origin tag: Fix** — a training-time constraint, not a modelling one.)*
 
 ---
 

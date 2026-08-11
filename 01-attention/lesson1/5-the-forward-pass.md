@@ -17,6 +17,8 @@ Before any formula: where does this thing actually live?
 - What happens to the scores afterwards — discarded, rebuilt every block, every forward pass.
   Only $W_Q, W_K, W_V$ persist
 - Sizes made real: $T = 2048$ → 4.2M score entries per block per pass
-- Self vs cross attention: one mechanism, three wirings. Padding masks
+- Self vs cross attention: one mechanism, three wirings
+- **Causal masking** — part 4 showed the decoder's recurrence enforced "no looking forward" for
+  free, and that attention has to be told. Padding masks alongside it
 
 *Figure ready: `figures/fig11-forward-pass.png`*

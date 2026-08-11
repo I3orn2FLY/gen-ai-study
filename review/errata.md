@@ -150,3 +150,37 @@ audit running after every pass rather than once at the end.
 Also worth recording: the audit's own report contained a stale finding — it flagged the 2.5
 billion figure that had already been corrected while it was reading. **Audit output is evidence,
 not verdict.** Check each finding against the current file before acting on it.
+
+---
+
+## 2026-08-11 — Section 01, lesson 1, third cold-read audit (after shortening)
+
+Run against parts 1–4 after a 30% length cut, specifically looking for arguments that lost a step.
+It found real damage, plus things the earlier passes had missed.
+
+| # | Problem | Fix |
+|---|---|---|
+| 15 | Part 3's parallelism table asked "waits on an earlier word?" and answered **no** for four rows that all consume $s_{i-1}$ — the very dependency the last row is bolded for. The patch sentence "none reaches back to a previous word" was false as written | The right question is which line *produces* what the next step needs. Only the cell does. Table is now two columns: parallel over the $T_x$ keys, and feeds the next step |
+| 16 | Part 2's cost argument said additive "touches a thousand values per score" — but $q^\top k$ also touches $d \approx d_a$ values. As FLOPs the comparison is **wrong**; the two are comparable | It was always a *memory* argument. Now stated: a matmul reduces in registers and writes one number; additive has to write out and read back $T_x d_a$ pre-activations because the $\tanh$ sits between $q$ and $k$. The underbrace is labelled "values materialized" |
+| 17 | Part 2: Luong's dot product "performed comparably" at $d = 1000$, and 40 lines later $d = 1000$ gives $\pm 31$ spread that "collapses softmax". Both stated flatly | Added the missing clause: real RNN states aren't independent or unit-variance, so $\sqrt d$ is a worst case, not what his model did |
+| 18 | Part 4: "the projection matrices don't depend on $n$ either" — no projection matrices exist in the model built so far; the dot-product form has no parameters at all | Restated without them |
+| 19 | Part 1's key advertises *"I'm 'cat', **position 2**"* — while part 4 argues the score function never sees position | Advertisement is now content-only |
+| 20 | Part 3: "one state of width $d$, however long the sentence" ignores that backprop retains every intermediate state, so training memory is $O(nd)$ — the same regime part 3 argues in | Scoped to the forward pass, with the training bill stated |
+| 21 | Part 1's softmax argument justified normalizing but asserted positivity — nine lines after saying $-3.7$ is a fine score | Both halves argued: a negative weight would subtract a word from the blend; exp is positive and order-preserving |
+| 22 | "Gated RNNs were already good enough at long range" — load-bearing (it's what makes path length non-decisive) with no support | Replaced with the checkable version: stacked LSTMs held translation SOTA up to 2017, Google's production system among them |
+| 23 | Part 3's $O(1)$ claim needs all queries to exist at once — which part 2 had just said in bold they don't. Never bridged | Added: without the RNN, a position's query comes from its own embedding or the previous layer, so they all exist up front |
+
+**The gap none of the three audits had caught until now:** the decoder's recurrence also made it
+*impossible to see the future*, and attention has no such constraint. Training a decoder on all
+positions at once requires an explicit **causal mask**. It wasn't in the broken-jobs list, wasn't
+a forward promise, and wasn't in part 5's outline — which listed padding masks only. Now in both.
+
+**Also fixed:** $f$/$f_t$ and $i$/$i_t$ collisions (the $c_t$ one was flagged, which made the
+silence on the other two conspicuous); $\mathrm{cell}$ used at two arities and never tied to
+part 1's $f$; "layer" silently narrowed from "4 stacked LSTM layers" to "one attention operation";
+"transformer" used argumentatively while undefined; $m$ and $\alpha_i$'s shape.
+
+**Note on the length rule.** The 700–1200 word ceiling written into `CLAUDE.md` earlier the same
+day was set from a bad estimate and turned out to be unreachable without cutting content. It is now
+1500, set by measuring. Part 3 sits at 1655 and is logged as over in `PROGRESS.md` rather than
+trimmed into incoherence.
