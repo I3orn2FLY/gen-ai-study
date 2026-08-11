@@ -1,11 +1,11 @@
-# 5 · Query, key, value
+# 6 · Query, key, value
 
 *~7 min. Lesson 1 — **not written yet**.*
 
 > **Placeholder.** Parts are written one at a time, after the previous one is right.
 > Below is what this part will contain.
 
-Part 4 had three tensors appear out of nowhere. What are they, and why three?
+Part 5 had three tensors appear out of nowhere. What are they, and why three?
 
 **Will cover**
 

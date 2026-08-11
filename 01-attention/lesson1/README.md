@@ -2,23 +2,24 @@
 
 *Roadmap Phase 1, steps 1–2 · ~2 hours total · runs on CPU*
 
-Nine short parts. **Written one at a time** — each is generated after the previous one reads
-right, so the style carries forward instead of nine parts inheriting the same mistake.
+Ten short parts. **Written one at a time** — each is generated after the previous one reads
+right, so the style carries forward instead of ten parts inheriting the same mistake.
 
 | # | Part | Time | Status |
 |---|---|---|---|
 | 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, the number that fixes it, and the decoder loop it lives in | ~6 min | **written** |
 | 2 | [Additive or multiplicative](2-additive-or-multiplicative.md) — how `score()` is actually computed, and why one form died | ~6 min | **written** |
 | 3 | [Why not recurrence](3-why-not-rnns.md) — what recurrence was for, and two arguments for deleting it anyway | ~6 min | **written** |
-| 4 | [The forward pass](4-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min | outline |
-| 5 | [Query, key, value](5-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |
-| 6 | [The operation](6-the-operation.md) | ~4 min | outline |
-| 7 | [Why √d](7-why-sqrt-d.md) — the one to slow down for | ~6 min | outline |
-| 8 | [The PyTorch you need](8-pytorch-you-need.md) | ~4 min | outline |
-| 9 | [Your task](9-your-task.md) | ~45 min doing | outline |
+| 4 | [What deleting it cost](4-what-it-cost.md) — the complexity trap, and which of recurrence's jobs survive | ~4 min | **written** |
+| 5 | [The forward pass](5-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min | outline |
+| 6 | [Query, key, value](6-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |
+| 7 | [The operation](7-the-operation.md) | ~4 min | outline |
+| 8 | [Why √d](8-why-sqrt-d.md) — the one to slow down for | ~6 min | outline |
+| 9 | [The PyTorch you need](9-pytorch-you-need.md) | ~4 min | outline |
+| 10 | [Your task](10-your-task.md) | ~45 min doing | outline |
 
 The outlines say what each part will contain, so the shape of the lesson is visible without
-committing nine files of prose to it. [`ledger.md`](ledger.md) tracks every non-derivable claim
+committing ten files of prose to it. [`ledger.md`](ledger.md) tracks every non-derivable claim
 and where each term is defined — not reading material, but it's what makes the lesson auditable.
 
 Each part opens on something that doesn't work yet, then earns the mechanism that fixes it.
@@ -83,6 +84,6 @@ python 01-attention/check_lesson1.py
 - **Luong, Pham, Manning (2015)** — *Effective Approaches to Attention-based NMT.*
   Dot-product vs additive, compared head-to-head.
 - **Vaswani et al. (2017)** — *Attention Is All You Need.* §3.2.1 and **footnote 4** for the
-  scaling. **Table 1** for part 3's comparison.
+  scaling. **Table 1** for part 4's comparison.
 - Optional: Lilian Weng, *Attention? Attention!* — good consolidation read, **after** you
   implement it.

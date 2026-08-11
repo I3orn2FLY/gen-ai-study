@@ -2,13 +2,13 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** **Fix parts 1 and 2** against the cold-read audit — the outstanding table at the
-bottom of `review/errata.md` is the work list. *Then* part 4. Parts 4–9 are outline stubs.
+**Next action:** Lesson 1 is now **ten** parts; **1–4 are written**, 5–10 are outline stubs.
+Kenessary has read parts 1–2 in an older form and needs to re-read 1–4. Then part 5.
 
-Part 3 was rewritten twice on 2026-08-11 (once for Kenessary's reading, once for the audit) and is
-current. Eight errors found and fixed so far — see `review/errata.md`. Note that errors 7 and 8
-were *introduced by the fix* for 5 and 6, which is the argument for the audit running on every
-part rather than on request.
+Fourteen errors found and fixed on 2026-08-10/11 — see `review/errata.md`. The pattern that
+matters: errors 7–8 were introduced by the fix for 5–6, and 9b by the fix for 7. **A revision is
+as likely to introduce an error as a first draft**, so the cold-read audit runs after every pass,
+not once at the end.
 
 Process added the same day: `lessonN/ledger.md` (claims + term order), a seeded
 `review/questions.md`, and a cold-read audit pass. Rules in `CLAUDE.md` and `TEACHING.md`
@@ -158,5 +158,6 @@ that never changes is one nobody is checking.
 | 2026-08-10 | Rule added: **verify claims, don't ship recall** — symbols over numbers, shapes written before any cost claim, corrections logged in the new `review/errata.md` rather than patched silently | Four factual errors found in part 1 after it was marked written |
 | 2026-08-11 | Rule sharpened: **a part may not use a mechanism it hasn't earned yet, even in a comparison table.** Part 3 compared "Recurrence $O(n)$" against "Attention $O(1)$", which is only true once the recurrence is deleted — the very thing the part was arguing for. Arguments must be derivable from the model in hand | Kenessary: "at that point it is still sequential for both encoder and decoder" |
 | 2026-08-11 | Rule added: **credit a mechanism before criticising it.** Part 3 attacked recurrence for two sections before saying what recurrence was for; the three jobs it did now come first, and the closing section is explicitly the bill | Kenessary: "it was explained that rnns are bad and then it was said that is why they exist" |
+| 2026-08-11 | Lesson 1 split again, nine parts → **ten**: part 3 had grown to 343 lines once the audit fixes landed, so *what deleting recurrence cost* became part 4 in its own right | The length ceiling; fixed structurally rather than by trimming, same as the earlier 8→9 split |
 | 2026-08-11 | **Web access confirmed working** from the Claude Code session despite the box having no network. Claims are now fetched and checked, not recalled | Two part-3 claims settled by fetching the papers |
 | 2026-08-03 | §4 bf16 detection corrected — `is_bf16_supported()` reports True on Turing via emulation; must pass `including_emulation=False` | Found by running the check on the actual machine |

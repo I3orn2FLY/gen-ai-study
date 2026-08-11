@@ -1,4 +1,4 @@
-# 4 · The forward pass — where attention sits
+# 5 · The forward pass — where attention sits
 
 *~6 min. Lesson 1 — **not written yet**.*
 

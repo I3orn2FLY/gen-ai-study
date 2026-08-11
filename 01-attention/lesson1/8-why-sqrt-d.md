@@ -1,11 +1,11 @@
-# 7 · Why √d
+# 8 · Why √d
 
 *~6 min — the one to slow down for. Lesson 1 — **not written yet**.*
 
 > **Placeholder.** Parts are written one at a time, after the previous one is right.
 > Below is what this part will contain.
 
-Part 4 walked past one line: `scores = scores / √64`. Why is it there?
+Part 5 walked past one line: `scores = scores / √64`. Why is it there?
 
 **Will cover**
 

@@ -1,6 +1,6 @@
 # 2 · Additive or multiplicative
 
-*~6 min. Lesson 1, part 2 of 9.*
+*~6 min. Lesson 1, part 2 of 10.*
 
 ## The problem
 
@@ -145,8 +145,8 @@ measured them:
 | concat | $v_a^{\top}\tanh\!\big(W_a[\,q;k\,]\big)$ | Bahdanau's additive form: $W_a \in \mathbb{R}^{d_a \times 2d}$, $v_a \in \mathbb{R}^{d_a}$ |
 
 > The two $W_a$'s are different matrices with different shapes — Luong reuses the letter across
-> rows. In `general` it maps a key into the query's space; in `concat` it's part 1's $W$ under
-> another name.
+> rows. In `general` it maps a key into the query's space; in `concat` it's the same $W$ from the
+> top of this part, under another name.
 
 The middle row is the obvious hedge against exactly the worry above: if the two spaces might not
 line up, put a learned matrix in between. It shipped as a peer of the other two.
@@ -193,9 +193,10 @@ there's no matrix product to factor out of the additive form — the two vectors
 product at all.
 
 **The technique that won is the one that maps onto the hardware, not the one with more
-expressive power.** Hold onto that; it decides a lot of this roadmap. And note the direction that
+expressive power.** Hold onto that; it decides a lot of this roadmap. And note which way that
 factor of $d_a$ points: every later architecture in this course has *more* positions attending to
-*more* positions, so the gap only widens. Part 3 puts a number on it.
+*more* positions, so $T_y \cdot T_x$ only grows — and the additive form pays $d_a$ times whatever
+that number is.
 
 ### What the dot product cost
 
@@ -216,7 +217,7 @@ position and stops passing gradient backward. Additive is immune to this: $\tanh
 input, and $v$ is learned to whatever scale works.
 
 To be accurate about the history: Luong did not diagnose it this way, and it isn't why he
-preferred one form or another. It gets identified and patched later — part 7, the one to slow
+preferred one form or another. It gets identified and patched later — part 8, the one to slow
 down for.
 
 ---

@@ -54,11 +54,12 @@ lesson 1 closes, drop the date and keep the mechanism.
 | **$d$** — the width query and key *share*; only exists in equal-width architectures | 2 |
 | $K$, then $Q$ and $E = QK^\top$ | 2 |
 | $W_a$, $v_a$ (Luong's, with the shape change between rows flagged) | 2 |
-| $n$ (sequence length), $x_t$, path length, sequential operations | 3 |
+| $n$ (sequence length), $x_t$, $h_0$, path length, sequential operations | 3 |
 | $c_t$, $f_t$, $i_t$, $\tilde c_t$, $\odot$; $g$, $\tau$; $\sigma$ | 3 |
 | unrolled RNN as a deep network | 3 |
-| permutation equivariance, $P$ | 3 |
-| self-attention, layer | 3 — *one-line gloss only; earned in 4–5* |
+| permutation invariance of $c_i$ (equivariance flagged, not derived) | 4 |
+| self-attention, layer | 3 — *one-line gloss only; earned in 5* |
+| context window, the $O(nd)$ / $O(n^2)$ split | 4 |
 | value, multi-head, positional encoding, KV cache, FlashAttention | *forward promises — named, never load-bearing* |
 
 The last row is the one to police. A part may **name** something later as a promise; it may not

@@ -1,11 +1,11 @@
-# 8 · The PyTorch you need
+# 9 · The PyTorch you need
 
 *~4 min. Lesson 1 — **not written yet**.*
 
 > **Placeholder.** Parts are written one at a time, after the previous one is right.
 > Below is what this part will contain.
 
-Every line of part 4's attention box, as an idiom. Not the solution — the vocabulary it's
+Every line of part 5's attention box, as an idiom. Not the solution — the vocabulary it's
 written in.
 
 **Will cover**

@@ -1,6 +1,6 @@
 # 1 · The scoring function
 
-*~6 min. Lesson 1, part 1 of 9.*
+*~6 min. Lesson 1, part 1 of 10.*
 
 ## The problem
 
@@ -87,9 +87,9 @@ $y_0 = \texttt{<sos>}$ ("start of sequence") is prepended to every target senten
 training. The model learns an embedding for it like any other word.
 
 **Worth noticing now:** this whole question only exists because there's a state chain to start.
-The **transformer** — the architecture this lesson is building toward, assembled in part 4 — has
-no such chain, so the problem evaporates: its first input is just the $\texttt{<sos>}$ embedding,
-with no state to initialize at all.
+Part 3 deletes that chain, and when it does, this section stops being needed at all — there's
+nothing left to initialize. Keep the observation; it's the first hint that the chain is the
+awkward part of the design rather than the load-bearing part.
 
 ### One decoder step
 
@@ -120,10 +120,11 @@ results into a vector $e_i \in \mathbb{R}^{T_x}$, here shape $(3,)$.
 
 **These are the scores.**
 
-**2 · Normalize into weights.** Scores can't multiply anything yet — scale all of them by $100$
-and the blend below would grow $100\times$ while the *preferences* between source words stayed
-identical. To be mixing proportions they have to be positive and sum to 1, which is what softmax
-does:
+**2 · Normalize into weights.** Scores can't multiply anything yet. Used *directly* as
+multipliers, scaling all of them by $100$ would grow the blend below $100\times$ while the
+*preferences* between source words stayed identical — the output size would track something that
+carries no information. To be mixing proportions they have to be positive and sum to 1, which is
+what softmax does:
 
 $$\alpha_{ij} \;=\; \frac{\exp(e_{ij})}{\sum_{j'=1}^{T_x} \exp(e_{ij'})}$$
 
@@ -193,10 +194,12 @@ $e_i$ of shape $(T_x,)$; with $T_y = 4$ output words that's four of them — a
 $T_y \times T_x = 4 \times 3$ table over the whole translation.
 
 Watch the lifetime: built → softmaxed into $\alpha$ → used to weight the $h_j$ → **dropped**.
-Scores are never stored, and they are not parameters — nothing in the optimizer's care. They're
-recomputed from scratch for every sentence, like any activation. What training updates is the
-*function* that produces them, never the scores themselves. That stays true for every attention
-mechanism in this course.
+Scores are not parameters — nothing in the optimizer's care. They're recomputed from scratch for
+every sentence, like any activation, and what training updates is the *function* that produces
+them, never the scores themselves. That stays true for every attention mechanism in this course.
+
+(Discarded between sentences isn't the same as free. While the pass is running they occupy
+memory, and part 3 shows that becoming the dominant cost of the whole design.)
 
 ---
 
@@ -213,7 +216,7 @@ c_i = \sum_j \alpha_{ij}\, \underbrace{h_j}_{\text{step 3}}$$
 
 One vector doing two different jobs: *how you get found*, and *what you contribute once found*.
 There is no reason those have to be the same vector. Splitting them apart produces a third name
-and a third projection — part 5.
+and a third projection — part 6.
 
 ---
 

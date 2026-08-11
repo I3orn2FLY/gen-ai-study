@@ -118,3 +118,35 @@ introduced on its own.
 The last row is why part 3 now writes the permutation argument with $c_i = \sum_j \alpha_{ij} h_j$
 rather than $\sum_j \alpha_{ij} v_j$ — $h_j$ is defined, $v_j$ isn't yet, and $v$ already means
 part 2's learned additive vector.
+
+---
+
+## 2026-08-11 — Section 01, lesson 1, second cold-read audit
+
+Run against the state that had just been fixed. Everything below was found by the audit except
+#9a, which was found by running the arithmetic in a shell before committing.
+
+| # | Claimed | Actually |
+|---|---|---|
+| 9a | "$50\cdot50\cdot1000$ = **2.5 billion** intermediate values" | **2.5 million.** Off by $1000\times$, in the one sentence whose job was to make the magnitude vivid |
+| 9b | The permutation argument, derived from $c_i = \sum_j\alpha_{ij}h_j$ and stated as $\mathrm{Attn}(PX) = P\,\mathrm{Attn}(X)$ | **That equation gives invariance of $c_i$, not equivariance.** Equivariance needs one output *per position*, i.e. self-attention, which part 3 has only glossed. Correct claim #7 → wrong derivation for it |
+| 10 | "the fixed-width state becomes $n$ keys you must hold at once → that's the $n^2$ bill above" | Holding $n$ keys is $O(nd)$ — **linear**. The $n^2$ is the score table, a different object with a different cause. The arrow equated a linear cost with a quadratic one |
+| 11 | "a layer is one attention op **plus the per-position network after it**" … "one layer is **a single** $(50\times d)(d\times 50)$ matmul" | Self-contradiction three lines apart, and the definition leaned on a feed-forward block that doesn't exist yet in this lesson |
+| 12 | Part 1: "Scores are **never stored**." Part 3: $E$ "**has to exist**", and FlashAttention's whole point is not storing it | Both true in different senses — not *parameters*, not persisted between sentences, but they do occupy memory during the pass and must survive to the backward pass. Unreconciled, the memory section reads as unmotivated |
+| 13 | "in `concat` it's **part 1's** $W$" | $W$ is introduced in part 2. Part 1 has no $W$, only $W_s$ |
+| 14 | "the gap only widens. **Part 3 puts a number on it.**" | Part 3 puts numbers on $n^2d$ vs $nd^2$ and on $n\times n$ memory — never on the additive-vs-dot gap. Promise never cashed |
+
+Symbol collisions also fixed: $f$ was the decoder cell, a generic recurrent cell, *and* the forget
+gate $f_t$; $c$ was both context vector and LSTM cell state; $d_h$ meant Bahdanau's concatenated
+bidirectional width in part 1 and a plain state width in part 3; $E$ went from $T_y\times T_x$ to
+$n \times n$ without a note; $i$/$j$ switched from (decoder step, source position) to two
+positions in one sequence; $d_e$, $L$, $h_0$, $X$ and $\mathrm{Attn}(\cdot)$ were used undefined.
+
+**The pattern worth naming.** Errors 7–8 were introduced by the fix for 5–6; 9b was introduced by
+the fix for 7. Three rounds, each one clean on the thing it targeted and wrong somewhere new.
+A *revision* is as likely to introduce an error as a first draft, which is the argument for the
+audit running after every pass rather than once at the end.
+
+Also worth recording: the audit's own report contained a stale finding — it flagged the 2.5
+billion figure that had already been corrected while it was reading. **Audit output is evidence,
+not verdict.** Check each finding against the current file before acting on it.
