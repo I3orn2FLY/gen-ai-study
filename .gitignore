@@ -51,6 +51,10 @@ lightning_logs/
 **/samples/
 **/*.log
 
+# Scratch answers — throwaway .md files written so a chat answer can be read
+# with rendered math. Never part of the curriculum; delete freely.
+scratch-*.md
+
 # Large media generated during training
 *.mp4
 *.gif

@@ -2,13 +2,22 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** Section 01, lesson 1 — **parts 1–3 written**, parts 4–9 are outline stubs.
-Kenessary has read parts 1–2. Next: `3-why-not-rnns.md`; if it reads
-right, write part 4. One part at a time.
+**Next action:** **Fix parts 1 and 2** against the cold-read audit — the outstanding table at the
+bottom of `review/errata.md` is the work list. *Then* part 4. Parts 4–9 are outline stubs.
 
-Four factual errors in part 1 were found and fixed on 2026-08-10 — see `review/errata.md`.
-The rule added in response (verify claims, prefer symbols to numbers, shapes before cost
-sentences) is in `CLAUDE.md` and `TEACHING.md` § Writing the material.
+Part 3 was rewritten twice on 2026-08-11 (once for Kenessary's reading, once for the audit) and is
+current. Eight errors found and fixed so far — see `review/errata.md`. Note that errors 7 and 8
+were *introduced by the fix* for 5 and 6, which is the argument for the audit running on every
+part rather than on request.
+
+Process added the same day: `lessonN/ledger.md` (claims + term order), a seeded
+`review/questions.md`, and a cold-read audit pass. Rules in `CLAUDE.md` and `TEACHING.md`
+§ Writing the material.
+
+**Web access works from this session** even though the box itself has no network — paper
+abstracts and arXiv HTML are fetchable, and errors 5 and 6 were settled that way. Use it to
+verify claims rather than relying on recall; the symbols-over-numbers rule still stands, but
+"no network" is not a reason to ship an unverified fact.
 
 ---
 
@@ -119,8 +128,9 @@ Trained weights that later sections depend on. Full detail in `checkpoints/MANIF
 
 Spaced review runs at the start of roughly every third session (`TEACHING.md` § review layer).
 
-- Question bank: `review/questions.md` — **0 questions**
-- Errata: `review/errata.md` — **4 corrections** (section 01 lesson 1 part 1, none quizzed)
+- Question bank: `review/questions.md` — **20 questions** (01 lesson 1, parts 1–3), 3 marked ⚠
+  as misconceptions he actually held. **None asked yet — a quiz is due before part 4.**
+- Errata: `review/errata.md` — **6 corrections** (section 01 lesson 1, parts 1 and 3; none quizzed)
 - Quiz history: `review/log.md` — **no quizzes run**
 - Outstanding **shaky** or **confidently wrong** items: none
 
@@ -146,4 +156,7 @@ that never changes is one nobody is checking.
 | 2026-08-03 | Rule added: **write one part at a time**; unwritten parts get outline stubs. A lesson drafted in one pass inherits the same mistake in every part | Kenessary: "if you generate whole lesson you suck" |
 | 2026-08-10 | Lesson 1 split into **nine** parts — the scoring-function *choice* (additive vs dot product) became part 2 in its own right, since part 1 had grown past the length rule and the shape argument needs room | Kenessary asked for the additive formula's shapes; the honest answer didn't fit |
 | 2026-08-10 | Rule added: **verify claims, don't ship recall** — symbols over numbers, shapes written before any cost claim, corrections logged in the new `review/errata.md` rather than patched silently | Four factual errors found in part 1 after it was marked written |
+| 2026-08-11 | Rule sharpened: **a part may not use a mechanism it hasn't earned yet, even in a comparison table.** Part 3 compared "Recurrence $O(n)$" against "Attention $O(1)$", which is only true once the recurrence is deleted — the very thing the part was arguing for. Arguments must be derivable from the model in hand | Kenessary: "at that point it is still sequential for both encoder and decoder" |
+| 2026-08-11 | Rule added: **credit a mechanism before criticising it.** Part 3 attacked recurrence for two sections before saying what recurrence was for; the three jobs it did now come first, and the closing section is explicitly the bill | Kenessary: "it was explained that rnns are bad and then it was said that is why they exist" |
+| 2026-08-11 | **Web access confirmed working** from the Claude Code session despite the box having no network. Claims are now fetched and checked, not recalled | Two part-3 claims settled by fetching the papers |
 | 2026-08-03 | §4 bf16 detection corrected — `is_bf16_supported()` reports True on Turing via emulation; must pass `including_emulation=False` | Found by running the check on the actual machine |

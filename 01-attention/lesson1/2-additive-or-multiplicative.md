@@ -98,9 +98,9 @@ the same width. This is a hard architectural constraint, not a preference — an
 **fails it**: bidirectional encoder states at $d_h = 2000$ against a decoder at $d_s = 1000$.
 You cannot drop a dot product into his architecture at all.
 
-Luong's is built differently: stacked LSTMs, $1000$ units on the encoder side *and* the decoder
-side, and a decoder whose state chain is seeded from the encoder's final state. Same width by
-design, shared origin. The two spaces aren't strangers.
+Luong's is built differently: stacked LSTMs — 4 layers of $1000$ cells, encoder *and* decoder —
+with a decoder whose state chain is seeded from the encoder's final state. Same width by design,
+shared origin. The two spaces aren't strangers.
 
 **Second, the relation is still learned — by the RNNs.** Look at what a gradient step does:
 
@@ -131,8 +131,11 @@ measured them:
 | concat | $v_a^{\top}\tanh\!\big(W_a[\,q;k\,]\big)$ | Bahdanau's additive form |
 
 The middle row is the obvious hedge against exactly the worry above: if the two spaces might not
-line up, put a learned matrix in between. It was implemented and shipped as a peer of the other
-two, and the results were mixed — no single form dominated across his settings.
+line up, put a learned matrix in between. It shipped as a peer of the other two.
+
+**No form dominated.** His conclusion was that *dot* worked well for one attention variant and
+*general* for another — and that `concat`, Bahdanau's own form, underperformed in a way he
+flagged as suspicious rather than settled.
 
 That is the entire empirical basis. Nobody proved a bare inner product was sufficient; it
 performed comparably and cost nothing, so it survived.

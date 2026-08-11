@@ -252,19 +252,28 @@ The expensive failure here is not a confusing explanation — that gets flagged 
 read. It's **a wrong fact that reads fluently**, survives review, and gets built on for ten
 lessons. Four habits, all cheap:
 
-- **Before a part is marked written, check every claim that isn't a derivation.** Widths, layer
-  counts, parameter shapes, dates, who did what, and every "X exists because Y". A derivation
-  can be re-derived on the spot; you cannot re-derive that Bahdanau used 1000 units per
-  direction. Those are the claims recall gets wrong.
-- **There is no network on this box.** Papers can't be fetched, so the check is an internal
-  consistency pass, not a lookup — which makes the next rule mandatory rather than stylistic.
-- **Prefer the symbol to the number.** If a specific figure doesn't teach anything, don't state
-  it: write $d_h$, not $2000$. A wrong symbol is impossible; a wrong number is invisible. State
-  a number only when it carries an argument — Bahdanau's 1000-against-2000 asymmetry earns its
-  place, because it's *why* additive scoring can take mismatched widths.
-- **Write the shapes before writing the sentence.** Claims about cost and parallelism are where
-  this goes wrong. "Additive scoring runs once per pair" was false — it batches over keys fine —
-  and one line of shapes would have caught it before it shipped.
+- **Fetch, don't recall.** The box has no network; the session does. `WebFetch` on an arXiv
+  abstract or the ar5iv HTML mirror settles quote-level questions in one call, so "I can't check"
+  isn't available. Trigger on *any* name, number, date or quote — not on feeling unsure.
+  Confidence is what produces the error.
+- **`lessonN/ledger.md` — two tables, updated as each part is written.** *Claims*: every
+  non-derivable assertion, its source, and whether it was actually opened. *Terms*: where each is
+  first defined — nothing may be **used** in part $N$ that isn't defined at part $\le N$. A part
+  may *name* a later mechanism as a promise; it may not rest an argument on one.
+- **Prefer the symbol to the number.** Write $d_h$, not $2000$, unless the number carries an
+  argument. A wrong symbol is impossible; a wrong number is invisible.
+- **Write the shapes before the sentence.** Every cost or parallelism claim. "Additive runs once
+  per pair" was false and one line of shapes would have caught it.
+- **Later sections re-derive; they don't cite.** When section 07 needs the softmax Jacobian it
+  derives it in three lines rather than pointing at lesson 1. Cheap, and it stops one wrong fact
+  from silently underwriting ten lessons.
+- **Cold-read pass before he sees a part.** A subagent reads it with no context and reports three
+  lists: machinery used before it's earned, symbols used before they're defined, and every
+  non-derivable claim. The third list is what feeds the ledger.
+- **"You're confused" is never the resolution.** If he pushes back and the material is right, that
+  is provable from what he's already been given — produce the derivation. If it can't be produced,
+  the material is wrong or incomplete regardless of who is confused. Every pushback in lesson 1
+  ended that way.
 
 **Corrections get logged, never silently patched.** `review/errata.md`: what was claimed, what's
 true, how it was found, and where it had already propagated. If the wrong claim had ever been

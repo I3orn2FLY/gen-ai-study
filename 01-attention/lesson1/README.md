@@ -9,7 +9,7 @@ right, so the style carries forward instead of nine parts inheriting the same mi
 |---|---|---|---|
 | 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, the number that fixes it, and the decoder loop it lives in | ~6 min | **written** |
 | 2 | [Additive or multiplicative](2-additive-or-multiplicative.md) — how `score()` is actually computed, and why one form died | ~6 min | **written** |
-| 3 | [Why not recurrence](3-why-not-rnns.md) — two arguments, one of which decided it | ~5 min | **written** |
+| 3 | [Why not recurrence](3-why-not-rnns.md) — what recurrence was for, and two arguments for deleting it anyway | ~6 min | **written** |
 | 4 | [The forward pass](4-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min | outline |
 | 5 | [Query, key, value](5-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |
 | 6 | [The operation](6-the-operation.md) | ~4 min | outline |
@@ -18,7 +18,8 @@ right, so the style carries forward instead of nine parts inheriting the same mi
 | 9 | [Your task](9-your-task.md) | ~45 min doing | outline |
 
 The outlines say what each part will contain, so the shape of the lesson is visible without
-committing nine files of prose to it.
+committing nine files of prose to it. [`ledger.md`](ledger.md) tracks every non-derivable claim
+and where each term is defined — not reading material, but it's what makes the lesson auditable.
 
 Each part opens on something that doesn't work yet, then earns the mechanism that fixes it.
 Symbols are defined beside the formula that uses them — no part assumes you remember notation

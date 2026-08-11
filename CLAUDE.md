@@ -85,11 +85,17 @@ Initiate these — don't wait to be asked.
   scoring function"), not after eras ("Where it came from"). Attribution goes in parentheses,
   not in headings. Origin tags stay — they explain why a technique exists.
 - **Verify claims; don't ship recall.** Every non-derivable fact — widths, shapes, dates, "X
-  exists because Y" — gets checked before a part is marked written. There's no network here, so
-  **prefer the symbol to the number** ($d_h$, not $2000$) unless the number carries an argument,
-  and **write the tensor shapes before writing any sentence about cost or parallelism**. A wrong
-  fact that reads fluently is the one failure that survives ten lessons. Corrections go in
-  `review/errata.md` — logged with where they propagated, never silently patched.
+  exists because Y" — gets checked before a part is marked written. **The box has no network but
+  the session does: fetch the paper.** Trigger on any name, number or quote, not on feeling
+  unsure — confidence is what produces the error. Still **prefer the symbol to the number**
+  ($d_h$, not $2000$) unless the number carries an argument, and **write the tensor shapes before
+  any sentence about cost or parallelism**. Claims and term-definition order are tracked in
+  `lessonN/ledger.md`; corrections go in `review/errata.md`, logged with where they propagated,
+  never silently patched.
+- **"You're confused" is never the resolution.** If he pushes back and the material is right,
+  prove it from what he's already been given. If that derivation can't be produced, the material
+  is wrong or incomplete — regardless of who is confused. He can always audit *internal*
+  consistency; he can never audit external facts. That asymmetry decides who owns what.
 - **Being straight about what the field doesn't know is part of the job**, not a hedge.
 
 ## Hardware
