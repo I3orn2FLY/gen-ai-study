@@ -128,9 +128,10 @@ Trained weights that later sections depend on. Full detail in `checkpoints/MANIF
 
 Spaced review runs at the start of roughly every third session (`TEACHING.md` § review layer).
 
-- Question bank: `review/questions.md` — **20 questions** (01 lesson 1, parts 1–3), 3 marked ⚠
-  as misconceptions he actually held. **None asked yet — a quiz is due before part 4.**
-- Errata: `review/errata.md` — **6 corrections** (section 01 lesson 1, parts 1 and 3; none quizzed)
+- Question bank: `review/questions.md` — **20 questions** (01 lesson 1, parts 1–4), 3 marked ⚠
+  as misconceptions he actually held. **None asked yet — a quiz is due before part 5.**
+- Errata: `review/errata.md` — **14 corrections** across three passes (01 lesson 1, parts 1–4;
+  none quizzed). Four of them were introduced by the fix for an earlier one.
 - Quiz history: `review/log.md` — **no quizzes run**
 - Outstanding **shaky** or **confidently wrong** items: none
 

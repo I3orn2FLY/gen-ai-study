@@ -12,7 +12,7 @@ out loud and corrected. Ask these first.
 
 ---
 
-## Section 01 · Lesson 1 — parts 1–3
+## Section 01 · Lesson 1 — parts 1–4
 
 | # | Question | Answer in one line | Grade | Last asked |
 |---|---|---|---|---|
