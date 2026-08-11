@@ -7,9 +7,9 @@ right, so the style carries forward instead of ten parts inheriting the same mis
 
 | # | Part | Time | Status |
 |---|---|---|---|
-| 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, the number that fixes it, and the decoder loop it lives in | ~6 min | **written** |
-| 2 | [Additive or multiplicative](2-additive-or-multiplicative.md) — how `score()` is actually computed, and why one form died | ~6 min | **written** |
-| 3 | [Why not recurrence](3-why-not-rnns.md) — what recurrence was for, and two arguments for deleting it anyway | ~6 min | **written** |
+| 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, the number that fixes it, and the decoder loop it lives in | ~4 min | **written** |
+| 2 | [Additive or multiplicative](2-additive-or-multiplicative.md) — how `score()` is actually computed, and why one form died | ~5 min | **written** |
+| 3 | [Why not recurrence](3-why-not-rnns.md) — what recurrence was for, and two arguments for deleting it anyway | ~5 min | **written** |
 | 4 | [What deleting it cost](4-what-it-cost.md) — the complexity trap, and which of recurrence's jobs survive | ~4 min | **written** |
 | 5 | [The forward pass](5-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min | outline |
 | 6 | [Query, key, value](6-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |

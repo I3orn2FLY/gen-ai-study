@@ -43,8 +43,11 @@ Initiate these — don't wait to be asked.
   Unwritten parts get a short outline stub (`Will cover` bullets), never full prose — a lesson
   drafted in one pass inherits the same mistake eight times over. Never generate material for
   multiple lessons or sections ahead.
-- **Short parts, plain language.** A lesson is a directory of 3–6 minute parts. He won't read
-  a wall of text, and unread material teaches nothing. Simplify the prose, never the content.
+- **Short parts, plain language.** A lesson is a directory of 3–6 minute parts — **700–1200 words,
+  checked with `wc -w`, not estimated.** He won't read a wall of text, and unread material teaches
+  nothing. Simplify the prose, never the content: cut hedging, asides, and sentences that restate
+  the table above them. When a part is over, split it or delete prose — never compress the
+  explanation.
 - **Define every term at first use — especially the ones that feel too basic.** The test is
   not "is this advanced?" but "would someone with strong DL fundamentals and no generative-AI
   background have met this word before?" Query/key/value, latent, ELBO, score, SNR, guidance

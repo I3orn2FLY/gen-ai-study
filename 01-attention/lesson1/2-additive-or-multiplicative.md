@@ -1,20 +1,15 @@
 # 2 · Additive or multiplicative
 
-*~6 min. Lesson 1, part 2 of 10.*
+*~5 min. Lesson 1, part 2 of 10.*
 
 ## The problem
 
-Part 1 left a hole in the middle of the mechanism:
+Part 1 left a hole: $e_{ij} = \mathrm{score}(s_{i-1}, h_j)$ was never opened up. It has a hard job
+— eat two vectors that aren't even the same width ($d_s = 1000$, $d_h = 2000$) and return one
+number saying how well they go together.
 
-$$e_{ij} \;=\; \mathrm{score}\!\left(s_{i-1},\, h_j\right)$$
-
-Everything downstream was specified — softmax it, blend the $h_j$ by it — but $\mathrm{score}$
-itself was never opened up. It has a hard job: eat two vectors that don't even have to be the
-same width ($d_s = 1000$ and $d_h = 2000$ in Bahdanau's setup) and return **one number** saying
-how well they go together.
-
-Two answers were proposed within a year of each other. One is more general. The other is the one
-in every model you'll ever load, and the reason why is not "it worked better".
+Two answers arrived within a year of each other. One is more general. The other is in every model
+you'll ever load, and the reason isn't "it worked better".
 
 ---
 
@@ -22,43 +17,33 @@ in every model you'll ever load, and the reason why is not "it worked better".
 
 $$\mathrm{score}(q, k) \;=\; v^{\top} \tanh\!\big(W\,[\,q;\,k\,]\big)$$
 
-Read it right to left, one shape at a time. This is **one pair in, one scalar out** — the same
-type as in part 1, so nothing here has a $T_x$ in it yet.
+One pair in, one scalar out — same type as part 1, so no $T_x$ anywhere yet.
 
-| Step | Shape | What it is |
+| | Shape | |
 |---|---|---|
-| $q$ | $(d_s,)$ | the query — one decoder state $s_{i-1}$ |
-| $k$ | $(d_h,)$ | the key — one encoder state $h_j$ |
-| $[\,q;\,k\,]$ | $(d_s + d_h,)$ | concatenation: stack them end to end into one long vector |
-| $W$ | $(d_a,\; d_s{+}d_h)$ | **learned** matrix |
-| $W[\,q;\,k\,]$ | $(d_a,)$ | |
-| $\tanh(\cdot)$ | $(d_a,)$ | elementwise — shape unchanged |
-| $v$ | $(d_a,)$ | **learned** vector |
+| $q$ | $(d_s,)$ | the query — one decoder state |
+| $k$ | $(d_h,)$ | the key — one encoder state |
+| $[\,q;\,k\,]$ | $(d_s + d_h,)$ | stacked end to end |
+| $W$ | $(d_a,\; d_s{+}d_h)$ | **learned** |
+| $\tanh(W[q;k])$ | $(d_a,)$ | elementwise |
+| $v$ | $(d_a,)$ | **learned** |
 | $v^{\top}\tanh(\cdot)$ | $()$ | **scalar** — this is $e_{ij}$ |
 
-> $d_a$ — the width of the hidden layer, a hyperparameter of the scoring function itself and
-> nothing to do with $d_s$ or $d_h$. Bahdanau used $1000$.
+> $d_a$ — how wide the hidden layer is. A knob on the scoring function, unrelated to $d_s$ or
+> $d_h$. Bahdanau used 1000.
 
-So it's a one-hidden-layer MLP eating a (query, key) pair. $W$ and $v$ are its only parameters,
-and they are shared across every step $i$, every source position $j$, and every sentence in the
-dataset. One small network, reused everywhere.
+A one-hidden-layer MLP eating a (query, key) pair. $W$ and $v$ are its only parameters, shared
+across every step, position and sentence.
 
 ### The concatenation is secretly two projections
 
-This is the step that makes the shapes click. Split $W$ into its left and right halves —
-$W = [\,W_q \mid W_k\,]$, with $W_q$ of shape $(d_a, d_s)$ and $W_k$ of shape $(d_a, d_h)$. Then
+Split $W$ down the middle: $W = [\,W_q \mid W_k\,]$, shapes $(d_a, d_s)$ and $(d_a, d_h)$. Then
 
 $$W\,[\,q;\,k\,] \;=\; W_q\,q \;+\; W_k\,k$$
 
-Concatenate-then-multiply **is** multiply-separately-then-add; it's the same numbers grouped
-differently. Bahdanau writes it the second way. So:
-
-$$\mathrm{score}(q,k) \;=\; v^{\top}\tanh\!\left(W_q\,q + W_k\,k\right)$$
-
-Now batching over the $T_x$ keys is obvious. Stack the encoder states as rows:
-
-> $H \in \mathbb{R}^{T_x \times d_h}$ — all $T_x$ encoder states, one per row. This is just
-> $h_1 \ldots h_{T_x}$ from part 1 collected into a matrix.
+Concatenate-then-multiply **is** multiply-separately-then-add. Bahdanau writes it the second way,
+and batching over the keys becomes obvious ($H \in \mathbb{R}^{T_x \times d_h}$ is the encoder
+states as rows):
 
 ```python
 K_proj = H @ W_k.T          # (T_x, d_h) @ (d_h, d_a)  ->  (T_x, d_a)
@@ -67,16 +52,10 @@ Z      = torch.tanh(q_proj + K_proj)    # broadcast     ->  (T_x, d_a)
 e_i    = Z @ v              # (T_x, d_a) @ (d_a,)      ->  (T_x,)
 ```
 
-Two things fall out of this that are worth keeping.
-
-**`K_proj` doesn't depend on $i$.** The encoder states never change during decoding, so you
-project the keys **once** before the loop starts and reuse them across all $T_y$ steps. Remember
-this one — section 03 reaches the same conclusion again, under a different name, for a much
-bigger payoff.
-
-**$q$ and $k$ never have to be the same width.** $W_q$ and $W_k$ only have to agree on their
-*output* size $d_a$. Bahdanau leaned on this: a $1000$-wide decoder state scoring against
-$2000$-wide bidirectional encoder states, no reshaping anywhere.
+Two things fall out. **`K_proj` doesn't depend on the step** — encoder states don't change while
+decoding, so project the keys once before the loop and reuse them. Section 03 hits the same idea
+again for a much bigger payoff. And **query and key never have to be the same width**: $W_q$ and
+$W_k$ only have to agree on their *output* size. Bahdanau leaned on that.
 
 ---
 
@@ -84,179 +63,119 @@ $2000$-wide bidirectional encoder states, no reshaping anywhere.
 
 $$\mathrm{score}(q, k) \;=\; q^{\top} k \;=\; \sum_{m=1}^{d} q_m k_m$$
 
-> $q_m$, $k_m$ — the $m$-th components of the two vectors.
-> $d$ — **their common width.** Writing this at all forces $q$ and $k$ to have the same one, so
-> from here on $d$ means "the width query and key share." Part 1's $d_s \neq d_h$ is exactly the
-> situation where no such $d$ exists.
+> $d$ — **the width $q$ and $k$ share.** Writing this at all forces them to have one. Part 1's
+> $d_s \neq d_h$ is exactly the case where no such $d$ exists.
 
-No parameters at all. No hidden layer, no $W$, no $v$. Batched over the keys it's one line:
+No parameters at all. Batched over the keys it's one line, `e_i = K @ q`, with
+$K \in \mathbb{R}^{T_x \times d}$ the keys as rows — the job $H$ did above, renamed because we're
+writing the general form now.
 
-```python
-e_i = K @ q                 # (T_x, d) @ (d,)  ->  (T_x,)
-```
-
-> $K \in \mathbb{R}^{T_x \times d}$ — the keys stacked as rows, the same role $H$ played above.
-> It's called $K$ rather than $H$ because we're now writing the general form, where the keys
-> needn't be encoder states at all.
-
-Which should bother you. The additive form had a learned $W$ standing between the query and the
-key, and that's where the "how do these two relate?" knowledge lived. Delete it and you're
-asking two vectors, produced by two different networks doing two different jobs, to line up
-under a plain sum of products. Why would they?
+Which should bother you. In the additive form the learned $W$ was where "how do these two relate"
+lived. Delete it and you're asking two vectors, made by two different networks doing two different
+jobs, to line up under a plain sum of products. Why would they?
 
 ### Why it isn't absurd
 
-**First, it doesn't even typecheck everywhere.** $\sum_m q_m k_m$ requires that common width $d$.
-This is a hard architectural constraint, not a preference — and Bahdanau's model **fails it**:
-bidirectional encoder states at $d_h = 2000$ against a decoder at $d_s = 1000$. You cannot drop a
-dot product into his architecture at all.
+**It doesn't even typecheck everywhere.** Bahdanau's model **fails**: 2000-wide encoder states
+against a 1000-wide decoder. You can't drop a dot product into his architecture at all.
 
-Luong's is built differently: stacked LSTMs — 4 layers of $1000$ cells, encoder *and* decoder —
-with a decoder whose state chain is seeded from the encoder's final state. So $d_s = d_h = d
-= 1000$: same width by design, shared origin. **Everything below is written in his architecture,
-not Bahdanau's** — that's what makes $d$ meaningful at all.
+Luong built differently — stacked LSTMs, 4 layers of 1000 cells on both sides, decoder seeded from
+the encoder's final state. So $d = 1000$ everywhere: same width by design, shared origin, and the
+two spaces aren't strangers. **Everything below is his architecture, not Bahdanau's.**
 
-**Second, the relation is still learned — by the RNNs.** Look at what a gradient step does:
+**And the relation is still learned — by the RNNs.**
 
 $$\frac{\partial e_{ij}}{\partial q} \;=\; k, \qquad \frac{\partial e_{ij}}{\partial k} \;=\; q$$
 
-Say the model should have attended to source word 2 and didn't. The loss pushes $e_{i2}$ up, and
-the gradient's instruction is: **move the query toward $h_2$, and move $h_2$ toward the query.**
-Those are directions in the state spaces themselves, so they flow straight back into the encoder
-and decoder weights.
+Say the model should have attended to word 2 and didn't. The loss pushes $e_{i2}$ up, and the
+instruction coming back is: **move the query toward $h_2$, move $h_2$ toward the query.** Those are
+directions in the state spaces, so they flow into the encoder and decoder weights. Over training,
+one loss shapes both networks into a geometry where *relevant* means *aligned*.
 
-Across training, the two networks get shaped by one loss into a geometry where *relevant* means
-*aligned*. The capacity to learn the relation didn't disappear when $W$ and $v$ were deleted —
-it moved into the two RNNs, which were being trained anyway.
-
-> You need a learned comparison function when you **can't change** the things being compared —
-> frozen features, a pretrained encoder you don't own. When both sides are trainable, the
-> comparison itself can be fixed.
+> You need a learned comparison when you **can't change** the things being compared — frozen
+> features, someone else's encoder. When both sides are trainable, the comparison can be fixed.
 
 ### Luong wasn't sure either
 
-He didn't propose the dot product as the answer. He proposed **three** scoring functions and
-measured them:
+He proposed **three** scoring functions and measured them:
 
-| Name | Form | Parameters |
+| | Form | |
 |---|---|---|
-| dot | $q^{\top} k$ | none |
-| general | $q^{\top} W_a\, k$ | $W_a \in \mathbb{R}^{d \times d}$ — **a learned matrix between the two** |
-| concat | $v_a^{\top}\tanh\!\big(W_a[\,q;k\,]\big)$ | Bahdanau's additive form: $W_a \in \mathbb{R}^{d_a \times 2d}$, $v_a \in \mathbb{R}^{d_a}$ |
+| dot | $q^{\top} k$ | no parameters |
+| general | $q^{\top} W_a\, k$ | $W_a \in \mathbb{R}^{d \times d}$ — a learned matrix in between |
+| concat | $v_a^{\top}\tanh\!\big(W_a[\,q;k\,]\big)$ | Bahdanau's form. Different $W_a$: $(d_a, 2d)$, plus $v_a \in \mathbb{R}^{d_a}$ |
 
-> The two $W_a$'s are different matrices with different shapes — Luong reuses the letter across
-> rows. In `general` it maps a key into the query's space; in `concat` it's the same $W$ from the
-> top of this part, under another name.
+The middle row is the obvious hedge against the worry above — if the spaces might not line up, put
+a learned matrix between them. It shipped as a peer of the other two.
 
-The middle row is the obvious hedge against exactly the worry above: if the two spaces might not
-line up, put a learned matrix in between. It shipped as a peer of the other two.
+**No form won.** *Dot* suited one attention variant, *general* another, and `concat` — Bahdanau's
+own form — underperformed in a way he flagged as suspicious rather than settled.
 
-**No form dominated.** His conclusion was that *dot* worked well for one attention variant and
-*general* for another — and that `concat`, Bahdanau's own form, underperformed in a way he
-flagged as suspicious rather than settled.
+That's the whole empirical basis. Nobody proved a bare inner product was enough; it performed
+comparably and cost nothing, so it survived.
 
-That is the entire empirical basis. Nobody proved a bare inner product was sufficient; it
-performed comparably and cost nothing, so it survived.
-
-*(Luong et al., 2015. **Origin tag: Empirical / efficiency** — this was not fixing a failure.
-The tidy explanation you'll hear today — "the dot product is the natural similarity measure" — is
-a story attached to the result afterwards. Don't carry it as a derivation.)*
+*(Luong et al., 2015. **Origin tag: Empirical / efficiency** — not a fix for a failure. The tidy
+story you'll hear, "the dot product is the natural similarity measure", was attached afterwards.)*
 
 ---
 
 ## Why the dot product won
 
-It scored about as well, and it's much faster — but not for the reason usually given. Additive
-attention batches over the keys perfectly well; the code above is one broadcast add. The
-difference is in what each one has to **materialize** on the way to those $T_x$ numbers.
+Not for the usual reason. Additive batches over keys fine — the code above is one broadcast add.
+The difference is what each has to **materialize** on the way to those $T_x$ numbers.
 
 ![what each scoring function materializes](figures/fig13-additive-vs-dot.png)
 
-| | intermediate, per decoder step | then |
-|---|---|---|
-| additive | $Z$, shape $(T_x, d_a)$ | reduce to $(T_x,)$ |
-| dot product | none | scores fall straight out |
+| | intermediate, per step |
+|---|---|
+| additive | $Z$, shape $(T_x, d_a)$ — then reduced to $(T_x,)$ |
+| dot product | none — scores fall straight out |
 
-With $d_a = 1000$, additive touches a thousand values for every one score it produces, and
-$\tanh$ is elementwise work no matmul kernel can absorb into itself.
-
-Now run the whole translation. There are $T_y$ decoder steps, so across one sentence:
+At $d_a = 1000$, additive touches a thousand values for every score it produces, and $\tanh$ is
+elementwise work no matmul kernel can swallow. Over a whole translation, $T_y$ steps:
 
 $$\underbrace{T_y \cdot T_x \cdot d_a}_{\text{additive}} \qquad\text{versus}\qquad
 \underbrace{T_y \cdot T_x}_{\text{dot product}}$$
 
-A factor of $d_a$ — a thousand. For a 50-word sentence into 50 words: $50 \cdot 50 \cdot 1000 =
-2.5$ million intermediate values against $50 \cdot 50 = 2500$. Same scores either way.
+A factor of $d_a$. For 50 words into 50: $50 \cdot 50 \cdot 1000 = 2.5$ million values against
+2500. Same scores either way.
 
-The $\tanh$ sitting *between* $q$ and $k$ is what forces the extra dimension. It's also why
-there's no matrix product to factor out of the additive form — the two vectors never meet as a
-product at all.
+The $\tanh$ sitting *between* $q$ and $k$ forces that extra dimension — and it's why there's no
+matrix product to factor out of the additive form. The two vectors never meet as a product at all.
 
-**The technique that won is the one that maps onto the hardware, not the one with more
-expressive power.** Hold onto that; it decides a lot of this roadmap. And note which way that
-factor of $d_a$ points: every later architecture in this course has *more* positions attending to
-*more* positions, so $T_y \cdot T_x$ only grows — and the additive form pays $d_a$ times whatever
-that number is.
+**The technique that won is the one that fits the hardware, not the one with more expressive
+power.** And note which way it points: every later architecture has more positions attending to
+more positions, so $T_y \cdot T_x$ only grows.
 
-### What the dot product cost
+### What it cost
 
-Two things, and neither is nothing.
-
-**Expressiveness.** $v^{\top}\tanh(W_q q + W_k k)$ is a *nonlinear* function of the pair.
-$q^{\top}k$ is a sum of products. Additive can express interactions between query and key that
-the dot product cannot reach at all. It lost on cost, not on quality — don't let the outcome
-convince you it was also the better function.
+**Expressiveness.** $v^{\top}\tanh(W_q q + W_k k)$ is *nonlinear* in the pair; $q^{\top}k$ is a sum
+of products. Additive can express interactions the dot product can't reach. It lost on cost, not
+quality.
 
 **Scale.** With roughly independent, zero-mean, unit-variance components,
+$\mathrm{Var}(q^{\top}k) = d$, so scores have standard deviation $\sqrt{d}$ — growing with the
+width. At $d = 1000$ that's a spread of about $\pm 31$, wide enough that softmax collapses onto one
+position and stops passing gradient back. Additive is immune: $\tanh$ bounds its input.
 
-$$\mathrm{Var}\big(q^{\top}k\big) \;=\; \sum_{m=1}^{d}\mathrm{Var}(q_m k_m) \;=\; d$$
-
-so the scores have standard deviation $\sqrt{d}$ — and it grows with the width. At Luong's
-$d = 1000$ that's a spread of about $\pm 31$, wide enough that softmax collapses onto a single
-position and stops passing gradient backward. Additive is immune to this: $\tanh$ bounds its
-input, and $v$ is learned to whatever scale works.
-
-To be accurate about the history: Luong did not diagnose it this way, and it isn't why he
-preferred one form or another. It gets identified and patched later — part 8, the one to slow
-down for.
+Luong didn't diagnose it this way, and it isn't why he preferred one form over another. It gets
+found and patched later — part 8, the one to slow down for.
 
 ---
 
 ## The prize you can't collect yet
 
-Still in the equal-width setting, at one decoder step you hold one query and all $T_x$ keys, so
-the dot-product form is a matrix–**vector** product:
-
-$$e_i \;=\; K\, s_{i-1}, \qquad (T_x \times d)(d \times 1) \;=\; (T_x \times 1)$$
-
-But if you held **all** the queries at once, the entire score table for the whole translation
-would be a single matmul:
+At one step you hold one query and all $T_x$ keys, so it's a matrix–**vector** product,
+$e_i = K s_{i-1}$. But hold **all** the queries at once and every score in the translation is a
+single matmul:
 
 $$E \;=\; Q K^{\top}, \qquad (T_y \times d)(d \times T_x) \;=\; (T_y \times T_x)$$
 
-> $Q \in \mathbb{R}^{T_y \times d}$ — every decoder state as a row.
-> $E_{ij} = e_{ij}$ — every score in the translation, at once.
+> $Q \in \mathbb{R}^{T_y \times d}$ — every decoder state as a row. $E_{ij} = e_{ij}$.
 
-One matmul, no loop, no intermediate — the thing GPUs are built to do, replacing $T_y$ separate
-matrix–vector products.
+No loop, no intermediate — exactly what GPUs are built for. But you don't hold them: $s_i$ needs
+$c_i$ needs $s_{i-1}$, so the queries arrive one at a time and $Q$ never exists as a matrix.
 
-You don't hold them. Part 1's state chain is the reason: $s_i$ needs $c_i$ needs $s_{i-1}$, so
-the queries arrive strictly one at a time and $Q$ never exists as a matrix.
-
-**This is a promissory note**, and the only way to cash it is to delete the recurrence — which
-is a much bigger claim than it sounds, and the whole of part 3.
-
----
-
-## The chain
-
-```
-fixed-vector bottleneck
-    → score every candidate, mix by weight
-    → make scoring a dot product, so there's no intermediate to materialize
-    → but the recurrence won't let you batch the queries
-    → so delete the recurrence
-    → and find out what that breaks
-```
+**A promissory note.** The only way to cash it is to delete the recurrence.
 
 **→ [3 · Why not recurrence](3-why-not-rnns.md)**
