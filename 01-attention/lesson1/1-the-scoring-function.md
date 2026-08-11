@@ -37,6 +37,10 @@ a replacement for it. **Origin tag: Fix** — named failure, targeted response.)
 
 Running example: translate "the cat sat" → "le chat s'assit".
 
+> $T_x$ — the **source** length, the number of input words. Here $T_x = 3$.
+> $T_y$ — the **target** length, the number of output words. Here $T_y = 4$.
+> Both vary per sentence; neither is a hyperparameter.
+
 ### The encoder runs once
 
 It reads the source one word at a time, carrying a vector forward and updating it each step.
@@ -45,7 +49,7 @@ Keep that vector at every position instead of only the last one:
 $$h_1,\; h_2,\; h_3$$
 
 > $h_j \in \mathbb{R}^{d_h}$ — the encoder's state at source word $j$. One per source word, so
-> $T_x = 3$ of them. $d_h$ is the width.
+> $T_x$ of them. $d_h$ is the encoder's width.
 
 Bahdanau read the sentence **twice** — once left-to-right, once right-to-left — and glued the
 two halves together:
@@ -71,20 +75,21 @@ $$s_0 \;=\; \tanh\!\left(W_s\, \overleftarrow{h}_1\right)$$
 > entire sentence. This is the one half-vector that has seen everything.
 > $W_s \in \mathbb{R}^{d_s \times d_h/2}$ — a small **learned** matrix, trained with the rest.
 > $d_s$ is the decoder's width, and it does **not** have to equal $d_h$ — here it's $1000$
-> against $2000$.
+> against $2000$. That inequality does real work in part 2.
 
-So the first query is a learned summary of the whole source: *"here's the sentence — what should
-a translation of it start with?"* Nothing circular, nothing magic. Other models pick differently
-— the mean of the $h_j$, or a learned constant vector that ignores the source entirely — because
-this is a bootstrap detail, not a mechanism.
+So the first decoder state is a learned summary of the whole source: *"here's the sentence — what
+should a translation of it start with?"* Nothing circular, nothing magic. Other implementations
+pick differently — the mean of the $h_j$, or a learned constant vector that ignores the source
+entirely — because this is a bootstrap detail, not a mechanism.
 
 The decoder also needs a previous *word* to feed itself, and there isn't one, so a reserved token
 $y_0 = \texttt{<sos>}$ ("start of sequence") is prepended to every target sentence during
 training. The model learns an embedding for it like any other word.
 
 **Worth noticing now:** this whole question only exists because there's a state chain to start.
-The transformer has no chain, so the problem evaporates — its first query comes straight from the
-$\texttt{<sos>}$ embedding. Part 4.
+The **transformer** — the architecture this lesson is building toward, assembled in part 4 — has
+no such chain, so the problem evaporates: its first input is just the $\texttt{<sos>}$ embedding,
+with no state to initialize at all.
 
 ### One decoder step
 
@@ -101,6 +106,13 @@ $$e_{ij} \;=\; \mathrm{score}\!\left(s_{i-1},\, h_j\right) \qquad j = 1, \dots, 
 > $e_{ij} \in \mathbb{R}$ — **one number.** How relevant source word $j$ is to what the decoder
 > needs right now. Unbounded: it can be $-3.7$ or $12.0$.
 
+The two arguments have names, and they're the names everything later is written in:
+
+> **Query** — what the thing doing the looking is after. Here $s_{i-1}$, shape $(d_s,)$.
+> *"I'm about to emit a French word; what do I need?"*
+> **Key** — what a thing being looked at advertises about itself. Here $h_j$, shape $(d_h,)$.
+> *"I'm the word 'cat', position 2."*
+
 $\mathrm{score}$ stays a black box until part 2 — but note its *type* now, because it's easy to
 misread the formula. It eats **one** query and **one** key and returns **one scalar**. No $T_x$
 appears inside it. The $T_x$ comes from running it once per source position and collecting the
@@ -113,10 +125,11 @@ and the blend below would grow $100\times$ while the *preferences* between sourc
 identical. To be mixing proportions they have to be positive and sum to 1, which is what softmax
 does:
 
-$$\alpha_{ij} \;=\; \frac{\exp(e_{ij})}{\sum_{k=1}^{T_x} \exp(e_{ik})}$$
+$$\alpha_{ij} \;=\; \frac{\exp(e_{ij})}{\sum_{j'=1}^{T_x} \exp(e_{ij'})}$$
 
-> $\alpha_{ij} \in [0,1]$ — the **weight** on source word $j$ at step $i$. The denominator sums
-> over **every** source position, which is exactly what forces $\sum_j \alpha_{ij} = 1$.
+> $\alpha_{ij} \in [0,1]$ — the **weight** on source word $j$ at step $i$. $j'$ is a summation
+> index running over **every** source position, which is exactly what forces
+> $\sum_j \alpha_{ij} = 1$.
 
 Score and weight are two different objects one step apart. (Everyone conflates them in
 conversation — papers and library code both call $\alpha$ "attention scores". Ask which side of
@@ -140,7 +153,7 @@ $$s_i \;=\; f\!\left(s_{i-1},\, y_{i-1},\, c_i\right)$$
 > looked at.
 > $y_{i-1}$ — the previous output word. During training this is the **ground-truth** previous
 > word rather than the model's own guess, so one bad prediction doesn't derail the rest of the
-> sentence. That's called **teacher forcing**, and it comes back in part 4.
+> sentence. That's called **teacher forcing**, and it comes back in part 3.
 
 Word $i$ is then predicted from $s_i$, $y_{i-1}$ and $c_i$ — instead of from one frozen vector.
 
@@ -164,8 +177,12 @@ There's no chicken-and-egg. At step $i$ you attend with a state you **already fi
 computing** at step $i-1$ — *"given everything I've generated so far, what do I need next?"* —
 and "everything so far" genuinely is already sitting there.
 
-But read the green chain and notice what it costs: $s_1 \to c_2 \to s_2 \to c_3 \to s_3$. You
-cannot compute $c_2$ before $s_1$ exists, and $s_1$ needs $c_1$. **The decoder cannot be
+But follow the state chain across the steps above — drawn in green in the figure — and notice
+what it costs:
+
+$$s_1 \;\to\; c_2 \;\to\; s_2 \;\to\; c_3 \;\to\; s_3$$
+
+You cannot compute $c_2$ before $s_1$ exists, and $s_1$ needs $c_1$. **The decoder cannot be
 parallelized over $i$** — not at training time, not at inference. That's structural, and it's
 part 3's whole subject.
 
@@ -178,26 +195,25 @@ $T_y \times T_x = 4 \times 3$ table over the whole translation.
 Watch the lifetime: built → softmaxed into $\alpha$ → used to weight the $h_j$ → **dropped**.
 Scores are never stored, and they are not parameters — nothing in the optimizer's care. They're
 recomputed from scratch for every sentence, like any activation. What training updates is the
-*function* that produces them. That stays true in the transformer.
+*function* that produces them, never the scores themselves. That stays true for every attention
+mechanism in this course.
 
 ---
 
-## Query and key
+## One vector, two jobs
 
-Two names for the two sides of $\mathrm{score}(\cdot,\cdot)$.
+Bind "key" to **the side being looked at**, not to "the encoder." That distinction looks
+pedantic now, when the keys obviously are the encoder states — but part 5 builds attention where
+both sides come from the same sequence, and "key = encoder" stops making sense there.
 
-**Query** — what the thing doing the looking is after.
-Here $s_{i-1}$. *"I'm about to emit a French word, what do I need?"*
+Now notice something about the two formulas above. $h_j$ appears **twice**:
 
-**Key** — what a thing being looked at advertises about itself.
-Here each $h_j$. *"I'm the word 'cat', position 2."*
+$$e_{ij} = \mathrm{score}(s_{i-1},\, \underbrace{h_j}_{\text{step 1}}), \qquad\qquad
+c_i = \sum_j \alpha_{ij}\, \underbrace{h_j}_{\text{step 3}}$$
 
-One query, one key, one number out. Bind "key" to **the side being looked at**, not to "the
-encoder" — in self-attention (part 4) both sides come from the same sequence.
-
-Now notice: $h_j$ appears **twice** — once inside $\mathrm{score}$ (step 1) and once in the
-weighted sum (step 3). One vector, two jobs: *how you get found* and *what you contribute*.
-Splitting those apart produces the third name, **value**, in part 5.
+One vector doing two different jobs: *how you get found*, and *what you contribute once found*.
+There is no reason those have to be the same vector. Splitting them apart produces a third name
+and a third projection — part 5.
 
 ---
 

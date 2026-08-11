@@ -39,23 +39,35 @@ lesson 1 closes, drop the date and keep the mechanism.
 
 ## Terms
 
-| Term | Defined in |
+| Term / symbol | Defined in |
 |---|---|
-| encoder / decoder state, $h_j$, $s_i$ | 1 |
-| the fixed-vector bottleneck | 1 |
-| score $e_{ij}$ vs weight $\alpha_{ij}$ | 1 |
+| $T_x$, $T_y$ (source and target length) | 1 |
+| $h_j$, $d_h$; bidirectional $h_j = [\overrightarrow h_j;\overleftarrow h_j]$ | 1 |
+| $s_i$, $d_s$, $s_0$, $W_s$, $f$ (decoder cell), $y_{i-1}$ | 1 |
+| score $e_{ij}$ vs weight $\alpha_{ij}$; $j'$ as summation index | 1 |
 | context vector $c_i$ | 1 |
-| query, key | 1 |
-| teacher forcing, `<sos>` | 1 |
-| activation vs parameter | 1 |
-| additive / multiplicative scoring, $d_a$ | 2 |
-| $Q$, $K$, $E = QK^\top$ (named, **not** yet usable) | 2 |
-| path length | 3 |
-| sequential operations | 3 |
+| **query, key** — at the formula that first uses them | 1 |
+| teacher forcing, `<sos>`, activation vs parameter | 1 |
+| the fixed-vector bottleneck | 1 |
+| additive / multiplicative scoring; $W$, $v$, $d_a$; $W_q$, $W_k$ | 2 |
+| $H$ (encoder states as rows) | 2 |
+| **$d$** — the width query and key *share*; only exists in equal-width architectures | 2 |
+| $K$, then $Q$ and $E = QK^\top$ | 2 |
+| $W_a$, $v_a$ (Luong's, with the shape change between rows flagged) | 2 |
+| $n$ (sequence length), $x_t$, path length, sequential operations | 3 |
+| $c_t$, $f_t$, $i_t$, $\tilde c_t$, $\odot$; $g$, $\tau$; $\sigma$ | 3 |
 | unrolled RNN as a deep network | 3 |
-| self-attention (**named only** — earned in 5) | 3 |
-| value $v_j$, multi-head, positional encoding, KV cache | *forward promises — flagged, never load-bearing* |
+| permutation equivariance, $P$ | 3 |
+| self-attention, layer | 3 — *one-line gloss only; earned in 4–5* |
+| value, multi-head, positional encoding, KV cache, FlashAttention | *forward promises — named, never load-bearing* |
 
 The last row is the one to police. A part may **name** something later as a promise; it may not
-rest an argument on it. Part 3's original "Attention — $O(1)$" table row broke this and is
-errata #6.
+rest an argument on it. Two violations so far, both caught: part 3's "Attention — $O(1)$" row
+(errata #6) and part 2's dot-product verdict, which was argued through self-attention, *head* and
+*layer* before any existed. Part 2 now argues it over $T_y$ decoder queries instead, which needs
+nothing beyond Bahdanau, and part 3 sharpens it to $n^2$ where self-attention is actually defined.
+
+**On completeness of the claims table above:** it was written from memory of what parts 1–3
+assert, and a cold-read audit then enumerated roughly three times as many. Build this table from
+the audit's output, not from recall — the same failure that produces wrong claims produces
+incomplete lists of them.
