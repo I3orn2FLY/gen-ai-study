@@ -1,197 +1,196 @@
 # 3 · Why not recurrence
 
-*~5 min. Lesson 1, part 3 of 10.*
+*~4 min. Lesson 1, part 3 of 10.*
 
 ## The problem
 
-Part 2's promissory note: every score in a translation is one matmul, $E = QK^{\top}$ — except $Q$
-never exists, because the queries arrive one at a time. To collect, delete the recurrence.
+Part 2 ended with something you can see but can't have. Every score in a whole translation is one
+matrix multiply, $E = QK^\top$ — except $Q$ never exists, because the decoder produces its states
+one at a time.
 
-That should feel reckless. The recurrence *is* the model. So first: what was it giving you?
+The only way to get it is to throw out the RNN.
+
+Which should sound reckless. The RNN *is* the model. So before touching it: what is it actually
+doing for you?
 
 ---
 
-## What recurrence was for
+## What the recurrence was giving you
+
+An RNN is just this, over and over:
 
 $$h_t \;=\; \mathrm{cell}(h_{t-1},\, x_t)$$
 
-> $x_t$ — the embedding of input word $t$. $h_t \in \mathbb{R}^{d}$ — the state after reading it,
-> where $d$ is just "however wide the state is". $h_0$ is zeros or learned; doesn't matter.
-> $\mathrm{cell}$ — the recurrent unit (RNN, LSTM, GRU), one weight matrix reused every step. It's
-> the same kind of object part 1 called $f$; renamed here because $f_t$ is about to mean something
-> else. A decoder cell takes an extra input or two, but the shape of the argument is identical.
+> $x_t$ — the embedding of input word $t$. $h_t$ — the state after reading it. $\mathrm{cell}$ —
+> the recurrent unit (plain RNN, LSTM, GRU), one set of weights reused at every step. It's the same
+> kind of thing part 1 called $f$.
 
-Three jobs, all done without being asked:
+Three things fall out of that shape for free:
 
-- **Order, for free.** The index $t$ is in the wiring. Nothing has to *represent* word order
-  because nothing can escape it.
-- **Any length, fixed memory.** Running forwards, one state of width $d$ carries the whole
-  sentence, however long it is. (Training is different — backprop needs every intermediate state
-  kept, so that's $n$ of them. The claim is about the model's design, not its training bill.)
-- **Parameters don't grow with length.** Same cell every step, so 5 words and 500 words use
-  identical parameters.
+- **It knows word order.** The step number $t$ is baked into the wiring. Nothing has to *represent*
+  order because nothing can avoid it.
+- **Any length, same memory.** One state vector carries the sentence, whether it's 5 words or 500.
+- **Length doesn't change the parameter count.** Same cell every step, so a short sentence and a
+  long one use exactly the same weights.
 
-Remember these three — part 4 is the bill, and one of them survives.
+Remember those three. Part 4 is the invoice, and one of them survives.
 
 ---
 
-## An RNN is a deep network
+## An RNN is secretly a deep network
 
-Unroll it and stop reading it as a loop: $h_0 \to h_1 \to \cdots \to h_n$, with a fresh $x_t$
-entering at every arrow. ($n$ is the sequence length; part 1's $T_x$ and $T_y$ are the source and
-target versions of it.) Read as a feedforward stack, **step $t$ is layer $t$**:
+Unroll the loop and stop reading it as a loop:
+
+$$h_0 \;\to\; h_1 \;\to\; h_2 \;\to\; \cdots \;\to\; h_n$$
+
+with a new word entering at every arrow. ($n$ is the sentence length; part 1's $T_x$ and $T_y$ are
+the input and output versions of it.) Squint and **step $t$ is layer $t$** — it's a deep
+feedforward network wearing a disguise:
 
 | | Ordinary deep net | Unrolled RNN |
 |---|---|---|
 | Weights | one matrix per layer | **one matrix shared by all layers** |
 | Input | enters at layer 1 | enters at **every** layer |
-| Depth | you pick it | **the sentence length picks it** |
+| Depth | you choose it | **the sentence length chooses it** |
 
-The math is otherwise the same, so the failure mode is the same. "Vanishing gradients in deep
-nets" and "vanishing gradients in RNNs" aren't two results — they're one, found in the same window
+That's not a cute analogy, it's the reason the two fields found the same problem at the same time.
+"Vanishing gradients in deep networks" and "vanishing gradients in RNNs" are one result, not two
 (Hochreiter 1991; Bengio, Simard, Frasconi 1994).
 
 ---
 
-## Argument 1 — path length
+## Argument 1 — the long way round
 
-> **Path length** — how many computation steps a signal passes through to get from one position to
-> another. Not distance in the sentence; distance *in the network*.
-
-In an RNN, word 1 reaches word 7 through everything in between: six steps, growing with the gap.
-Attention scores them against each other directly — one hop, however far apart.
+For word 1 to influence word 7, its information has to be carried through every state in between.
+Six hops. Twenty words apart, twenty hops. Attention just scores the two against each other
+directly — **one hop, no matter the distance.**
 
 ![path length: walking versus jumping](figures/fig2-path-length.png)
 
-### Why length hurts
+> **Path length** — how many computation steps something passes through to get from one position to
+> another. Distance in the network, not in the sentence.
 
-Backprop from step $n$ to step 1 multiplies the Jacobian of every layer between — which, per the
-table above, means every *step*:
+### Why the long way hurts
+
+It's a gradient problem. To send a learning signal from step $n$ back to step 1, backprop
+multiplies together one matrix per step in between:
 
 $$\frac{\partial h_n}{\partial h_1} \;=\; \prod_{t=2}^{n} \frac{\partial h_t}{\partial h_{t-1}}$$
 
-> $\partial h_t / \partial h_{t-1} \in \mathbb{R}^{d\times d}$ — how each part of the new state
-> responds to each part of the old one. There are $n-1$ of them.
+> Each factor says how much the state at one step responds to the state at the previous one.
+> There are $n-1$ of them.
 
-That product behaves like $\sigma^{\,n-1}$, where $\sigma$ is a typical singular value of one. The
-exponent is the sentence length, which you don't control. It fails two ways, and only one is hard:
+Multiplying $n-1$ similar matrices is like raising one number to the power $n-1$. If that number is
+a bit below 1, the result collapses toward zero. A bit above 1 and it explodes. And the exponent is
+the sentence length, which you don't control.
 
-| | $\sigma$ | Fix |
-|---|---|---|
-| Exploding | $>1$ | **gradient clipping** — shrink it when it gets too big. Standard by 2013 |
-| Vanishing | $<1$ | *nothing like it* |
+Only one direction is a real problem:
 
-You can shrink a gradient that came back too large. You can't restore one that hit numerical zero
-— the direction is gone, not just the size. "The RNN gradient problem" means **vanishing**.
+| | Fix |
+|---|---|
+| Exploding | **gradient clipping** — if the gradient comes back too big, scale it down. One line, standard by 2013 |
+| Vanishing | *nothing equivalent* |
 
-### Gating shortens the path, it doesn't remove it
+You can shrink something that's too large. You can't recover something that already went to zero —
+the *direction* is gone, not just the size. So "the RNN gradient problem" means vanishing.
 
-This is what LSTMs and GRUs were for — a memory channel running alongside the state:
+### Gating shortens the trip, it doesn't cancel it
+
+This is what LSTMs and GRUs were built for. An LSTM keeps a second vector alongside the state, a
+memory line:
 
 $$c_t \;=\; f_t \odot c_{t-1} \;+\; i_t \odot \tilde{c}_t$$
 
-> $c_t$ — the **cell state**. $f_t \in (0,1)^{d}$ — the **forget gate**, how much old memory to keep
-> per component. $i_t \odot \tilde c_t$ — **input gate** times **candidate**, how much new to let
-> in. $\odot$ is elementwise.
->
-> Three letters here are reused from part 1, and they're reused in the literature too, so it's
-> worth naming once: $c_t$ is a cell state, not a context vector; $f_t$ is a gate vector, not a
-> cell function; $i_t$ is a gate vector, not a decoder step index. Subscript $t$ means "gate".
+> $c_t$ — the **cell state**, the memory line. $f_t$ — the **forget gate**, numbers between 0 and 1
+> saying how much old memory to keep. $i_t \odot \tilde c_t$ — how much new material to let in.
+> $\odot$ multiplies elementwise. (Letters get reused here and in every paper: this $c_t$ isn't
+> part 1's context vector, and $f_t$ isn't part 1's cell function.)
 
-When $f_t \approx 1$ the update is **additive**, so $\partial c_t/\partial c_{t-1} \approx I$ — the
-identity, not a decaying matrix, and the product stops shrinking. (The forget gate wasn't in the
-1997 LSTM; Gers et al. added it in 2000.)
+When the forget gate sits near 1, that line reads $c_t \approx c_{t-1} + \text{something}$ —
+addition, not multiplication. Nothing shrinks. The gradient gets a road with no tolls on it. (That
+gate wasn't in the original 1997 LSTM; Gers et al. added it in 2000.)
 
-That's a shortcut through the unrolled depth — the same move highway networks and ResNet make on
-ordinary depth in 2015. Three of a kind:
+So gating, residual connections and attention are all the same idea: give the signal a shortcut so
+it doesn't have to survive a long chain. The first two make the trip easier; attention deletes the
+trip.
 
-| | Shortcut across | Wiring |
-|---|---|---|
-| LSTM gating | unrolled time | learned gates, one hop per step |
-| Residual connections | layers | fixed when you build the model |
-| Attention | positions, one hop | **computed from the content**, per sentence |
-
-Gating and residuals make the path easier. Attention **deletes** it, and its shortcuts aren't
-wiring — $\alpha_{ij}$ is recomputed every forward pass.
-
-**Now the trap.** This is the argument everyone reaches for and it's *not* the one that mattered.
-Stacked LSTMs held the state of the art in machine translation right up to 2017 — Google's
-production translation system was one. Long-range quality was not what had the field stuck. Path
-length is a real advantage and a satisfying story. It decided nothing.
+**Now the catch.** This is the argument everyone reaches for, and it's *not* the one that mattered.
+Stacked LSTMs held the state of the art in translation right up to 2017 — Google's production
+system was one. Long-range quality was not what had the field stuck. Path length is real, it's
+satisfying, and it decided nothing.
 
 ---
 
-## Argument 2 — parallelism
+## Argument 2 — the queue
 
-This is the one. To see it, notice the model you already have is **partly parallel** — and the
-parallel part is the attention.
+Here's the one. And the way in is to notice that the model you already have is **half parallel
+already**, and the parallel half is the attention.
 
-One Bahdanau decoder step, shapes from part 2. Every line takes $s_{i-1}$ as an input — that isn't
-the problem. The problem is which line *produces* the state the **next** step needs, because that's
-what forces the steps into a queue:
+Take one decoder step. The thing that costs wall-clock time isn't how much arithmetic there is,
+it's which line has to wait for the *previous word* to finish:
 
-| Step | Shape | Parallel over the $T_x$ keys? | Feeds the next step? |
+| Step | Shape | Spread over the $T_x$ keys? | Makes the next step wait? |
 |---|---|---|---|
 | $K_{\text{proj}} = H W_k^{\top}$ | $(T_x, d_a)$ | yes — and done once, before the loop | no |
 | $Z = \tanh(W_q s_{i-1} + K_{\text{proj}})$ | $(T_x, d_a)$ | yes | no |
 | $e_i = Z v$ | $(T_x,)$ | yes | no |
-| $\alpha_i = \mathrm{softmax}(e_i)$ | $(T_x,)$ | yes (a sum, so $\log T_x$ deep, not $T_x$) | no |
-| $c_i = \alpha_i^{\top} H$ | $(d_h,)$ | yes (same) | no |
-| $s_i = \mathrm{cell}(s_{i-1},\, y_{i-1},\, c_i)$ | $(d_s,)$ | — | **yes — it makes $s_i$** |
+| $\alpha_i = \mathrm{softmax}(e_i)$ | $(T_x,)$ | yes | no |
+| $c_i = \alpha_i^{\top} H$ | $(d_h,)$ | yes | no |
+| $s_i = \mathrm{cell}(s_{i-1},\, y_{i-1},\, c_i)$ | $(d_s,)$ | — | **yes — it produces $s_i$** |
 
-Only the last row puts anything into the chain $s_0 \to s_1 \to \cdots$. Everything above it is
-one sweep across the source positions whose depth doesn't grow with $T_x$. **Attention is already
-the parallel part.** The RNN cell is the only thing that serializes over words.
+Only the last row puts anything into the chain $s_0 \to s_1 \to s_2 \to \cdots$. Everything above
+it fans out across all the input positions at once, and doesn't get slower as the sentence gets
+longer. **Attention is already the parallel part.** The RNN cell is the bottleneck.
 
-Count a training example: $T_x$ sequential steps for the encoder plus $T_y$ for the decoder, each a
-small matrix–vector product. A GPU with thousands of cores runs one, idles, repeats.
+Add it up over one training example: $T_x$ steps for the encoder, $T_y$ for the decoder, each one a
+small matrix-times-vector. A GPU with thousands of cores does one, sits idle, does the next.
 
-So the question isn't "is attention parallel?" It already is. It's: **what if the parallel part
-were the whole model?** And notice what that fixes — part 2 couldn't batch the queries because each
-$s_{i-1}$ had to be computed first. Take the RNN out and a position's query comes from its own
-input: the word embedding, or whatever the previous layer produced there. Every query exists before
-you start.
+So the real question isn't "can attention be parallel". It already is. It's: **what if the parallel
+part were the whole model?**
 
-> **Self-attention** — attention where queries and keys come from the *same* sequence, so every
-> position scores every other instead of scoring a separate encoder.
-> **Layer** — from here on, one attention operation over a whole sequence, the kind a model stacks
-> many of. (Narrower than "layer" in "4 stacked LSTM layers" a moment ago — same word, new unit.)
-> Both are part 5's; here they just mean "attention with no RNN around it."
+And notice what that fixes. Part 2 couldn't batch the queries because each one had to wait for the
+previous state. Take the RNN out and a position's query comes from its own input — the word
+embedding, or whatever the layer below produced there. They all exist before you start.
 
-| Per layer | Sequential operations |
+> **Self-attention** — attention where the queries and keys come from the *same* sentence, so every
+> position scores every other one instead of scoring a separate encoder.
+> **Layer** — one attention operation over a whole sentence, the kind you stack many of. (Narrower
+> than "layer" in "4 stacked LSTM layers"; same word, new unit.)
+> Both get built in part 5. Here they just mean "attention with no RNN wrapped around it."
+
+| Per layer | Steps that must happen in order |
 |---|---|
-| Recurrence | $O(n)$ — state $t$ needs state $t-1$ |
-| Self-attention, no recurrence | $O(1)$ — every position scores every other at once |
+| Recurrence | $n$ — state $t$ needs state $t-1$ |
+| Self-attention | $1$ — every position scores every other at once |
 
-The score computation for one such layer over a 50-word sentence is a single
-$(50 \times d)(d \times 50)$ matmul, every output independent — the shape the hardware was built
-for.
+Scoring one such layer over a 50-word sentence is a single $(50 \times d)(d \times 50)$ matrix
+multiply, every entry independent. That is exactly the shape GPUs are built for.
 
-### Teacher forcing doesn't rescue the RNN
+### And teacher forcing doesn't save the RNN
 
-This is the detail that makes it decisive. In training the whole target sentence is known up front,
-so you'd think the decoder could do all positions at once. It can't: $s_i$ still needs $s_{i-1}$.
-Knowing the *inputs* ahead of time doesn't help when the *states* form a chain.
+Worth being precise, because this is the part that settles it. During training you already know the
+whole target sentence, so you might think the decoder could do all positions at once. It can't:
+$s_i$ still needs $s_{i-1}$. Knowing the *inputs* in advance doesn't help when the *states* form a
+chain.
 
-That's exactly what *Attention Is All You Need* (Vaswani et al., 2017) says: recurrence "precludes
-parallelization within training examples" (§1). And what its abstract claims is time, not quality —
-more parallelizable, significantly less time to train.
+That's exactly the complaint in *Attention Is All You Need* (Vaswani et al., 2017): recurrence
+"precludes parallelization within training examples" (§1). And what the abstract promises is time,
+not quality — more parallelizable, significantly less time to train.
 
-> **Recurrence wasn't replaced for learning badly. It was replaced for training slowly.**
+> **The RNN wasn't replaced for learning badly. It was replaced for training slowly.**
 
 *(**Origin tag: Fix** — a training-time constraint, not a modelling one.)*
 
 ---
 
 ```
-scores are one matmul — but only if all the queries exist at once
+every score is one matmul — but only if all the queries exist at once
     → attention is already parallel; the RNN around it is not
-    → is recurrence load-bearing?  path length: nice, not decisive
-                                   parallelism: decisive
+    → is the RNN load-bearing?   long-range quality:  fine, LSTMs handled it
+                                 training throughput: no, and that's the blocker
     → delete it
 ```
 
-The deletion is decided. What it costs hasn't been counted — and the bill starts with the claim
-you'll hear most often being false.
+Decided. Now count what it costs — starting with the claim you'll hear most often, which is false.
 
 **→ [4 · What deleting it cost](4-what-it-cost.md)**

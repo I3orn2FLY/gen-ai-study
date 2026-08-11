@@ -14,8 +14,15 @@ Process added the same day: `lessonN/ledger.md` (claims + term order), a seeded
 `review/questions.md`, and a cold-read audit pass. Rules in `CLAUDE.md` and `TEACHING.md`
 § Writing the material.
 
-**Outstanding:** part 3 is 1655 words against the 1500 ceiling — the densest part, and the one to
-watch if he says the length still isn't right. Parts 1/2/4 are 1227/1543/1201.
+**Parts 1–4 regenerated whole on 2026-08-11**, from `ledger.md`'s verified claims rather than from
+the previous prose — Kenessary: "you are building on some faulty stuff and only do edits." Voice is
+intuition-first now: plain-English idea, then the formula as confirmation. Word counts 1458 / 1460 /
+1567 / 1283 against a 1500 ceiling; part 3 is 67 over and is the one to watch.
+
+`CLAUDE.md` cut from **sixteen non-negotiables to five rules**, his list: draw it, intuition first
+and short, show the forward pass with real numbers, nothing before it's introduced, be correct. The
+sixteen had accumulated reactively and together pushed toward *complete and rigorous* with nothing
+pointing at *he understands it* — which is what produced material he couldn't read.
 
 **Web access works from this session** even though the box itself has no network — paper
 abstracts and arXiv HTML are fetchable, and errors 5 and 6 were settled that way. Use it to
