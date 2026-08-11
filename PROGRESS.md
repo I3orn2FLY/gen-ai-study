@@ -10,19 +10,22 @@ matters: errors 7–8 were introduced by the fix for 5–6, and 9b by the fix fo
 as likely to introduce an error as a first draft**, so the cold-read audit runs after every pass,
 not once at the end.
 
-Process added the same day: `lessonN/ledger.md` (claims + term order), a seeded
-`review/questions.md`, and a cold-read audit pass. Rules in `CLAUDE.md` and `TEACHING.md`
-§ Writing the material.
+Process added the same day: `lessonN/plan.md`, a seeded `review/questions.md`, and a cold-read
+audit pass. See `CLAUDE.md` § How material gets written.
 
-**Parts 1–4 regenerated whole on 2026-08-11**, from `ledger.md`'s verified claims rather than from
-the previous prose — Kenessary: "you are building on some faulty stuff and only do edits." Voice is
-intuition-first now: plain-English idea, then the formula as confirmation. Word counts 1458 / 1460 /
-1567 / 1283 against a 1500 ceiling; part 3 is 67 over and is the one to watch.
+**Parts 1–4 regenerated whole on 2026-08-11**, from the verified claims rather than the previous
+prose — Kenessary: "you are building on some faulty stuff and only do edits." Voice is
+intuition-first: plain-English idea, then the formula as confirmation. Word counts 1458 / 1460 /
+1567 / 1283 against a 1500 ceiling; part 3 is 67 over.
 
-`CLAUDE.md` cut from **sixteen non-negotiables to five rules**, his list: draw it, intuition first
-and short, show the forward pass with real numbers, nothing before it's introduced, be correct. The
-sixteen had accumulated reactively and together pushed toward *complete and rigorous* with nothing
-pointing at *he understands it* — which is what produced material he couldn't read.
+**`CLAUDE.md` restructured the same day.** Sixteen reactive non-negotiables → a two-stage process:
+plan the part in `lessonN/plan.md`, write prose from the plan, and send all feedback to the plan
+rather than the prose. The diagnosis is in the file: every error today came from deciding what's
+true *while* writing paragraphs, which made every correction a full rewrite and every rewrite a
+fresh chance to improvise something wrong. Three fixes introduced new errors that way.
+
+**Part 5 is planned but not written** — see the block at the bottom of `01-attention/lesson1/plan.md`,
+including an open question about whether parts 6 and 7 should merge.
 
 **Web access works from this session** even though the box itself has no network — paper
 abstracts and arXiv HTML are fetchable, and errors 5 and 6 were settled that way. Use it to

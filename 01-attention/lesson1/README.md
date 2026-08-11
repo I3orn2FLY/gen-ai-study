@@ -19,7 +19,7 @@ right, so the style carries forward instead of ten parts inheriting the same mis
 | 10 | [Your task](10-your-task.md) | ~45 min doing | outline |
 
 The outlines say what each part will contain, so the shape of the lesson is visible without
-committing ten files of prose to it. [`ledger.md`](ledger.md) tracks every non-derivable claim
+committing ten files of prose to it. [`plan.md`](plan.md) is what each part is planned against — claims, terms
 and where each term is defined — not reading material, but it's what makes the lesson auditable.
 
 Each part opens on something that doesn't work yet, then earns the mechanism that fixes it.
