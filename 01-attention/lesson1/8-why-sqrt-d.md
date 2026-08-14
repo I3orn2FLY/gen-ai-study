@@ -5,7 +5,7 @@
 > **Placeholder.** Parts are written one at a time, after the previous one is right.
 > Below is what this part will contain.
 
-Part 5 walked past one line: `scores = scores / √64`. Why is it there?
+Part 4 walked past one line: `scores = scores / √64`. Why is it there?
 
 **Will cover**
 

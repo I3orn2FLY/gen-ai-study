@@ -12,7 +12,7 @@ out loud and corrected. Ask these first.
 
 ---
 
-## Section 01 · Lesson 1 — parts 1–4
+## Section 01 · Lesson 1 — parts 1–5
 
 | # | Question | Answer in one line | Grade | Last asked |
 |---|---|---|---|---|
@@ -36,6 +36,11 @@ out loud and corrected. Ask these first.
 | 18 | Why does LSTM gating help the gradient? | $c_t = f_t\odot c_{t-1} + \ldots$ — with $f_t\approx 1$ the update is additive, so $\partial c_t/\partial c_{t-1}\approx I$ | — | — |
 | 19 | ⚠ Recurrence did three jobs. How many survive its deletion? | **Two break, one survives.** Word order breaks (→ positional encoding); bounded memory breaks ($O(nd)$ keys + $O(n^2)$ scores); parameters-independent-of-length survives. Multi-head and $1/\sqrt d$ are *new* bills, not recurrence's jobs | — | — |
 | 20 | ⚠ Is attention permutation invariant or equivariant? | **Equivariant** — permute the input and the outputs permute with it, not stay put. $\alpha_{ij}$ never sees $j$ and a sum has no order, so a *single* query's output is genuinely invariant; that's the piece people over-generalize into "invariance" | — | — |
+| 21 | Why does the causal mask write $-\infty$ into the scores *before* softmax, instead of zeroing weights after? | $\exp(-\infty) = 0$ and the row renormalizes over the visible positions automatically. A score of 0 is a full vote ($\exp(0)=1$), and zeroing $A$ after softmax leaves rows summing to less than 1 | — | — |
+| 22 | Why do decoder-only models need a causal mask when Bahdanau's decoder needed nothing? | $s_i$ was built from $s_{i-1}$ — the future physically wasn't wired in. Attention connects every position to every position, so training all positions at once puts the answer in the input, one row down: loss → 0 by copying | — | — |
+| 23 | Train a transformer on short sequences, run on long ones — what breaks, and what doesn't? | Attention/MLP weights don't — every weight acts per row, shapes come from widths. A **stored** position table does: one learned vector per position means a baked-in max length. Computed position signals close the gap | — | — |
+| 24 | What persists in the attention op between two forward passes? | Only $W_Q, W_K, W_V$. $E$ and $A$ are activations — rebuilt and discarded every block, every pass ($2048^2 \approx 4.2$M entries *each* per block while the pass lives) | — | — |
+| 25 | Where in a transformer block do positions interact? | Only inside attention — $QK^\top$ and $AV$ are the only cross-row ops, and neither has weights. Embedding, LayerNorm, MLP, and output projection are all per-row | — | — |
 
 ---
 

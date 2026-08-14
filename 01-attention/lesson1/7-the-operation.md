@@ -12,7 +12,7 @@ for a GPU.
 
 - The loop rewritten as matrices: $\text{Attention}(Q,K,V) = \text{softmax}(QK^\top/\sqrt{d_k})V$
 - Side-by-side with part 1's three steps — nothing new, just the loops removed
-- Anchored on part 5's numbers first ($T=7$, $d=64$), then generalized to
+- Anchored on part 4's numbers first ($T=7$, $d=64$), then generalized to
   $(B, H, L_q, d_k)$
 - `dim=-1` not `dim=-2`, and why the wrong one trains fine while being broken
 - The real attention matrix as a heatmap

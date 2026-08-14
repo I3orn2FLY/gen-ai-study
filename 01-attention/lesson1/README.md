@@ -10,8 +10,8 @@ right, so the style carries forward instead of ten parts inheriting the same mis
 | 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, the number that fixes it, and the decoder loop it lives in | ~4 min | **written** |
 | 2 | [Additive or multiplicative](2-additive-or-multiplicative.md) — how `score()` is actually computed, and why one form died | ~5 min | **written** |
 | 3 | [Why not recurrence](3-why-not-rnns.md) — what recurrence was for, and two arguments for deleting it anyway | ~5 min | **written** |
-| 4 | [What deleting it cost](4-what-it-cost.md) — the complexity trap, and which of recurrence's jobs survive | ~4 min | **written** |
-| 5 | [The forward pass](5-the-forward-pass.md) — the whole model, real shapes, where attention sits | ~6 min | outline |
+| 4 | [The forward pass](4-the-forward-pass.md) — the transformer built shape by shape, and where attention sits | ~6 min | **written** |
+| 5 | [What deleting it cost](5-what-it-cost.md) — the complexity trap, audited on the model just built | ~5 min | **written** |
 | 6 | [Query, key, value](6-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |
 | 7 | [The operation](7-the-operation.md) | ~4 min | outline |
 | 8 | [Why √d](8-why-sqrt-d.md) — the one to slow down for | ~6 min | outline |
@@ -31,7 +31,7 @@ from another one. History is structure, not subject.
 ## The one-paragraph version
 
 Inside every transformer block sits an attention op. It projects the input `x` `(T, d)` three
-ways — `Q = x W_Q`, `K = x W_K`, `V = x W_V` — builds a `(T, T)` **score** table `S = QKᵀ/√d`,
+ways — `Q = x W_Q`, `K = x W_K`, `V = x W_V` — builds a `(T, T)` **score** table `E = QKᵀ/√d`,
 softmaxes each row into weights, and returns `A V`: each position replaced by a weighted blend
 of all positions. The scores are a temporary, rebuilt and discarded every forward pass; only
 the three `W` matrices are learned. It's a Python dict lookup with three things relaxed —
@@ -84,6 +84,6 @@ python 01-attention/check_lesson1.py
 - **Luong, Pham, Manning (2015)** — *Effective Approaches to Attention-based NMT.*
   Dot-product vs additive, compared head-to-head.
 - **Vaswani et al. (2017)** — *Attention Is All You Need.* §3.2.1 and **footnote 4** for the
-  scaling. **Table 1** for part 4's comparison.
+  scaling. **Table 1** for part 5's comparison.
 - Optional: Lilian Weng, *Attention? Attention!* — good consolidation read, **after** you
   implement it.

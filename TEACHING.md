@@ -189,6 +189,14 @@ Where the honest origin isn't a fix (**Transfer**, **Empirical**, **Unification*
 on the problem — it's just "here's the gap this filled" or "here's what nobody could explain"
 rather than "here's what broke." Never manufacture a failure that didn't happen.
 
+**And raise a problem only where its mechanism can land — the same part or the one next door.**
+This is the no-forward-references rule applied to *problems*, not just terms (Kenessary,
+2026-08-13: lesson 1's old part 4 catalogued six debts whose repairs lived in later lessons, and
+it read as foreshadowing because structurally it was). A far-future repair gets one of two
+treatments: cut it, and raise the problem in the part that solves it — or give the solution's
+one-line sketch right where the tension appears, with the later part elaborating rather than
+rescuing. A part must never end as a list of open IOUs.
+
 ### This is a deep-learning course, not a history course
 
 History is **structure, not subject**. It's a good spine — technique X exists because Y broke —

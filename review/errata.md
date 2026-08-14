@@ -184,3 +184,26 @@ part 1's $f$; "layer" silently narrowed from "4 stacked LSTM layers" to "one att
 day was set from a bad estimate and turned out to be unreachable without cutting content. It is now
 1500, set by measuring. Part 3 sits at 1655 and is logged as over in `PROGRESS.md` rather than
 trimmed into incoherence.
+
+---
+
+## 2026-08-13 — Section 01, lesson 1, parts 4–5 (regenerated after the 4↔5 swap)
+
+Parts 4 and 5 were swapped and regenerated the same day (Kenessary: old part 4 was foreshadowing
+problems whose solutions lived in future material). The cold-read audit ran on the fresh prose,
+before Kenessary read it. Not quizzed; no propagation beyond the two new files.
+
+| # | Claimed | Actually | How it was found |
+|---|---|---|---|
+| 24 | Part 5: "**$T$ appears in none of those shapes**" — every parameter is length-independent, so train-short/run-long works unconditionally | Part 4's own position mechanism is a **learned table with one row per position** — a parameter whose shape contains the maximum length. Train at length 7 and position 8 has no vector. True claim: every *per-row* weight is length-blind; the stored position table is the one exception | Cold-read audit |
+| 25 | Part 5's equivariance proof: "shuffle the rows of $x$ (the words, re-ordered)" with only the mask set aside | Part 4's $x$ already has position vectors added, so shuffling its rows is *not* re-ordering the words — re-ordered words would get different position vectors, which is exactly the symmetry-breaking the section says doesn't exist yet. The proof holds only for the bare embeddings; mask *and* position vectors must both be set aside | Cold-read audit |
+| 26 | Part 5: "$2048^2$ = 4,194,304 entries per block" | The part's own table two lines up lists **both $E$ and $A$** at $T \times T$ — the materialized score tables are ~8.4M entries per block, double the stated figure | Cold-read audit |
+| 27 | Part 5: "**Critical path** — … the middle **and right** columns: 1 against $T$, and it's the whole victory" | The middle column (sequential steps) is part 3's decisive throughput argument; the right column is part 3's *path length*, which part 3 explicitly priced as **not** decisive. Folding both into "the victory" un-drew part 3's central distinction | Cold-read audit |
+
+**The pattern, again.** All four were introduced by a regeneration that was clean on its target
+(removing forward-promises) and wrong somewhere new — same shape as errors 7–8 and 9b. The audit
+after every pass continues to earn its keep: all four were caught before first read.
+
+**#24 is the keeper.** The correction is more instructive than the original claim — "the attention
+machinery is length-blind, the stored position patch isn't" is a real interview distinction, and it
+is now the honest hook for lesson 5 instead of a hand-waved "positional encoding comes later."

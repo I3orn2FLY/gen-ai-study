@@ -118,7 +118,7 @@ def fig_path_length():
     save(fig, "fig2-path-length.png")
 
 
-# ---------------------------------------------------------------- part 5
+# ---------------------------------------------------------------- part 6
 def fig_dict_to_attention():
     fig, ax = blank((10, 5.2))
     ax.set_xlim(0, 10); ax.set_ylim(0, 5.2)

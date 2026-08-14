@@ -170,7 +170,7 @@ about.
 
 **Scores are throwaway.** Computed → softmaxed → used → gone. They aren't parameters; the optimizer
 never sees them. Training changes the *function* that produces them. (Throwaway isn't free, though
-— they sit in memory while the pass runs, and part 4 shows how fast that grows.)
+— they sit in memory while the pass runs, and part 5 shows how fast that grows.)
 
 **$h_j$ is doing two jobs at once.** It appears in the score, deciding *whether* word $j$ gets
 picked. Then it appears in the weighted sum, being *what you get* when it is picked. Those are
@@ -178,7 +178,7 @@ different jobs, and there's no law saying one vector has to do both. Splitting t
 third name comes from — part 6.
 
 One habit worth forming now: "key" means **the side being looked at**, not "the encoder". Looks
-like a pointless distinction here, where the keys obviously are encoder states. Part 5 builds
+like a pointless distinction here, where the keys obviously are encoder states. Part 4 builds
 attention where both sides come from the same sentence, and "key = encoder" stops making sense.
 
 ---

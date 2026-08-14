@@ -2,8 +2,12 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** Lesson 1 is now **ten** parts; **1–4 are written**, 5–10 are outline stubs.
-Kenessary has read parts 1–2 in an older form and needs to re-read 1–4. Then part 5.
+**Next action:** Lesson 1 is ten parts; **1–5 are written**, 6–10 are outline stubs.
+**Parts 4 and 5 were swapped and regenerated on 2026-08-13** (Kenessary's feedback while reading
+old part 4: don't raise problems whose solutions live in future material). Part 4 is now the
+forward pass — the transformer built shape by shape — and part 5 is the cost audit, pointed at the
+built model. He should read 4 and 5; the parts 1–4 quiz from `review/questions.md` is still owed.
+Before writing part 6: settle the 6/7 merge question at the bottom of `01-attention/lesson1/plan.md`.
 
 Fourteen errors found and fixed on 2026-08-10/11 — see `review/errata.md`. The pattern that
 matters: errors 7–8 were introduced by the fix for 5–6, and 9b by the fix for 7. **A revision is
@@ -24,8 +28,8 @@ rather than the prose. The diagnosis is in the file: every error today came from
 true *while* writing paragraphs, which made every correction a full rewrite and every rewrite a
 fresh chance to improvise something wrong. Three fixes introduced new errors that way.
 
-**Part 5 is planned but not written** — see the block at the bottom of `01-attention/lesson1/plan.md`,
-including an open question about whether parts 6 and 7 should merge.
+**Open question carried in `plan.md`:** whether parts 6 and 7 should merge, now that part 4
+traces $QK^\top$ with real shapes. Decide in the plan before writing part 6.
 
 **Web access works from this session** even though the box itself has no network — paper
 abstracts and arXiv HTML are fetchable, and errors 5 and 6 were settled that way. Use it to
@@ -141,10 +145,11 @@ Trained weights that later sections depend on. Full detail in `checkpoints/MANIF
 
 Spaced review runs at the start of roughly every third session (`TEACHING.md` § review layer).
 
-- Question bank: `review/questions.md` — **20 questions** (01 lesson 1, parts 1–4), 3 marked ⚠
-  as misconceptions he actually held. **None asked yet — a quiz is due before part 5.**
-- Errata: `review/errata.md` — **14 corrections** across three passes (01 lesson 1, parts 1–4;
-  none quizzed). Four of them were introduced by the fix for an earlier one.
+- Question bank: `review/questions.md` — **25 questions** (01 lesson 1, parts 1–5), 3 marked ⚠
+  as misconceptions he actually held. **None asked yet — a quiz is overdue.**
+- Errata: `review/errata.md` — **18 corrections** across four passes (01 lesson 1, parts 1–5;
+  none quizzed). Eight of them were introduced by a fix or regeneration of earlier material —
+  the audit-after-every-pass rule exists because of exactly this.
 - Quiz history: `review/log.md` — **no quizzes run**
 - Outstanding **shaky** or **confidently wrong** items: none
 
@@ -175,3 +180,4 @@ that never changes is one nobody is checking.
 | 2026-08-11 | Lesson 1 split again, nine parts → **ten**: part 3 had grown to 343 lines once the audit fixes landed, so *what deleting recurrence cost* became part 4 in its own right | The length ceiling; fixed structurally rather than by trimming, same as the earlier 8→9 split |
 | 2026-08-11 | **Web access confirmed working** from the Claude Code session despite the box having no network. Claims are now fetched and checked, not recalled | Two part-3 claims settled by fetching the papers |
 | 2026-08-03 | §4 bf16 detection corrected — `is_bf16_supported()` reports True on Turing via emulation; must pass `including_emulation=False` | Found by running the check on the actual machine |
+| 2026-08-13 | Lesson 1 parts 4↔5 swapped: the forward pass now precedes the cost audit, and both were regenerated from `plan.md`. Rule added (`TEACHING.md` § Open with the problem): **raise a problem only where its mechanism can land** — same part or adjacent; far-future repairs are cut or get a one-line solution sketch in place. Old part 4's multi-head teaser cut (lesson 2 raises it where it's solved); causal mask motivated *and* delivered inside part 4 | Kenessary, reading old part 4: it felt redundant alone, "too much foreshadowing" — problems were being introduced whose solutions lived in future material |

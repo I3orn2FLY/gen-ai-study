@@ -5,7 +5,8 @@
 > **Placeholder.** Parts are written one at a time, after the previous one is right.
 > Below is what this part will contain.
 
-Part 5 had three tensors appear out of nowhere. What are they, and why three?
+Part 4 had three matrices appear out of nowhere, and part 5 closed on the open question:
+why three?
 
 **Will cover**
 

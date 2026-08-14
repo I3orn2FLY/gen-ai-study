@@ -33,7 +33,7 @@ Three things fall out of that shape for free:
 - **Length doesn't change the parameter count.** Same cell every step, so a short sentence and a
   long one use exactly the same weights.
 
-Remember those three. Part 4 is the invoice, and one of them survives.
+Remember those three. Part 5 is the invoice, and one of them survives.
 
 ---
 
@@ -156,7 +156,7 @@ embedding, or whatever the layer below produced there. They all exist before you
 > position scores every other one instead of scoring a separate encoder.
 > **Layer** — one attention operation over a whole sentence, the kind you stack many of. (Narrower
 > than "layer" in "4 stacked LSTM layers"; same word, new unit.)
-> Both get built in part 5. Here they just mean "attention with no RNN wrapped around it."
+> Both get built in part 4. Here they just mean "attention with no RNN wrapped around it."
 
 | Per layer | Steps that must happen in order |
 |---|---|
@@ -191,6 +191,7 @@ every score is one matmul — but only if all the queries exist at once
     → delete it
 ```
 
-Decided. Now count what it costs — starting with the claim you'll hear most often, which is false.
+Decided. Delete it — and realize there is now no model left to run. Building its replacement
+comes first; the bill comes right after.
 
-**→ [4 · What deleting it cost](4-what-it-cost.md)**
+**→ [4 · The forward pass](4-the-forward-pass.md)**
