@@ -2,16 +2,23 @@
 
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
-**Next action:** Lesson 1 is ten parts; **1–5 are written**, 6–10 are outline stubs.
-**Part 4 regenerated again on 2026-08-17**, mid-read, on two pieces of Kenessary feedback: the
-output projection read as the block's MLP with an imagined argmax→ids step (full answer in
-`scratch-qa.md`; ⚠ questions 26–27 added), and — structural — "no coherent story". Diagnosis in
-`lesson1/plan.md`: the part was answer-first and outside-in; it's now one pass of one sentence
-through the machine, in data order. **He confirmed the word ceiling is subordinate to flow** —
-part 4 ships at 1601 words deliberately. He should finish reading 4, then 5 — **if part 5 gives
-him the same struggle, restructure it the same way, don't patch it.** The parts 1–4 quiz from
-`review/questions.md` is still owed. Before writing part 6: settle the 6/7 merge question at the
-bottom of `01-attention/lesson1/plan.md`.
+**Next action:** Lesson 1 is ten parts; **1–7 are written**, 8–10 are outline stubs. He should
+read **4 → 5 → 6 → 7** (4 was regenerated 2026-08-17 as one data-order pass after his "no
+coherent story" feedback; 5 was tightened the same day; 6 and 7 are new). The parts 1–4 quiz
+from `review/questions.md` (29 questions, 6 ⚠) is **still owed and overdue**. Next to write:
+part 8 (why √d — flagged as the one to slow down for), then 9, then 10's task scaffold.
+
+**2026-08-17, full re-audit pass** (his request: accurate, coherent, followable, parts kept
+small): one cold-read auditor per written part, briefed with per-part earned vocabulary and told
+to recompute every number. Outcomes — part 2's cost table was wrong as shipped (errata #19:
+102.5M vs 2.5M ≈ 41×, not 157M/60×; the printed numbers used dims the prose had abandoned);
+three smaller factual fixes (errata #20–22); ~25 followability fixes across parts 1/2/3/5;
+parts 6 and 7 written from plan blocks (6/7 merge question settled: separate, 7 re-scoped
+without the multi-head dim) and each audit-corrected before shipping — including a false
+symmetry argument in 6 (the causal mask invalidates it; rebuilt on the ask-for-yourself lock)
+and a backwards `dim=-2` consequence in 7. Figures fig4/5/6 regenerated (title overlap, 8→7
+positions and honest captions, head dim removed). **Word ceiling stays subordinate to flow**
+(his instruction); parts run 860–1700 words, read times updated.
 
 Fourteen errors found and fixed on 2026-08-10/11 — see `review/errata.md`. The pattern that
 matters: errors 7–8 were introduced by the fix for 5–6, and 9b by the fix for 7. **A revision is

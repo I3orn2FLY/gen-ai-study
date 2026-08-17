@@ -7,13 +7,13 @@ right, so the style carries forward instead of ten parts inheriting the same mis
 
 | # | Part | Time | Status |
 |---|---|---|---|
-| 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, the number that fixes it, and the decoder loop it lives in | ~4 min | **written** |
-| 2 | [Additive or multiplicative](2-additive-or-multiplicative.md) — how `score()` is actually computed, and why one form died | ~5 min | **written** |
-| 3 | [Why not recurrence](3-why-not-rnns.md) — what recurrence was for, and two arguments for deleting it anyway | ~5 min | **written** |
-| 4 | [The forward pass](4-the-forward-pass.md) — the transformer built shape by shape, and where attention sits | ~6 min | **written** |
-| 5 | [What deleting it cost](5-what-it-cost.md) — the complexity trap, audited on the model just built | ~5 min | **written** |
-| 6 | [Query, key, value](6-query-key-value.md) — a dict lookup with three things relaxed | ~7 min | outline |
-| 7 | [The operation](7-the-operation.md) | ~4 min | outline |
+| 1 | [The scoring function](1-the-scoring-function.md) — the bottleneck, the number that fixes it, and the decoder loop it lives in | ~6 min | **written** |
+| 2 | [Additive or multiplicative](2-additive-or-multiplicative.md) — how `score()` is actually computed, and why one form died | ~6 min | **written** |
+| 3 | [Why not recurrence](3-why-not-rnns.md) — what recurrence was for, and two arguments for deleting it anyway | ~7 min | **written** |
+| 4 | [The forward pass](4-the-forward-pass.md) — the transformer built shape by shape, one sentence pushed through | ~7 min | **written** |
+| 5 | [What deleting it cost](5-what-it-cost.md) — the complexity trap, audited on the model just built | ~6 min | **written** |
+| 6 | [Query, key, value](6-query-key-value.md) — delete the three matrices and watch what breaks | ~6 min | **written** |
+| 7 | [The operation, generalized](7-the-operation.md) — the canonical formula, shapes come loose, and the bug that trains fine | ~5 min | **written** |
 | 8 | [Why √d](8-why-sqrt-d.md) — the one to slow down for | ~6 min | outline |
 | 9 | [The PyTorch you need](9-pytorch-you-need.md) | ~4 min | outline |
 | 10 | [Your task](10-your-task.md) | ~45 min doing | outline |
@@ -59,9 +59,12 @@ python 01-attention/check_lesson1.py
 
 ## Interview questions this covers
 
-1. **Why are Q and K separate matrices?** Sharing them makes the score matrix symmetric —
-   relationships would lose direction — and the diagonal `‖xW‖²` would dominate every row, so
-   every token would mostly attend to itself.
+1. **Why are Q and K separate matrices?** With `Q = K` a position can only ask "what's similar
+   to *me*" — the query is chained to the identity, and direction ("it"→"cat" strong,
+   "cat"→"it" weak) is inexpressible. At init the diagonal `‖x_i‖²` also tops every row
+   (equal-norm rows after LayerNorm + Cauchy–Schwarz), so the op starts biased toward attending
+   to itself. (The classic "symmetric score table" version assumes both directions are live — a
+   causal mask discards the mirror entry, so lead with the ask-for-yourself lock.)
 2. **Self-attention vs cross-attention?** Same operation; only where Q, K, V come from
    changes. Self → square score matrix, cross → rectangular `(T_q, T_k)`.
 3. **Why is there a √d in attention?** Variance of a `d`-term dot product is `d` → unscaled

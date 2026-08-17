@@ -1,6 +1,6 @@
 # 2 · Additive or multiplicative
 
-*~4 min. Lesson 1, part 2 of 10.*
+*~6 min. Lesson 1, part 2 of 10.*
 
 ## The problem
 
@@ -46,7 +46,8 @@ $W = [\,W_q \mid W_k\,]$. Then
 $$W\,[\,q;\,k\,] \;=\; W_q\,q \;+\; W_k\,k$$
 
 Same arithmetic, regrouped — glue-then-multiply is multiply-separately-then-add. Bahdanau writes
-it the second way, and now the code is obvious ($H$ is the encoder states stacked as rows):
+it the second way, and now the code is obvious ($H$ is the encoder states stacked as rows;
+`s_prev` is the query $s_{i-1}$ — part 1's rule, the state finished last step):
 
 ```python
 K_proj = H @ W_k.T          # (T_x, d_h) @ (d_h, d_a)  ->  (T_x, d_a)
@@ -85,9 +86,10 @@ happen to produce arrows that line up. Why on earth would they?
 
 **One: you can't always do it anyway.** Multiplying pairwise means both vectors need the same
 length. Bahdanau's don't — 2000 against 1000 — so the dot product isn't even an option in his
-model. Luong's is built the other way: stacked LSTMs, 4 layers of 1000 cells on both sides, and the
-decoder starts from the encoder's final state. Same size by design, and the two sides share an
-origin, so they're not strangers to begin with. **Everything below is Luong's setup.**
+model. Luong's (Luong et al., 2015 — the second of the two papers, a year after Bahdanau) is built
+the other way: stacked LSTMs, 4 layers of 1000 cells on both sides. Same size by design — and both
+stacks train jointly against one loss, so they're not strangers to begin with. **Everything below
+is Luong's setup.**
 
 **Two: the networks learn to line up.** Nobody told them to point the same way — but the loss does.
 When the model should have looked at word 2 and didn't, the gradient's instruction is literally
@@ -113,44 +115,49 @@ He didn't propose the dot product as *the* answer. He proposed three and measure
 | general | $q^{\top} W_a\, k$ | a learned matrix in between — the obvious hedge |
 | concat | $v_a^{\top}\tanh(W_a[\,q;k\,])$ | Bahdanau's form |
 
+> Luong's paper writes $W_a, v_a$ where we wrote $W, v$ — and `general`'s $W_a$ is $(d, d)$ while
+> `concat`'s is $(d_a, 2d)$: same letter in the paper, two different matrices.
+
 The middle one is exactly the worry above, patched: if the two spaces might not line up, put
 something learnable between them. It shipped alongside the other two.
 
-**None of them won.** Dot did better in one setting, general in another, and `concat` —
-Bahdanau's own — underperformed in a way Luong flagged as odd rather than settled.
+**None of them won on quality.** Dot did better in one setting, general in another, and `concat`
+— Bahdanau's own — underperformed; the paper's own comment is that it "does not yield good
+performances and more analysis should be done."
 
 That's the whole empirical basis. Nobody proved a bare dot product was enough. It did about as
 well and cost nothing, so it stuck.
 
-*(Luong et al., 2015. **Origin tag: Empirical / efficiency** — not a fix for a failure. The tidy
-line you'll hear today, "the dot product is the natural similarity measure", got attached
-afterwards.)*
+*(Luong et al., 2015. **Origin tag: Empirical / efficiency** — not a fix for a failure. Given
+that table, the tidy line you'll hear today — "the dot product is the natural similarity
+measure" — is confidence the experiments didn't have.)*
 
 ---
 
-## Why the dot product won
+## Why the dot product won anyway
 
-It's cheaper, and not by a little.
+Not on quality — on cost. It's cheaper, and not by a little.
 
-**No parameters.** Additive carries $W$ and $v$ — about three million numbers to store, initialize,
+**No parameters.** Additive carries $W$ and $v$ — about two million numbers to store, initialize,
 compute gradients for, and update every single batch. The dot product carries **zero**.
 
-**Much less arithmetic.** For 50 words into 50, with everything 1000 wide:
+**Much less arithmetic.** For 50 words into 50, with everything 1000 wide, counting
+multiply-adds (the tanh and the additions ride along and don't change the story):
 
 | | | multiply-adds |
 |---|---|---|
-| additive | project the keys | 100 M |
+| additive | project the keys | 50 M |
 | | project the queries | 50 M |
-| | the per-pair MLP | 7.5 M |
-| | **total** | **157 M** |
+| | score all pairs (the $v$ dot) | 2.5 M |
+| | **total** | **102.5 M** |
 | dot product | all of it | **2.5 M** |
 
-Roughly **60× the work** for the same 2500 numbers. Look where it goes: almost all of it is the
+Roughly **40× the work** for the same 2500 numbers. Look where it goes: almost all of it is the
 projections. That's not an implementation detail you could optimize away — it *is* additive's idea.
 "Map both sides into a shared space, then compare there" costs two big matrix multiplies. The dot
 product skips straight to comparing.
 
-There's a third, smaller one — additive has to hold a $(T_x, d_a)$ scratch tensor on the way to
+**A third, smaller advantage.** Additive has to hold a $(T_x, d_a)$ scratch tensor on the way to
 $T_x$ scores, because the $\tanh$ sits *between* $q$ and $k$. The dot product holds nothing.
 
 ![what each scoring function materializes](figures/fig13-additive-vs-dot.png)

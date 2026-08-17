@@ -207,3 +207,29 @@ after every pass continues to earn its keep: all four were caught before first r
 **#24 is the keeper.** The correction is more instructive than the original claim — "the attention
 machinery is length-blind, the stored position patch isn't" is a real interview distinction, and it
 is now the honest hook for lesson 5 instead of a hand-waved "positional encoding comes later."
+
+---
+
+## 2026-08-17 — Section 01, lesson 1, parts 1, 2, 5
+
+Found by the four-part cold-read re-audit (one auditor per part, briefed with each part's earned
+vocabulary and verified claims, told to recompute every number). Parts 1 and 2 had been read;
+part 5 had not. Nothing quizzed.
+
+| # | Claimed | Actually | How it was found |
+|---|---|---|---|
+| 19 | Part 2's cost table: additive = **157 M** multiply-adds ("100 M keys + 50 M queries + 7.5 M per-pair MLP"), "**60×** the work", "$W$, $v$ ≈ **3 M** params — under "everything 1000 wide" | Under the declared uniform-1000 (Luong) dims: keys **50 M**, queries 50 M, $v$-dots **2.5 M** → **102.5 M**, ≈ **41×**; params ≈ **2 M**. The printed numbers silently used Bahdanau's 2000-wide encoder, and the 7.5 M row counted tanh/adds under a "multiply-adds" header | Auditor recomputed the table; the rows could not be reproduced from the stated dimensions |
+| 20 | Part 2: Luong's "decoder starts from the encoder's final state", carrying the "shared origin" argument | The paper doesn't state its decoder init; the claim was recalled, not fetched. Argument rebuilt on what is derivable: same architecture both sides, trained jointly against one loss | Fetched ar5iv 1508.04025 to verify; the sentence isn't there |
+| 21 | Part 1: "papers and PyTorch both say 'attention scores' for $\alpha$" | PyTorch's API calls the post-softmax quantity *weights* (`attn_output_weights`); it's papers that are loose. Reworded to "you'll see $\alpha$ called 'weights' in one paper and 'scores' in the next" | Auditor challenged the API claim |
+| 22 | Part 5: Bahdanau's $h_j$ "came out of an RNN that read the sentence in order" | The encoder is **bidirectional** (two passes, one each way) — the same fact errata #1 corrected once already. Reworded | Auditor cross-checked against part 1 |
+
+**Consequences beyond the fix.** #19 is the one with teeth — a shipped, *verified-marked* cost
+claim (plan claims row 13, "arithmetic run ✅") whose arithmetic was right for dimensions the
+prose had explicitly abandoned two sections earlier. The check ran the numbers but not the
+numbers *against the declared setup*. Claims row 13 rewritten with the uniform-1000 figures.
+#22 shows a corrected error (errata #1) re-entering through a later part — exactly the
+propagation this file exists to catch.
+
+Same audit, non-errata: ~25 followability fixes across parts 1, 2, 3, 5 (logged in
+`lesson1/plan.md`), including part 1 never naming "attention" in its body and part 3's opening
+path-length example running on self-attention it hadn't built yet.

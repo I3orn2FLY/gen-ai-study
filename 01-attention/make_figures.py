@@ -148,15 +148,15 @@ def fig_dict_to_attention():
 
 
 def fig_qkv():
-    fig, ax = blank((9, 3.9))
-    ax.set_xlim(0, 9); ax.set_ylim(0, 3.9)
-    ax.text(0.1, 3.65, "one input, three learned views of it", fontsize=12, weight="bold")
-    box(ax, 0.3, 1.55, 1.5, 0.75, "$x$\ntoken embeddings", fc="#f3f4f6", ec=INK, fs=9)
+    fig, ax = blank((9, 4.3))
+    ax.set_xlim(0, 9); ax.set_ylim(0, 4.3)
+    ax.text(0.1, 4.05, "one input, three learned views of it", fontsize=12, weight="bold")
+    box(ax, 0.2, 1.55, 1.7, 0.75, "$x$\ntoken embeddings", fc="#f3f4f6", ec=INK, fs=9)
     specs = [(2.95, "$W_Q$", "$Q$  query", "what I'm looking for", BLUE, "#eff6ff"),
              (1.55, "$W_K$", "$K$  key", "what I'm filed under", GREEN, "#f0fdf4"),
              (0.15, "$W_V$", "$V$  value", "what I hand over", ORANGE, "#fff7ed")]
     for y, wm, name, desc, c, fc in specs:
-        arrow(ax, 1.85, 1.93, 2.75, y + 0.35, color=c, lw=1.5)
+        arrow(ax, 1.95, 1.93, 2.75, y + 0.35, color=c, lw=1.5)
         box(ax, 2.75, y, 1.05, 0.7, wm, fc="white", ec=c, fs=11)
         arrow(ax, 3.85, y + 0.35, 4.55, y + 0.35, color=c, lw=1.5)
         box(ax, 4.55, y, 1.45, 0.7, name, fc=fc, ec=c, fs=10, weight="bold")
@@ -167,7 +167,7 @@ def fig_qkv():
 
 def fig_symmetry():
     torch.manual_seed(3)
-    L, d = 8, 32
+    L, d = 7, 32
     x = torch.randn(L, d)
     W = torch.randn(d, d) / math.sqrt(d)
     Wq, Wk = torch.randn(d, d) / math.sqrt(d), torch.randn(d, d) / math.sqrt(d)
@@ -177,7 +177,7 @@ def fig_symmetry():
     fig, axes = plt.subplots(1, 2, figsize=(9.4, 4.2))
     for ax, m, title, sub in (
         (axes[0], shared, "$W_Q = W_K$  (shared)",
-         "symmetric · diagonal dominates\nevery token mostly attends to itself"),
+         "diagonal dominates — every token mostly attends to itself\n(the scores underneath are exactly symmetric)"),
         (axes[1], sep, "$W_Q \\neq W_K$  (separate)",
          "asymmetric · direction is expressible"),
     ):
@@ -185,11 +185,12 @@ def fig_symmetry():
         ax.set_title(title, fontsize=11, weight="bold", pad=8)
         ax.set_xlabel("key j", fontsize=9); ax.set_ylabel("query i", fontsize=9)
         ax.set_xticks(range(L)); ax.set_yticks(range(L))
+        ax.set_xticklabels(range(1, L + 1)); ax.set_yticklabels(range(1, L + 1))
         ax.tick_params(labelsize=8)
         ax.text(0.5, -0.28, sub, transform=ax.transAxes, ha="center", va="top",
                 fontsize=9, color=MUTED)
         fig.colorbar(im, ax=ax, fraction=0.046)
-    fig.suptitle("attention weights: sharing the projection forces symmetry",
+    fig.suptitle("attention weights: what sharing the projection does",
                  fontsize=12, weight="bold", y=1.0)
     fig.tight_layout()
     save(fig, "fig5-symmetry.png")
@@ -201,10 +202,10 @@ def fig_three_steps():
     ax.set_xlim(0, 10.2); ax.set_ylim(0, 3.2)
     ax.text(0.1, 2.95, "three steps, and the shape at each one", fontsize=12, weight="bold")
     stages = [
-        (0.15, "$Q$", "(B, H, $L_q$, $d_k$)", "#eff6ff", BLUE),
-        (2.05, "$Q K^\\top / \\sqrt{d_k}$", "(B, H, $L_q$, $L_k$)", "#f5f3ff", "#7c3aed"),
-        (4.65, "softmax(·, dim=-1)", "(B, H, $L_q$, $L_k$)", "#f0fdf4", GREEN),
-        (7.45, "$A V$", "(B, H, $L_q$, $d_v$)", "#fff7ed", ORANGE),
+        (0.15, "$Q$", "(B, $L_q$, $d_k$)", "#eff6ff", BLUE),
+        (2.05, "$Q K^\\top / \\sqrt{d_k}$", "(B, $L_q$, $L_k$)", "#f5f3ff", "#7c3aed"),
+        (4.65, "softmax(·, dim=-1)", "(B, $L_q$, $L_k$)", "#f0fdf4", GREEN),
+        (7.45, "$A V$", "(B, $L_q$, $d_v$)", "#fff7ed", ORANGE),
     ]
     for i, (x, lab, shp, fc, ec) in enumerate(stages):
         w = 1.4 if i in (0, 3) else 2.2
@@ -215,7 +216,7 @@ def fig_three_steps():
     ax.text(5.75, 0.65, "softmax over the LAST dim — the keys.\n"
             "each query spends one unit of attention across all keys.",
             ha="center", fontsize=9.5, color=GREEN, style="italic")
-    ax.text(1.55, 0.65, "$K$: (B,H,$L_k$,$d_k$)\n$V$: (B,H,$L_k$,$d_v$)",
+    ax.text(1.55, 0.65, "$K$: (B, $L_k$, $d_k$)\n$V$: (B, $L_k$, $d_v$)",
             ha="center", fontsize=9, color=MUTED)
     save(fig, "fig6-three-steps.png")
 

@@ -1,6 +1,6 @@
 # 3 · Why not recurrence
 
-*~4 min. Lesson 1, part 3 of 10.*
+*~7 min. Lesson 1, part 3 of 10.*
 
 ## The problem
 
@@ -23,7 +23,8 @@ $$h_t \;=\; \mathrm{cell}(h_{t-1},\, x_t)$$
 
 > $x_t$ — the embedding of input word $t$. $h_t$ — the state after reading it. $\mathrm{cell}$ —
 > the recurrent unit (plain RNN, LSTM, GRU), one set of weights reused at every step. It's the same
-> kind of thing part 1 called $f$.
+> kind of thing part 1 called $f$ — the decoder's version just takes extra inputs,
+> $f(s_{i-1}, y_{i-1}, c_i)$: same machine, more arguments.
 
 Three things fall out of that shape for free:
 
@@ -53,17 +54,20 @@ feedforward network wearing a disguise:
 | Input | enters at layer 1 | enters at **every** layer |
 | Depth | you choose it | **the sentence length chooses it** |
 
-That's not a cute analogy, it's the reason the two fields found the same problem at the same time.
-"Vanishing gradients in deep networks" and "vanishing gradients in RNNs" are one result, not two
-(Hochreiter 1991; Bengio, Simard, Frasconi 1994).
+That's not a cute analogy — it's why "vanishing gradients in deep networks" and "vanishing
+gradients in RNNs" are one result, not two (Hochreiter 1991; Bengio, Simard, Frasconi 1994).
 
 ---
 
 ## Argument 1 — the long way round
 
-For word 1 to influence word 7, its information has to be carried through every state in between.
-Six hops. Twenty words apart, twenty hops. Attention just scores the two against each other
-directly — **one hop, no matter the distance.**
+*(The famous one — and not, it will turn out, the one that decided. Worth building anyway: it's
+the argument everyone reaches for, and knowing its limits is the interview answer.)*
+
+In the model you have, information already travels two ways. Along the encoder RNN: for word 1 to
+reach the state at word 7, it's carried through every state in between — six hops; twenty words
+apart, twenty hops. Through attention: when the decoder needs input word $j$, it scores $h_j$
+directly — **one hop, no matter the distance.** Every hop the chain adds, attention's route skips.
 
 ![path length: walking versus jumping](figures/fig2-path-length.png)
 
@@ -110,9 +114,9 @@ When the forget gate sits near 1, that line reads $c_t \approx c_{t-1} + \text{s
 addition, not multiplication. Nothing shrinks. The gradient gets a road with no tolls on it. (That
 gate wasn't in the original 1997 LSTM; Gers et al. added it in 2000.)
 
-So gating, residual connections and attention are all the same idea: give the signal a shortcut so
-it doesn't have to survive a long chain. The first two make the trip easier; attention deletes the
-trip.
+So gating, residual connections (ResNet's skip-adds) and attention are all the same idea: give
+the signal a shortcut so it doesn't have to survive a long chain. The first two make the trip
+easier; attention deletes the trip.
 
 **Now the catch.** This is the argument everyone reaches for, and it's *not* the one that mattered.
 Stacked LSTMs held the state of the art in translation right up to 2017 — Google's production
@@ -123,8 +127,8 @@ satisfying, and it decided nothing.
 
 ## Argument 2 — the queue
 
-Here's the one. And the way in is to notice that the model you already have is **half parallel
-already**, and the parallel half is the attention.
+Here's the one. And the way in is to notice that the model you already have is **mostly parallel
+already**, and the parallel part is the attention.
 
 Take one decoder step. The thing that costs wall-clock time isn't how much arithmetic there is,
 it's which line has to wait for the *previous word* to finish:
@@ -138,6 +142,9 @@ it's which line has to wait for the *previous word* to finish:
 | $c_i = \alpha_i^{\top} H$ | $(d_h,)$ | yes | no |
 | $s_i = \mathrm{cell}(s_{i-1},\, y_{i-1},\, c_i)$ | $(d_s,)$ | — | **yes — it produces $s_i$** |
 
+(Row 2 adds a $(d_a,)$ vector to a $(T_x, d_a)$ matrix — broadcast over the rows, the same trick
+as part 2's code.)
+
 Only the last row puts anything into the chain $s_0 \to s_1 \to s_2 \to \cdots$. Everything above
 it fans out across all the input positions at once, and doesn't get slower as the sentence gets
 longer. **Attention is already the parallel part.** The RNN cell is the bottleneck.
@@ -149,8 +156,8 @@ So the real question isn't "can attention be parallel". It already is. It's: **w
 part were the whole model?**
 
 And notice what that fixes. Part 2 couldn't batch the queries because each one had to wait for the
-previous state. Take the RNN out and a position's query comes from its own input — the word
-embedding, or whatever the layer below produced there. They all exist before you start.
+previous state. Take the RNN out and a position's query comes from its own input — at the bottom,
+just the word's embedding. They all exist before you start.
 
 > **Self-attention** — attention where the queries and keys come from the *same* sentence, so every
 > position scores every other one instead of scoring a separate encoder.
@@ -174,8 +181,8 @@ $s_i$ still needs $s_{i-1}$. Knowing the *inputs* in advance doesn't help when t
 chain.
 
 That's exactly the complaint in *Attention Is All You Need* (Vaswani et al., 2017): recurrence
-"precludes parallelization within training examples" (§1). And what the abstract promises is time,
-not quality — more parallelizable, significantly less time to train.
+"precludes parallelization within training examples" (§1). And the abstract leads with the cure —
+more parallelizable, significantly less time to train.
 
 > **The RNN wasn't replaced for learning badly. It was replaced for training slowly.**
 

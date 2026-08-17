@@ -1,6 +1,6 @@
 # 4 · The forward pass
 
-*~6 min. Lesson 1, part 4 of 10.*
+*~7 min. Lesson 1, part 4 of 10.*
 
 ## The hole
 

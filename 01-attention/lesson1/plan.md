@@ -25,11 +25,12 @@ enumeration, never from memory — the first version of this table missed two th
 | 10 | Table 1: self-attn $n^2d$ / 1 / 1; recurrent $nd^2$ / $n$ / $n$ | Vaswani Table 1 | 5 | ✅ 08-11 |
 | 11 | "precludes parallelization within training examples" — **§1, not the abstract** | Vaswani §1 | 3 | ✅ 08-11 |
 | 12 | Abstract: "more parallelizable and requiring significantly less time to train" | Vaswani abstract | 3 | ✅ 08-11 |
-| 13 | Additive ≈157M multiply-adds vs dot 2.5M at $T_x{=}T_y{=}50$, $d{=}d_a{=}1000$; 3M params vs 0 | derived, arithmetic run | 2 | ✅ 08-11 |
+| 13 | Additive ≈102.5M multiply-adds (50M keys + 50M queries + 2.5M $v$-dots) vs dot 2.5M at $T_x{=}T_y{=}50$, uniform $d{=}d_a{=}1000$ → ≈41×; ≈2M params vs 0 | derived, re-run 08-17 (old 157M/60×/3M silently used Bahdanau's $d_h{=}2000$ — errata #19) | 2 | ✅ 08-17 |
 | 14 | Vanishing gradients: Hochreiter 1991, Bengio–Simard–Frasconi 1994 | — | 3 | ⬜ recalled |
 | 15 | Gradient clipping standard by 2013 | — | 3 | ⬜ recalled |
 | 16 | Forget gate added by Gers et al. 2000, not in the 1997 LSTM | — | 3 | ⬜ recalled |
 | 17 | Stacked LSTMs held translation SOTA to 2017, incl. Google production | — | 3 | ⬜ recalled |
+| 18 | K/V split — "different encodings in the addressing and output stages" — explicit in Key-Value Memory Networks, Miller et al. 2016 | abstract | 6 | ✅ 08-17 |
 
 ⬜ rows are dates and attributions. None carries an argument — if one can't be confirmed before the
 lesson closes, drop the date and keep the mechanism.
@@ -52,6 +53,23 @@ transformer existed on the page — and Kenessary's read confirmed the consequen
 sections ended in a pointer to future material. It read as foreshadowing because structurally it was.
 The forward pass now comes first (part 4); the bill is audited against the built model (part 5).
 The old part 4 text is regenerated, not just renumbered.
+
+**Re-audit 08-17 (all written parts, one cold reader each, accuracy + followability), incorporated:**
+part 1 — "attention" now named in the body (it never was); encoder/decoder attached to the RNNs in
+prose; "s'assit" token split stated; `<sos>`→$y_0$ connected in the loop; argmax claim narrowed to
+"no gradient"; PyTorch-naming claim fixed (errata #21); Bahdanau named in prose; $s_{i-1}$ gloss
+covers $i{=}1$; bidirectionality's second payoff marked. part 2 — cost table corrected to uniform
+Luong dims (errata #19: 102.5M vs 2.5M, ≈41×, ≈2M params); Luong init claim dropped, shared-origin
+argument rebuilt (errata #20); query↔`s_prev` binding stated in prose; Luong introduced at first
+use; `concat` verdict now quotes the paper; "won on quality" vs "won anyway" pivot marked;
+$W_a/v_a$ notation note added. part 3 — Argument 1 signposted as non-decisive up front; its opening
+example rebuilt on earned machinery (decoder→$h_j$ hop, not self-attention); cell's 3-arg decoder
+form noted at definition; broadcast note on the step table; "time, not quality" overreach dropped
+(the abstract claims quality too). part 5 — fourth job announced in the opening; verdict table
+reordered to match proof order; train-on-700 claim carries its exception inline; shape-limit vs
+cost-limit ceilings connected; Vaswani table intro de-fragmented; bidirectional gloss fixed
+(errata #22); stalling parenthetical trimmed. Reading times updated (parts run ~6–7 min at
+1450–1700 words; ceiling stays subordinated to flow per 08-17 instruction).
 
 **Symbol collisions, declared once:** $c$ is both context vector (part 1) and LSTM cell state
 (part 3); $f$ is both the decoder cell (part 1) and the forget gate $f_t$ (part 3); $i$ is both the
@@ -194,6 +212,69 @@ of the answer at the point the tension appears. This extends the no-forward-refe
   pinned to part 3's sense (the attention op, not a block) with one shared width $d$ noted;
   "model card" jargon cut; opening overclaim ("nothing about a future model") softened
 
-Open question to settle in the plan, not in prose: parts 6 and 7 both look like they cover the
-operation. If part 5 has already traced $QK^\top$ with real shapes, 6 (query/key/value) and 7 (the
-operation) may need merging into one part. Decide before writing 6.
+**6/7 merge question — settled 08-17: keep them separate, re-scope 7.** Part 4 already traced
+$QK^\top$ with real shapes, so 7's old "loops removed" framing is spent — but what remains splits
+into two different kinds of part: 6 is a *why* part (why three matrices), 7 is a *shapes* part
+(the op beyond the square self-attention case). Merged, they'd be one oversized part; Kenessary
+asked parts stay small (08-17). The old stub 7's $(B, H, L_q, d_k)$ is cut — $H$ is multi-head,
+lesson 2's machinery, unearned here; the batch dim stays.
+
+## Part 6 — Query, key, value
+
+- **opens on** — a cheaper model: delete the three matrices and attend with $x$ directly,
+  $Q = K = V = x$. It typechecks, it runs, it saves parameters. What breaks?
+- **teaches** — why the three projections exist; query/key/value as *roles*, not tensors
+- **intuition** — a Python dict: a request matched against labels to fetch contents. Attention is
+  that dict with three relaxations — exact match → dot-product score, one winner → softmax blend,
+  hand-written labels → learned projections
+- **figure** — `fig3-dict-to-attention.png`, `fig4-qkv-projections.png`, `fig5-symmetry.png`,
+  each eyeballed before shipping
+- **trace** — $S = xx^\top$ on part 4's $(7, 64)$ rows: symmetric ($S_{ij} = S_{ji}$ — "it→cat"
+  forced equal to "cat→it"), and the diagonal $S_{ii} = \lVert x_i \rVert^2$ is the row max once
+  LayerNorm has equalized norms (Cauchy–Schwarz) — every position mostly votes for itself.
+  Shared $W$ ($Q = K = xW$) fixes neither: still symmetric, diagonal still
+  $\lVert x_i W \rVert^2$
+- **introduces** — the three roles properly (query = what I'm looking for, key = what I
+  advertise, value = what I hand over); un-learns two live errors: "the key is what I need"
+  (no — that's the value) and "key = the encoder side" (only in cross-attention)
+- **may name** — cross-attention (part 7, adjacent)
+- **claims** — row 18 (fetched). Naming lineage stated softly: the names follow key-value
+  stores, and the addressing/output split predates the transformer by a year — no claim about
+  what Vaswani personally borrowed
+- **earns** — parts 7–10 use query/key/value as roles; README interview Q1 (why
+  $W_Q \neq W_K$) becomes answerable
+- **cold-read audit 08-17, incorporated** — the symmetry break was **false for the causal
+  model** (the mask discards the mirror entry $E_{ji}$, so no two-needs averaging ever occurs);
+  break one rebuilt on the mask-proof argument: with $Q = K$ the only expressible question is
+  "similar to me" (nearest-neighbor lock), symmetry demoted to a scoped aside for unmasked ops.
+  Cauchy–Schwarz hedge tightened ("comparable" → equal norms, which LayerNorm delivers at init);
+  "mostly attends to itself" → "largest single weight is its own"; figure's shared-$W$ diagonal
+  labeled an instance, not a theorem; the three-views box softened from conclusion to setup;
+  linguistic features marked as illustration. README interview Q1 rewritten to match
+
+## Part 7 — The operation, generalized
+
+- **opens on** — part 4's box quietly assumed queries and keys are the same 7 rows: square
+  table, one sentence, no batch. Part 1's translator was never square — French queries against
+  English keys. The op needs its general form, which is also what part 10's checker
+  (`F.scaled_dot_product_attention`) implements
+- **teaches** — $\mathrm{Attention}(Q, K, V) = \mathrm{softmax}(QK^\top / \sqrt{d_k})\,V$ with
+  fully general shapes
+- **intuition** — part 1's three steps — score, normalize, blend — survive unchanged; only the
+  assumption about where $Q$ and $K$ come from is dropped
+- **figure** — `fig6-three-steps.png`, `fig7-attention-heatmap.png`, eyeballed before shipping
+- **trace** — part 4's $(7, 64)$ self case first, then general: $Q\,(L_q, d_k)$,
+  $K\,(L_k, d_k)$, $V\,(L_k, d_v)$ → scores $(L_q, L_k)$ → out $(L_q, d_v)$; part 1's
+  translation as the worked rectangle; a batch dim broadcast in front
+- **introduces** — **cross-attention** (the rectangular case, named), $L_q$, $L_k$, $d_k$,
+  $d_v$ — why $K$ and $V$ share $L_k$ but may differ in width; `dim=-1` and why the wrong
+  softmax dim trains fine while being broken
+- **may name** — `F.scaled_dot_product_attention` (parts 9–10). Multi-head NOT named (lesson 2)
+- **claims** — none external
+- **earns** — parts 8–10 may use the canonical formula and the general shapes
+- **cold-read audit 08-17, incorporated** — the `dim=-2` consequence had its direction backwards
+  (an output row's scale swings with how much of the keys' budgets *that query* captures, not
+  with key popularity) — corrected; $B$ glossed at first use and fig6 (batched shapes) moved to
+  the batching paragraph; loss-curve claim made precise (the buggy run descends regardless; only
+  a comparison or exactness check catches it); "layers learn to cope" causal story cut; $d_k$
+  tied to part 2's $d$
