@@ -3,11 +3,15 @@
 Current state of the curriculum. Updated at the end of every section (`TEACHING.md` stage 9).
 
 **Next action:** Lesson 1 is ten parts; **1–5 are written**, 6–10 are outline stubs.
-**Parts 4 and 5 were swapped and regenerated on 2026-08-13** (Kenessary's feedback while reading
-old part 4: don't raise problems whose solutions live in future material). Part 4 is now the
-forward pass — the transformer built shape by shape — and part 5 is the cost audit, pointed at the
-built model. He should read 4 and 5; the parts 1–4 quiz from `review/questions.md` is still owed.
-Before writing part 6: settle the 6/7 merge question at the bottom of `01-attention/lesson1/plan.md`.
+**Part 4 regenerated again on 2026-08-17**, mid-read, on two pieces of Kenessary feedback: the
+output projection read as the block's MLP with an imagined argmax→ids step (full answer in
+`scratch-qa.md`; ⚠ questions 26–27 added), and — structural — "no coherent story". Diagnosis in
+`lesson1/plan.md`: the part was answer-first and outside-in; it's now one pass of one sentence
+through the machine, in data order. **He confirmed the word ceiling is subordinate to flow** —
+part 4 ships at 1601 words deliberately. He should finish reading 4, then 5 — **if part 5 gives
+him the same struggle, restructure it the same way, don't patch it.** The parts 1–4 quiz from
+`review/questions.md` is still owed. Before writing part 6: settle the 6/7 merge question at the
+bottom of `01-attention/lesson1/plan.md`.
 
 Fourteen errors found and fixed on 2026-08-10/11 — see `review/errata.md`. The pattern that
 matters: errors 7–8 were introduced by the fix for 5–6, and 9b by the fix for 7. **A revision is
@@ -145,7 +149,7 @@ Trained weights that later sections depend on. Full detail in `checkpoints/MANIF
 
 Spaced review runs at the start of roughly every third session (`TEACHING.md` § review layer).
 
-- Question bank: `review/questions.md` — **25 questions** (01 lesson 1, parts 1–5), 3 marked ⚠
+- Question bank: `review/questions.md` — **29 questions** (01 lesson 1, parts 1–5), 6 marked ⚠
   as misconceptions he actually held. **None asked yet — a quiz is overdue.**
 - Errata: `review/errata.md` — **18 corrections** across four passes (01 lesson 1, parts 1–5;
   none quizzed). Eight of them were introduced by a fix or regeneration of earlier material —

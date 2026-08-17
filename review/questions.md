@@ -41,6 +41,10 @@ out loud and corrected. Ask these first.
 | 23 | Train a transformer on short sequences, run on long ones — what breaks, and what doesn't? | Attention/MLP weights don't — every weight acts per row, shapes come from widths. A **stored** position table does: one learned vector per position means a baked-in max length. Computed position signals close the gap | — | — |
 | 24 | What persists in the attention op between two forward passes? | Only $W_Q, W_K, W_V$. $E$ and $A$ are activations — rebuilt and discarded every block, every pass ($2048^2 \approx 4.2$M entries *each* per block while the pass lives) | — | — |
 | 25 | Where in a transformer block do positions interact? | Only inside attention — $QK^\top$ and $AV$ are the only cross-row ops, and neither has weights. Embedding, LayerNorm, MLP, and output projection are all per-row | — | — |
+| 26 | ⚠ What produces the $(T, \text{vocab})$ logits — the block's MLP? | No — a single learned $(d_{\text{model}}, \text{vocab})$ matrix applied once after the last block. Every MLP lives *inside* a block and returns to width $d_{\text{model}}$ | — | — |
+| 27 | ⚠ Where does argmax happen in a transformer? | Never inside the model — the pass ends at logits. Training consumes the softmax distributions (probability of the true next token; argmax has no gradient). Generation picks/samples one id, from the **last row only** | — | — |
+| 28 | Why is the output projection "the same move as attention scoring"? | Each column of $W_{\text{out}}$ is a learned word vector, so row $t$'s logits are vocab-many dot-product scores against position $t$'s representation, then softmax — dot product as compatibility, softmax as scores-to-proportions | — | — |
+| 29 | ⚠ Row $t$ of the output is "structurally" step $t$ — so why do inputs need position vectors at all? | Structural position survives everywhere (rows keep their slots), but only *outside* consumers read indices (`logits[t]`, the loss). Inside, every op is content-only — $QK^\top$ and $AV$ contain no $t$ (mask excepted, past-vs-future only) — so order must be injected into the contents, or into the op itself (RoPE) | — | — |
 
 ---
 

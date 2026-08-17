@@ -109,6 +109,48 @@ of the answer at the point the tension appears. This extends the no-forward-refe
   no batch statistics); position table honest about its chosen max length; transformer attribution
   qualified as the stripped decoder-only variant of Vaswani 2017; copy-shortcut claim replaced
   with the derivable version (loss reaches zero by copying)
+- **feedback 08-17 (Kenessary, reading part 4)** — the output projection was read as the block's
+  MLP producing $(7,1000)$, with an imagined argmax→ids step inside the forward pass; the "times
+  a learned $(64,1000)$ matrix" cell didn't land, and the stack table's `LayerNorm → output
+  projection` rows mirror the block's `LayerNorm → MLP` wiring, inviting the conflation. Fix in
+  the logits blockquote: it is **one matrix multiply**, not a block MLP (those return to width
+  $d_{\text{model}}$), and **no id is picked inside the model** — training reads the probability
+  given to the true next token; generation samples one id, from the last row only. Full answer
+  (incl. columns-of-$W_{\text{out}}$-as-word-vectors and why "projection") in `scratch-qa.md`;
+  ⚠ questions added to `review/questions.md`
+- **feedback 08-17 (Kenessary, second — structural)** — "no coherent story", struggling to read,
+  can't point at why; and: don't focus on the 1500 ceiling, make the text smooth. Diagnosis: the
+  part was **answer-first and outside-in** — the stack table landed before *block* or *projection*
+  meant anything; then two nested unpackings (block → attention box), each holding IOUs; the mask
+  applied in the box but explained a section later; the *task* (next-token prediction) buried as
+  detail three of the sketch grading. **Regenerated as one pass of one sentence through the
+  machine, in data order**: the hole → the job (next-token, every position at once) → ids /
+  embedding / position in → the attention box → the cheat visible the moment $E$ exists → causal
+  mask lands there, padding mask one line → MLP + residuals + LayerNorm close the block → final
+  LayerNorm → output projection → logits and their two consumers → the reveal (stack table +
+  "this is a transformer" as *summary*, not introduction). Sketch grading compressed to one line;
+  its three corrections land where the pipeline reaches them. Figure moved up to serve as the map
+  the part then walks. $W_{\text{out}}$ added to introduces (defined at its formula). Ceiling
+  subordinated to flow — if a regenerated part runs long, split it, never sand sentences down.
+  **If part 5 gives him the same struggle, it gets the same diagnosis-and-restructure, not edits.**
+- **feedback 08-17 (Kenessary, third — reading the ending)** — (a) "how do we not argmax in
+  generation — isn't it greedy, or beam search?" The claim was about the *boundary*, not the
+  picker: prose now says the picking happens in a loop around the model (greedy argmax / sample;
+  pickers are section 03's subject). (b) "output logits are structurally per-step — why do inputs
+  need position vectors at all?" The right observation: structural position survives everywhere,
+  but only *outside* consumers (loss, generation loop) read indices; every op inside is
+  content-only — $QK^\top$/$AV$ contain no $t$ (mask excepted, past-vs-future only) — so the
+  index must be smuggled into the contents, or into the op itself (RoPE — lesson 5). Position
+  paragraph now carries the one-line reason; swap-two-words derivation in `scratch-qa.md`;
+  ⚠ question 29 added. Part 5's order-blindness section is this question's proof — it arrived
+  on schedule
+- **cold-read audit 08-17, incorporated** — "next *word*" until token id exists (then the job gets
+  its proper name, next-token prediction); the quoted sentence loses its trailing period (word-level
+  tokenization was silently dropping it); all three sketch fixes now labeled where they land; row 7's
+  target honesty (whatever followed in the training text); $x$ re-bound at the logits formula (final
+  LayerNorm's output); residual "correction to *its input*", not to $x$; the mask triangle shows
+  row 3 — the worked example — instead of row 4; $W_Q/W_K$ casing disambiguated from part 2's
+  additive-score $W_q/W_k$
 
 ## Part 5 — What deleting it cost (regenerated from old part 4)
 
